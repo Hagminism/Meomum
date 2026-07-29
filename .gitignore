@@ -1,0 +1,100 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins-dependencies
+.flutter/
+.vercel-cache/
+.pub-cache/
+.pub/
+/build/
+/coverage/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Code generation files
+# freezed, json_serializable, etc.
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+
+# Firebase configuration files (개별 설정 및 API 키 포함)
+/lib/firebase_options.dart
+/ios/Runner/GoogleService-Info.plist
+android/google-services.json
+/android/app/google-services.json
+
+# Firebase CLI 로그 및 임시 폴더 (시스템 정보 및 상세 에러 기록)
+firebase-debug.log*
+.firebase/
+.firebaserc
+
+# (선택) 배포 설정 파일
+# 팀 프로젝트에서 배포 규칙을 공유해야 한다면 제외,
+# 개인적인 배포 환경이나 보안이 중요하다면 포함하세요.
+firebase.json
+firestore.rules
+storage.rules
+
+# Local properties (contains API keys - do not commit)
+android/local.properties
+ios/Runner/Secrets.xcconfig
+.dart_defines
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.staging
+.env.test
+
+# Claude Code
+.claude/
+.agents/
+skills-lock.json
+
+# Continue
+.continue/
+
+# Node
+functions/node_modules/
+
+.vscode/
+.venv/
+.cursor/
