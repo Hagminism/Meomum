@@ -34,6 +34,7 @@ class MyPageViewModel extends Notifier<MyPageState> {
     final authRepository = ref.read(authRepositoryProvider);
 
     final result = await authRepository.signOut();
+    if (!ref.mounted) return;
 
     switch (result) {
       case Success():
