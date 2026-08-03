@@ -6,6 +6,7 @@ import 'package:meomum/core/presentation/component/custom_bottom_app_bar.dart';
 import 'package:meomum/core/routing/go_router_refresh_stream.dart';
 import 'package:meomum/core/routing/routes.dart';
 import 'package:meomum/feature/home/presentation/screen/home_screen_root.dart';
+import 'package:meomum/feature/my_page/presentation/screen/my_page_screen_root.dart';
 import 'package:meomum/feature/sign_in/presentation/screen/sign_in_screen_root.dart';
 
 final routerProvider = Provider<GoRouter>((Ref ref) {
@@ -63,7 +64,7 @@ final routerProvider = Provider<GoRouter>((Ref ref) {
             routes: [
               GoRoute(
                 path: Routes.myPage,
-                builder: (_, _) => const Placeholder(color: Colors.pink),
+                builder: (_, _) => const MyPageScreenRoot(),
               ),
             ],
           ),
@@ -75,9 +76,10 @@ final routerProvider = Provider<GoRouter>((Ref ref) {
       final isSignedIn = ref.read(authRepositoryProvider).isSignedIn;
       final location = state.matchedLocation;
       final isSignInRoute = location == Routes.signIn;
-      final isHomeRoute = location == Routes.home;
+      final isOnBoardingRoute = location == Routes.onBoarding;
+      final isAuthEntryRoute = isSignInRoute || isOnBoardingRoute;
 
-      if (!isSignedIn && isHomeRoute) {
+      if (!isSignedIn && !isAuthEntryRoute) {
         return Routes.signIn;
       }
 
