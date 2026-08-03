@@ -22,9 +22,6 @@ class AuthDataSourceImpl implements AuthDataSource {
     return switch (provider) {
       AuthProvider.google => _signInWithGoogle(),
       AuthProvider.kakao => _signInWithOAuthBrowser(OAuthProvider.kakao),
-      AuthProvider.apple => const Result.failure(
-        '애플 로그인은 추후 지원 예정입니다.',
-      ),
       AuthProvider.naver => const Result.failure(
         '네이버 로그인은 추후 지원 예정입니다.',
       ),
