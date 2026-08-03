@@ -13,10 +13,9 @@ class AuthDataSourceImpl implements AuthDataSource {
   final GoogleSignIn _googleSignIn;
 
   AuthDataSourceImpl({
-    required GoTrueClient auth,
-    required GoogleSignIn googleSignIn,
-  }) : _auth = auth,
-       _googleSignIn = googleSignIn;
+    required this._auth,
+    required this._googleSignIn,
+  });
 
   @override
   Future<Result<bool>> signInWithOAuth(AuthProvider provider) async {

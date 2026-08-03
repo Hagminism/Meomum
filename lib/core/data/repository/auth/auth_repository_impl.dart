@@ -10,8 +10,8 @@ class AuthRepositoryImpl implements AuthRepository {
   final AuthDataSource _dataSource;
 
   AuthRepositoryImpl({
-    required AuthDataSource dataSource,
-  }) : _dataSource = dataSource;
+    required this._dataSource,
+  });
 
   @override
   Future<Result<bool>> signInWithOAuth(AuthProvider provider) {
