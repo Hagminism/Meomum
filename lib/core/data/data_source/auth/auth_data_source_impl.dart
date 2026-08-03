@@ -93,6 +93,21 @@ class AuthDataSourceImpl implements AuthDataSource {
   }
 
   @override
+  Future<Result<bool>> signOut() async {
+    try {
+      await Future.wait([
+        _auth.signOut(),
+        _googleSignIn.signOut(),
+      ]);
+      return const Result.success(true);
+    } on AuthException catch (error) {
+      return Result.failure(error.message);
+    } catch (error) {
+      return Result.failure(error.toString());
+    }
+  }
+
+  @override
   Stream<AuthSessionStatus> watchAuthState() {
     return _auth.onAuthStateChange.map((AuthState data) {
       final session = data.session;

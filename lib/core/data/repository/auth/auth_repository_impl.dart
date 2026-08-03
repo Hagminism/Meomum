@@ -19,6 +19,11 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Result<bool>> signOut() {
+    return _dataSource.signOut();
+  }
+
+  @override
   Stream<AuthSessionStatus> watchAuthState() {
     return _dataSource.watchAuthState();
   }
