@@ -13,30 +13,54 @@ class MyPageScreen extends StatelessWidget {
     required this.onAction,
   });
 
+  static const int _demoItemCount = 30;
+
   @override
   Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.paddingOf(context).bottom + 72;
+
     return Scaffold(
       appBar: AppBar(title: const Text('마이페이지')),
-      body: SafeArea(
-        child: Stack(
-          children: [
-            Center(
-              child: ElevatedButton(
-                onPressed: state.isLoading
-                    ? null
-                    : () {
-                        onAction(const MyPageAction.tapLogout());
-                      },
-                child: const Text('로그아웃'),
-              ),
+      body: Stack(
+        children: [
+          ListView.separated(
+            padding: EdgeInsets.fromLTRB(16, 8, 16, bottomInset),
+            itemCount: _demoItemCount + 1,
+            separatorBuilder: (BuildContext context, int index) {
+              return const SizedBox(height: 8);
+            },
+            itemBuilder: (BuildContext context, int index) {
+              if (index == _demoItemCount) {
+                return ElevatedButton(
+                  onPressed: state.isLoading
+                      ? null
+                      : () {
+                          onAction(const MyPageAction.tapLogout());
+                        },
+                  child: const Text('로그아웃'),
+                );
+              }
+
+              return ListTile(
+                tileColor: AppColors.black.withValues(alpha: 0.04),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                leading: CircleAvatar(
+                  backgroundColor: AppColors.black.withValues(alpha: 0.08),
+                  child: Text('${index + 1}'),
+                ),
+                title: Text('마이페이지 항목 ${index + 1}'),
+                subtitle: const Text('바텀 바 반투명 효과 확인용 더미 항목'),
+              );
+            },
+          ),
+          if (state.isLoading)
+            ColoredBox(
+              color: AppColors.black.withValues(alpha: 0.3),
+              child: const Center(child: CircularProgressIndicator()),
             ),
-            if (state.isLoading)
-              ColoredBox(
-                color: AppColors.black.withValues(alpha: 0.3),
-                child: const Center(child: CircularProgressIndicator()),
-              ),
-          ],
-        ),
+        ],
       ),
     );
   }
