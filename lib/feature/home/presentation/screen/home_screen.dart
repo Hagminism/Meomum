@@ -70,7 +70,7 @@ class HomeScreen extends StatelessWidget {
             ),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 30, 20, 12),
+                padding: const EdgeInsets.fromLTRB(20, 30, 20, 12),
                 child: Text(
                   '지금 머뭄에서는',
                   style: TextStyle(
@@ -90,7 +90,7 @@ class HomeScreen extends StatelessWidget {
                   crossAxisCount: 2,
                   mainAxisSpacing: 12,
                   crossAxisSpacing: 12,
-                  mainAxisExtent: 310,
+                  mainAxisExtent: 300,
                 ),
                 delegate: SliverChildBuilderDelegate(
                   (BuildContext context, int index) {
