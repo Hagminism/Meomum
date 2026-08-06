@@ -5,8 +5,10 @@ class AppColors {
   static const Color black = Color(0xFF000000);
 
   static const Color primary = Color(0xFF63C77E);
-
   static const Color textSecondary = Color(0xFF757575);
+
+  // CustomBottomAppBar 관련 색상
+  static const Color unselectedItem = Color(0xFFC1C1C1);
 
   // SocialSignInButton 관련 색상
   static const Color signUpWithGoogleButton = white;

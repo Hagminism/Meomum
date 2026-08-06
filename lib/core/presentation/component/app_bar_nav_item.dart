@@ -54,7 +54,7 @@ class AppBarNavItem extends StatelessWidget {
                   size: 24,
                   color: isSelected
                       ? AppColors.primary
-                      : AppColors.black.withValues(alpha: 0.40),
+                      : AppColors.unselectedItem,
                 ),
               ),
               const SizedBox(height: 2),
