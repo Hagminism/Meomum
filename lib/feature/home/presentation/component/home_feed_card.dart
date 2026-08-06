@@ -89,7 +89,7 @@ class HomeFeedCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontFamily: 'Pretendard',
-                          fontSize: 16,
+                          fontSize: 18,
                           fontWeight: FontWeight.w600,
                           color: AppColors.black,
                           height: 1.4,
