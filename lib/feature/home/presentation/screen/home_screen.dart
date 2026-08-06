@@ -1,77 +1,111 @@
 import 'package:flutter/material.dart';
-import 'package:meomum/core/domain/enum/auth_provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/services.dart';
+import 'package:meomum/feature/home/presentation/component/home_banner_section.dart';
+import 'package:meomum/feature/home/presentation/component/home_category_item.dart';
+import 'package:meomum/feature/home/presentation/component/home_feed_card.dart';
+import 'package:meomum/feature/home/presentation/screen/home_action.dart';
+import 'package:meomum/feature/home/presentation/screen/home_state.dart';
+import 'package:meomum/ui/app_colors.dart';
 
 class HomeScreen extends StatelessWidget {
-  final User? user;
+  final HomeState state;
+  final void Function(HomeAction) onAction;
 
   const HomeScreen({
     super.key,
-    required this.user,
+    required this.state,
+    required this.onAction,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (user == null) {
-      return const Scaffold(
-        body: Center(
-          child: Text('로그인된 사용자가 없습니다.'),
-        ),
-      );
-    }
+    final bottomPadding = MediaQuery.paddingOf(context).bottom + 88;
 
-    final currentUser = user!;
-    final providerLabel = _resolveProviderLabel(currentUser);
-    final displayName =
-        currentUser.userMetadata?['full_name'] as String? ??
-        currentUser.userMetadata?['name'] as String? ??
-        '-';
-    final avatarUrl =
-        currentUser.userMetadata?['avatar_url'] as String? ??
-        currentUser.userMetadata?['picture'] as String? ??
-        '-';
-
-    return Scaffold(
-      appBar: AppBar(title: const Text('홈')),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('인증 제공자: $providerLabel'),
-              const SizedBox(height: 12),
-              Text('id: ${currentUser.id}'),
-              const SizedBox(height: 8),
-              Text('email: ${currentUser.email ?? '-'}'),
-              const SizedBox(height: 8),
-              Text('displayName: $displayName'),
-              const SizedBox(height: 8),
-              Text('avatarUrl: $avatarUrl'),
-            ],
-          ),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+      child: Scaffold(
+        backgroundColor: AppColors.homeBackground,
+        body: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              expandedHeight: 400,
+              stretch: true,
+              pinned: false,
+              floating: false,
+              toolbarHeight: 0,
+              elevation: 0,
+              scrolledUnderElevation: 0,
+              backgroundColor: Colors.transparent,
+              flexibleSpace: FlexibleSpaceBar(
+                stretchModes: const [StretchMode.zoomBackground],
+                collapseMode: CollapseMode.parallax,
+                background: HomeBannerSection(
+                  banners: state.banners,
+                  currentIndex: state.currentBannerIndex,
+                  onAction: onAction,
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 40),
+                child: SizedBox(
+                  height: 84,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    itemCount: state.categories.length,
+                    separatorBuilder: (BuildContext context, int index) {
+                      return const SizedBox(width: 20);
+                    },
+                    itemBuilder: (BuildContext context, int index) {
+                      return HomeCategoryItem(
+                        category: state.categories[index],
+                        onAction: onAction,
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 30, 20, 12),
+                child: Text(
+                  '지금 머뭄에서는',
+                  style: TextStyle(
+                    fontFamily: 'Pretendard',
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.black,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ),
+            SliverPadding(
+              padding: EdgeInsets.fromLTRB(16, 0, 16, bottomPadding),
+              sliver: SliverGrid(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                  mainAxisExtent: 310,
+                ),
+                delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) {
+                    return HomeFeedCard(
+                      item: state.feedItems[index],
+                      onAction: onAction,
+                    );
+                  },
+                  childCount: state.feedItems.length,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
-  }
-
-  String _resolveProviderLabel(User user) {
-    final identityProvider = user.identities?.isNotEmpty == true
-        ? user.identities!.first.provider
-        : null;
-    final appProvider = user.appMetadata['provider'] as String?;
-    final rawProvider = identityProvider ?? appProvider;
-
-    if (rawProvider == null) {
-      return '알 수 없음';
-    }
-
-    return switch (rawProvider) {
-      'google' => AuthProvider.google.toDisplayName(),
-      'kakao' => AuthProvider.kakao.toDisplayName(),
-      'naver' => AuthProvider.naver.toDisplayName(),
-      _ => rawProvider,
-    };
   }
 }
