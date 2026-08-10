@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:meomum/core/routing/router.dart';
@@ -31,6 +32,26 @@ Future<void> main() async {
   await GoogleSignIn.instance.initialize(
     clientId: (iosClientId == null || iosClientId.isEmpty) ? null : iosClientId,
     serverClientId: webClientId,
+  );
+
+  // ------------ Naver Map SDK 초기화 ------------ //
+  final naverMapClientId = dotenv.env['NAVER_MAP_CLIENT_ID'];
+  if (naverMapClientId == null || naverMapClientId.isEmpty) {
+    throw StateError('NAVER_MAP_CLIENT_ID가 .env에 설정되지 않았습니다.');
+  }
+
+  await FlutterNaverMap().init(
+    clientId: naverMapClientId,
+    onAuthFailed: (ex) {
+      switch (ex) {
+        case NQuotaExceededException(:final message):
+          debugPrint('Naver Map 사용량 초과 (message: $message)');
+        case NUnauthorizedClientException() ||
+            NClientUnspecifiedException() ||
+            NAnotherAuthFailedException():
+          debugPrint('Naver Map 인증 실패: $ex');
+      }
+    },
   );
 
   // ------------ main 앱 실행 ------------ //
