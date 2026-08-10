@@ -22,6 +22,8 @@ class MapViewModel extends Notifier<MapState> {
     switch (action) {
       case MapReady():
         state = state.copyWith(isMapReady: true);
+      case SearchBarPressed():
+        break;
     }
   }
 }

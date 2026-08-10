@@ -110,8 +110,16 @@ class _MapScreenRootState extends ConsumerState<MapScreenRoot> {
     final state = ref.watch(mapViewModelProvider);
 
     return MapScreen(
-      state: state,
       mapView: _mapView ?? _createMapView(),
+      state: state,
+      onAction: (action) {
+        switch (action) {
+          case MapReady():
+          case SearchBarPressed():
+            // TODO: 검색 화면 이동 로직은 추후 추가
+            break;
+        }
+      },
     );
   }
 
