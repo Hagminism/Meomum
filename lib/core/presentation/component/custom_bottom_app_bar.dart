@@ -33,42 +33,39 @@ class CustomBottomAppBar extends StatelessWidget {
                 ),
               ),
             ),
-            child: SafeArea(
-              top: false,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                child: Row(
-                  children: [
-                    AppBarNavItem(
-                      navigationShell: navigationShell,
-                      index: 0,
-                      icon: Icons.home_outlined,
-                      selectedIcon: Icons.home_rounded,
-                      label: '홈',
-                    ),
-                    AppBarNavItem(
-                      navigationShell: navigationShell,
-                      index: 1,
-                      icon: Icons.article_outlined,
-                      selectedIcon: Icons.article_rounded,
-                      label: '커뮤니티',
-                    ),
-                    AppBarNavItem(
-                      navigationShell: navigationShell,
-                      index: 2,
-                      icon: Icons.map_outlined,
-                      selectedIcon: Icons.map_rounded,
-                      label: '동네지도',
-                    ),
-                    AppBarNavItem(
-                      navigationShell: navigationShell,
-                      index: 3,
-                      icon: Icons.person_outline_rounded,
-                      selectedIcon: Icons.person_rounded,
-                      label: '나의 여행',
-                    ),
-                  ],
-                ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(8, 4, 8, 20),
+              child: Row(
+                children: [
+                  AppBarNavItem(
+                    navigationShell: navigationShell,
+                    index: 0,
+                    icon: Icons.home_outlined,
+                    selectedIcon: Icons.home_rounded,
+                    label: '홈',
+                  ),
+                  AppBarNavItem(
+                    navigationShell: navigationShell,
+                    index: 1,
+                    icon: Icons.article_outlined,
+                    selectedIcon: Icons.article_rounded,
+                    label: '커뮤니티',
+                  ),
+                  AppBarNavItem(
+                    navigationShell: navigationShell,
+                    index: 2,
+                    icon: Icons.map_outlined,
+                    selectedIcon: Icons.map_rounded,
+                    label: '동네지도',
+                  ),
+                  AppBarNavItem(
+                    navigationShell: navigationShell,
+                    index: 3,
+                    icon: Icons.person_outline_rounded,
+                    selectedIcon: Icons.person_rounded,
+                    label: '나의 여행',
+                  ),
+                ],
               ),
             ),
           ),
