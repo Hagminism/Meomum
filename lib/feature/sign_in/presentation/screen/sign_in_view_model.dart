@@ -46,7 +46,8 @@ class SignInViewModel extends Notifier<SignInState> {
 
     switch (result) {
       case Success():
-        state = state.copyWith(isLoading: false, errorMessage: null);
+        // 로그인 성공 후 홈 화면 이동 전 시각적 전달과 타 로그인 버튼 중복 클릭을 방지
+        return;
       case Failure(:final message):
         state = state.copyWith(isLoading: false, errorMessage: message);
         _eventController.add(SignInEvent.showError(message));

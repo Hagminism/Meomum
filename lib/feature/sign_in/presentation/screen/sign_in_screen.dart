@@ -87,7 +87,9 @@ class SignInScreen extends StatelessWidget {
         if (state.isLoading)
           ColoredBox(
             color: AppColors.black.withValues(alpha: 0.3),
-            child: Center(child: CircularProgressIndicator()),
+            child: Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            ),
           ),
       ],
     );
