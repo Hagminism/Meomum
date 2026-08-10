@@ -46,30 +46,27 @@ class AppBarNavItem extends StatelessWidget {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: isSelected
-                      ? AppColors.black.withValues(alpha: 0.10)
-                      : Colors.transparent,
+                  color: Colors.transparent,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Icon(
                   isSelected ? selectedIcon : icon,
                   size: 24,
                   color: isSelected
-                      ? AppColors.black
-                      : AppColors.black.withValues(alpha: 0.40),
+                      ? AppColors.primary
+                      : AppColors.unselectedItem,
                 ),
               ),
               const SizedBox(height: 2),
               AnimatedDefaultTextStyle(
                 duration: const Duration(milliseconds: 200),
                 style: TextStyle(
-                  // fontFamily: AppTextStyles.fontFamily,
-                  fontSize: 11,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  letterSpacing: -0.1,
+                  fontFamily: 'Pretendard',
+                  fontSize: 12,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                   color: isSelected
-                      ? AppColors.black
-                      : AppColors.black.withValues(alpha: 0.40),
+                      ? AppColors.primary
+                      : AppColors.textSecondary,
                 ),
                 child: Text(label),
               ),

@@ -55,14 +55,6 @@ final routerProvider = Provider<GoRouter>((Ref ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: Routes.jobs,
-                builder: (_, _) => const Placeholder(color: Colors.green),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
                 path: Routes.myPage,
                 builder: (_, _) => const MyPageScreenRoot(),
               ),

@@ -1,9 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:meomum/core/data/data_source/auth/auth_data_source.dart';
 import 'package:meomum/core/domain/enum/auth_provider.dart';
 import 'package:meomum/core/domain/enum/auth_session_status.dart';
-import 'package:meomum/core/utils/auth_constants.dart';
 import 'package:meomum/core/utils/result.dart';
 import 'package:meomum/di/di.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -11,6 +11,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class AuthDataSourceImpl implements AuthDataSource {
   final GoTrueClient _auth;
   final GoogleSignIn _googleSignIn;
+
+  static const String redirectUrl = 'meomum://login-callback';
 
   AuthDataSourceImpl({
     required this._auth,
@@ -21,7 +23,7 @@ class AuthDataSourceImpl implements AuthDataSource {
   Future<Result<bool>> signInWithOAuth(AuthProvider provider) async {
     return switch (provider) {
       AuthProvider.google => _signInWithGoogle(),
-      AuthProvider.kakao => _signInWithOAuthBrowser(OAuthProvider.kakao),
+      AuthProvider.kakao => _signInWithKakao(),
       AuthProvider.naver => const Result.failure(
         '네이버 로그인은 추후 지원 예정입니다.',
       ),
@@ -68,17 +70,15 @@ class AuthDataSourceImpl implements AuthDataSource {
     }
   }
 
-  Future<Result<bool>> _signInWithOAuthBrowser(OAuthProvider provider) async {
+  Future<Result<bool>> _signInWithKakao() async {
     try {
-      final launched = await _auth.signInWithOAuth(
-        provider,
-        redirectTo: AuthConstants.redirectUrl,
-        authScreenLaunchMode: LaunchMode.externalApplication,
+      await _auth.signInWithOAuth(
+        OAuthProvider.kakao,
+        redirectTo: kIsWeb ? null : redirectUrl,
+        authScreenLaunchMode: kIsWeb
+            ? LaunchMode.platformDefault
+            : LaunchMode.externalApplication,
       );
-
-      if (!launched) {
-        return const Result.failure('OAuth 화면을 열지 못했습니다.');
-      }
 
       return const Result.success(true);
     } on AuthException catch (error) {
