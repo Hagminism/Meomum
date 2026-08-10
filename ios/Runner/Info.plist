@@ -90,5 +90,9 @@
 	</array>
 	<key>GIDClientID</key>
     <string>$(GOOGLE_IOS_CLIENT_ID)</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>동네지도에서 내 주변 정보를 보여주기 위해 위치 권한이 필요합니다.</string>
+	<key>NSLocationUsageDescription</key>
+	<string>동네지도에서 내 주변 정보를 보여주기 위해 위치 권한이 필요합니다.</string>
 </dict>
 </plist>
