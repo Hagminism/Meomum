@@ -62,27 +62,28 @@ class HomeFeedCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 4,
-                        vertical: 4,
+                    if (item.location != null) ...[
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.location_on_outlined,
+                            size: 20,
+                            color: AppColors.feedMetaText,
+                          ),
+                          Text(
+                            item.location!,
+                            style: TextStyle(
+                              fontFamily: 'Pretendard',
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.feedMetaText,
+                              height: 1,
+                            ),
+                          ),
+                        ],
                       ),
-                      decoration: BoxDecoration(
-                        color: AppColors.categoryBadge,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        item.category,
-                        style: TextStyle(
-                          fontFamily: 'Pretendard',
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.black,
-                          height: 1,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
+                      const SizedBox(height: 8),
+                    ],
                     Text(
                       item.title,
                       maxLines: 2,
@@ -95,7 +96,6 @@ class HomeFeedCard extends StatelessWidget {
                         height: 1.4,
                       ),
                     ),
-                    const SizedBox(height: 4),
                     Text(
                       item.content,
                       maxLines: 2,
@@ -104,9 +104,25 @@ class HomeFeedCard extends StatelessWidget {
                         fontFamily: 'Pretendard',
                         fontSize: 14,
                         fontWeight: FontWeight.w400,
-                        color: AppColors.black,
+                        color: AppColors.feedContentText,
                         height: 1.4,
                       ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: [
+                        if (item.placeTag != null)
+                          _FeedTagBadge(
+                            label: item.placeTag!,
+                            backgroundColor: AppColors.placeTagBadge,
+                          ),
+                        _FeedTagBadge(
+                          label: item.category,
+                          backgroundColor: AppColors.categoryBadge,
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 12),
                     Row(
@@ -115,7 +131,7 @@ class HomeFeedCard extends StatelessWidget {
                         Icon(
                           Icons.favorite_border,
                           size: 20,
-                          color: AppColors.textSecondary,
+                          color: AppColors.feedContentText,
                         ),
                         const SizedBox(width: 4),
                         Text(
@@ -123,15 +139,15 @@ class HomeFeedCard extends StatelessWidget {
                           style: TextStyle(
                             fontFamily: 'Pretendard',
                             fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.feedContentText,
                           ),
                         ),
                         const SizedBox(width: 8),
                         Icon(
                           Icons.chat_bubble_outline,
                           size: 20,
-                          color: AppColors.textSecondary,
+                          color: AppColors.feedContentText,
                         ),
                         const SizedBox(width: 4),
                         Text(
@@ -139,8 +155,8 @@ class HomeFeedCard extends StatelessWidget {
                           style: TextStyle(
                             fontFamily: 'Pretendard',
                             fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.feedContentText,
                           ),
                         ),
                         const Spacer(),
@@ -150,7 +166,7 @@ class HomeFeedCard extends StatelessWidget {
                             fontFamily: 'Pretendard',
                             fontSize: 12,
                             fontWeight: FontWeight.w400,
-                            color: AppColors.textSecondary,
+                            color: AppColors.feedMetaText,
                           ),
                         ),
                       ],
@@ -160,6 +176,40 @@ class HomeFeedCard extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FeedTagBadge extends StatelessWidget {
+  final String label;
+  final Color backgroundColor;
+
+  const _FeedTagBadge({
+    required this.label,
+    required this.backgroundColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 4,
+        vertical: 4,
+      ),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontFamily: 'Pretendard',
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          color: AppColors.black,
+          height: 1,
         ),
       ),
     );

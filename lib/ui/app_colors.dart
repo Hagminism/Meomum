@@ -14,6 +14,9 @@ class AppColors {
   static const Color homeBackground = Color(0xFFFFFFFA);
   static const Color feedCard = Color(0xFFF2F2F2);
   static const Color categoryBadge = Color(0xFFF0DF75);
+  static const Color placeTagBadge = Color(0xFFEBEBEB);
+  static const Color feedContentText = Color(0xFF646465);
+  static const Color feedMetaText = Color(0xFF828282);
   static const Color categoryHighlight = Color(0xFFE9F39B);
   static const Color bannerOverlay = Color(0xCC000000);
 

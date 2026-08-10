@@ -110,6 +110,8 @@ class HomeViewModel extends Notifier<HomeState> {
       likeCount: 20,
       commentCount: 4,
       timeLabel: '20분 전',
+      location: '포항시',
+      placeTag: '포항중앙시장',
       imageUrl:
           'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=400&q=80',
     ),
@@ -122,6 +124,8 @@ class HomeViewModel extends Notifier<HomeState> {
       likeCount: 20,
       commentCount: 4,
       timeLabel: '20분 전',
+      location: '포항시',
+      placeTag: '포항중앙시장',
       imageUrl:
           'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=400&q=80',
     ),

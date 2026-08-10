@@ -14,6 +14,8 @@ abstract class HomeFeedItem with _$HomeFeedItem {
     required int commentCount,
     required String timeLabel,
     String? imageUrl,
+    String? location,
+    String? placeTag,
   }) = _HomeFeedItem;
 
   factory HomeFeedItem.fromJson(Map<String, dynamic> json) =>
