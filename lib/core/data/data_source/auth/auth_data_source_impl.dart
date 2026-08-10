@@ -13,6 +13,7 @@ class AuthDataSourceImpl implements AuthDataSource {
   final GoogleSignIn _googleSignIn;
 
   static const String redirectUrl = 'meomum://login-callback';
+  static const String naverOAuthProviderName = 'custom:naver';
 
   AuthDataSourceImpl({
     required this._auth,
@@ -24,9 +25,7 @@ class AuthDataSourceImpl implements AuthDataSource {
     return switch (provider) {
       AuthProvider.google => _signInWithGoogle(),
       AuthProvider.kakao => _signInWithKakao(),
-      AuthProvider.naver => const Result.failure(
-        '네이버 로그인은 추후 지원 예정입니다.',
-      ),
+      AuthProvider.naver => _signInWithNaver(),
     };
   }
 
@@ -71,9 +70,19 @@ class AuthDataSourceImpl implements AuthDataSource {
   }
 
   Future<Result<bool>> _signInWithKakao() async {
+    return _signInWithOAuthProvider(OAuthProvider.kakao);
+  }
+
+  Future<Result<bool>> _signInWithNaver() async {
+    return _signInWithOAuthProvider(
+      OAuthProvider(naverOAuthProviderName),
+    );
+  }
+
+  Future<Result<bool>> _signInWithOAuthProvider(OAuthProvider provider) async {
     try {
       await _auth.signInWithOAuth(
-        OAuthProvider.kakao,
+        provider,
         redirectTo: kIsWeb ? null : redirectUrl,
         authScreenLaunchMode: kIsWeb
             ? LaunchMode.platformDefault
