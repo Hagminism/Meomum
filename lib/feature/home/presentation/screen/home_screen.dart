@@ -69,7 +69,6 @@ class HomeScreen extends StatelessWidget {
 
     return switch (rawProvider) {
       'google' => AuthProvider.google.toDisplayName(),
-      'apple' => AuthProvider.apple.toDisplayName(),
       'kakao' => AuthProvider.kakao.toDisplayName(),
       'naver' => AuthProvider.naver.toDisplayName(),
       _ => rawProvider,
