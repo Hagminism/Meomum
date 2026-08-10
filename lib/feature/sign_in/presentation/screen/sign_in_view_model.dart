@@ -32,9 +32,7 @@ class SignInViewModel extends Notifier<SignInState> {
       case TapKakao():
         _signIn(AuthProvider.kakao);
       case TapNaver():
-        _eventController.add(
-          const SignInEvent.showMessage('네이버 로그인은 추후 지원 예정입니다.'),
-        );
+        _signIn(AuthProvider.naver);
     }
   }
 
