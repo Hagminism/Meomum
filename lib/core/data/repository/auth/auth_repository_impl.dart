@@ -3,6 +3,7 @@ import 'package:meomum/core/data/data_source/auth/auth_data_source.dart';
 import 'package:meomum/core/data/data_source/auth/auth_data_source_impl.dart';
 import 'package:meomum/core/domain/enum/auth_provider.dart';
 import 'package:meomum/core/domain/enum/auth_session_status.dart';
+import 'package:meomum/core/domain/model/user/user.dart';
 import 'package:meomum/core/domain/repository/auth/auth_repository.dart';
 import 'package:meomum/core/utils/result.dart';
 
@@ -27,6 +28,9 @@ class AuthRepositoryImpl implements AuthRepository {
   Stream<AuthSessionStatus> watchAuthState() {
     return _dataSource.watchAuthState();
   }
+
+  @override
+  User? get currentUser => _dataSource.currentUser;
 
   @override
   bool get isSignedIn => _dataSource.isSignedIn;

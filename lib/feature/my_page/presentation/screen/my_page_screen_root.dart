@@ -31,6 +31,7 @@ class _MyPageScreenRootState extends ConsumerState<MyPageScreenRoot> {
 
         switch (event) {
           case ShowError(:final message):
+          case ShowMessage(:final message):
             ScaffoldMessenger.of(
               context,
             ).showSnackBar(SnackBar(content: Text(message)));
@@ -48,6 +49,12 @@ class _MyPageScreenRootState extends ConsumerState<MyPageScreenRoot> {
       state: state,
       onAction: (MyPageAction action) {
         switch (action) {
+          case TapMyFeed():
+          case TapProfile():
+          case TapCurrentStayMenu():
+          case TapCategory():
+          case TapStayHistory():
+          case TapStayHistoryMenu():
           case TapLogout():
             viewModel.onAction(action);
         }

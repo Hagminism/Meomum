@@ -2,14 +2,17 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:meomum/core/data/data_source/auth/auth_data_source.dart';
+import 'package:meomum/core/data/dto/user/user_dto.dart';
+import 'package:meomum/core/data/mapper/user/user_mapper.dart';
 import 'package:meomum/core/domain/enum/auth_provider.dart';
 import 'package:meomum/core/domain/enum/auth_session_status.dart';
+import 'package:meomum/core/domain/model/user/user.dart';
 import 'package:meomum/core/utils/result.dart';
 import 'package:meomum/di/di.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 class AuthDataSourceImpl implements AuthDataSource {
-  final GoTrueClient _auth;
+  final supabase.GoTrueClient _auth;
   final GoogleSignIn _googleSignIn;
 
   static const String redirectUrl = 'meomum://login-callback';
@@ -51,7 +54,7 @@ class AuthDataSourceImpl implements AuthDataSource {
       }
 
       await _auth.signInWithIdToken(
-        provider: OAuthProvider.google,
+        provider: supabase.OAuthProvider.google,
         idToken: idToken,
         accessToken: accessToken,
       );
@@ -62,7 +65,7 @@ class AuthDataSourceImpl implements AuthDataSource {
         return Result.failure(error.toString());
       }
       return Result.failure(error.description ?? error.toString());
-    } on AuthException catch (error) {
+    } on supabase.AuthException catch (error) {
       return Result.failure(error.message);
     } catch (error) {
       return Result.failure(error.toString());
@@ -70,27 +73,29 @@ class AuthDataSourceImpl implements AuthDataSource {
   }
 
   Future<Result<bool>> _signInWithKakao() async {
-    return _signInWithOAuthProvider(OAuthProvider.kakao);
+    return _signInWithOAuthProvider(supabase.OAuthProvider.kakao);
   }
 
   Future<Result<bool>> _signInWithNaver() async {
     return _signInWithOAuthProvider(
-      OAuthProvider(naverOAuthProviderName),
+      supabase.OAuthProvider(naverOAuthProviderName),
     );
   }
 
-  Future<Result<bool>> _signInWithOAuthProvider(OAuthProvider provider) async {
+  Future<Result<bool>> _signInWithOAuthProvider(
+    supabase.OAuthProvider provider,
+  ) async {
     try {
       await _auth.signInWithOAuth(
         provider,
         redirectTo: kIsWeb ? null : redirectUrl,
         authScreenLaunchMode: kIsWeb
-            ? LaunchMode.platformDefault
-            : LaunchMode.externalApplication,
+            ? supabase.LaunchMode.platformDefault
+            : supabase.LaunchMode.externalApplication,
       );
 
       return const Result.success(true);
-    } on AuthException catch (error) {
+    } on supabase.AuthException catch (error) {
       return Result.failure(error.message);
     } catch (error) {
       return Result.failure(error.toString());
@@ -105,7 +110,7 @@ class AuthDataSourceImpl implements AuthDataSource {
         _googleSignIn.signOut(),
       ]);
       return const Result.success(true);
-    } on AuthException catch (error) {
+    } on supabase.AuthException catch (error) {
       return Result.failure(error.message);
     } catch (error) {
       return Result.failure(error.toString());
@@ -114,13 +119,22 @@ class AuthDataSourceImpl implements AuthDataSource {
 
   @override
   Stream<AuthSessionStatus> watchAuthState() {
-    return _auth.onAuthStateChange.map((AuthState data) {
+    return _auth.onAuthStateChange.map((supabase.AuthState data) {
       final session = data.session;
       if (session != null) {
         return AuthSessionStatus.signedIn;
       }
       return AuthSessionStatus.signedOut;
     });
+  }
+
+  @override
+  User? get currentUser => _mapCurrentUser(_auth.currentUser);
+
+  User? _mapCurrentUser(supabase.User? user) {
+    if (user == null) return null;
+
+    return UserDto.fromSupabaseUser(user).toModel();
   }
 
   @override

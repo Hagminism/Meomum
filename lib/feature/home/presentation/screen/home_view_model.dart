@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meomum/core/domain/model/category/category.dart';
 import 'package:meomum/feature/home/domain/model/home_banner.dart';
-import 'package:meomum/feature/home/domain/model/home_category.dart';
 import 'package:meomum/feature/home/domain/model/home_feed_item.dart';
 import 'package:meomum/feature/home/presentation/screen/home_action.dart';
 import 'package:meomum/feature/home/presentation/screen/home_event.dart';
@@ -70,30 +70,30 @@ class HomeViewModel extends Notifier<HomeState> {
     ),
   ];
 
-  static const List<HomeCategory> _mockCategories = [
-    HomeCategory(
+  static const List<Category> _mockCategories = [
+    Category(
       id: 'category-1',
       label: '지역추천',
       backgroundColor: 0xFFE9F39B,
       imageUrl:
           'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=120&q=80',
     ),
-    HomeCategory(
+    Category(
       id: 'category-2',
       label: '지역추천',
       backgroundColor: 0xFFF2F2F2,
     ),
-    HomeCategory(
+    Category(
       id: 'category-3',
       label: '자유게시판',
       backgroundColor: 0xFFF2F2F2,
     ),
-    HomeCategory(
+    Category(
       id: 'category-4',
       label: '일자리',
       backgroundColor: 0xFFF2F2F2,
     ),
-    HomeCategory(
+    Category(
       id: 'category-5',
       label: '일자리',
       backgroundColor: 0xFFF2F2F2,

@@ -1,23 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:meomum/feature/home/domain/model/home_category.dart';
-import 'package:meomum/feature/home/presentation/screen/home_action.dart';
+import 'package:meomum/core/domain/model/category/category.dart';
 import 'package:meomum/ui/app_colors.dart';
 
-class HomeCategoryItem extends StatelessWidget {
-  final HomeCategory category;
-  final void Function(HomeAction) onAction;
+class CategoryItem extends StatelessWidget {
+  final Category category;
+  final void Function(String id) onTap;
 
-  const HomeCategoryItem({
+  const CategoryItem({
     super.key,
     required this.category,
-    required this.onAction,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        onAction(HomeAction.tapCategory(category.id));
+        onTap(category.id);
       },
       behavior: HitTestBehavior.opaque,
       child: SizedBox(

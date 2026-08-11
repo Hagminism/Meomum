@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:meomum/core/presentation/component/category_item.dart';
 import 'package:meomum/feature/home/presentation/component/home_banner_section.dart';
-import 'package:meomum/feature/home/presentation/component/home_category_item.dart';
 import 'package:meomum/feature/home/presentation/component/home_feed_card.dart';
 import 'package:meomum/feature/home/presentation/screen/home_action.dart';
 import 'package:meomum/feature/home/presentation/screen/home_state.dart';
@@ -60,9 +60,11 @@ class HomeScreen extends StatelessWidget {
                       return const SizedBox(width: 20);
                     },
                     itemBuilder: (BuildContext context, int index) {
-                      return HomeCategoryItem(
+                      return CategoryItem(
                         category: state.categories[index],
-                        onAction: onAction,
+                        onTap: (String id) {
+                          onAction(HomeAction.tapCategory(id));
+                        },
                       );
                     },
                   ),

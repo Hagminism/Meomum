@@ -22,13 +22,6 @@ class MapScreen extends StatelessWidget {
       body: Stack(
         children: [
           mapView,
-          if (!state.isMapReady)
-            ColoredBox(
-              color: AppColors.black.withValues(alpha: 0.3),
-              child: Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
-              ),
-            ),
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -37,6 +30,13 @@ class MapScreen extends StatelessWidget {
               ),
             ),
           ),
+          if (!state.isMapReady)
+            ColoredBox(
+              color: AppColors.black.withValues(alpha: 0.3),
+              child: Center(
+                child: CircularProgressIndicator(color: AppColors.primary),
+              ),
+            ),
         ],
       ),
     );
