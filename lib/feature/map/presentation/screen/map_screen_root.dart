@@ -5,10 +5,12 @@ import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meomum/core/data/repository/location/location_repository_impl.dart';
 import 'package:meomum/core/domain/model/location/geo_location.dart';
+import 'package:meomum/core/domain/model/tour_spot/tour_spot.dart';
 import 'package:meomum/core/utils/result.dart';
 import 'package:meomum/feature/map/presentation/screen/map_action.dart';
 import 'package:meomum/feature/map/presentation/screen/map_event.dart';
 import 'package:meomum/feature/map/presentation/screen/map_screen.dart';
+import 'package:meomum/feature/map/presentation/screen/map_state.dart';
 import 'package:meomum/feature/map/presentation/screen/map_view_model.dart';
 
 class MapScreenRoot extends ConsumerStatefulWidget {
@@ -25,6 +27,7 @@ class _MapScreenRootState extends ConsumerState<MapScreenRoot> {
 
   StreamSubscription<MapEvent>? _eventSubscription;
   Widget? _mapView;
+  NaverMapController? _mapController;
 
   @override
   void initState() {
@@ -40,6 +43,7 @@ class _MapScreenRootState extends ConsumerState<MapScreenRoot> {
 
         switch (event) {
           case ShowMessage(:final message):
+          case ShowError(:final message):
             ScaffoldMessenger.of(
               context,
             ).showSnackBar(SnackBar(content: Text(message)));
@@ -64,6 +68,7 @@ class _MapScreenRootState extends ConsumerState<MapScreenRoot> {
         ),
       ),
       onMapReady: (controller) {
+        _mapController = controller;
         unawaited(_initializeMapCamera(controller));
       },
     );
@@ -86,7 +91,27 @@ class _MapScreenRootState extends ConsumerState<MapScreenRoot> {
 
     ref
         .read(mapViewModelProvider.notifier)
-        .onAction(const MapAction.mapReady());
+        .onAction(MapAction.mapReady(target));
+  }
+
+  // 조회된 주변 관광정보를 지도 위 마커로 갱신
+  Future<void> _updateTourSpotMarkers(List<TourSpot> tourSpots) async {
+    final controller = _mapController;
+    if (controller == null) return;
+
+    await controller.clearOverlays(type: NOverlayType.marker);
+
+    final markers = tourSpots
+        .map(
+          (spot) => NMarker(
+            id: spot.id,
+            position: NLatLng(spot.latitude, spot.longitude),
+            caption: NOverlayCaption(text: spot.title),
+          ),
+        )
+        .toSet();
+
+    await controller.addOverlayAll(markers);
   }
 
   // 사용자에게 위치 권한 요청 + 사용자 위치 좌표 반환
@@ -108,6 +133,12 @@ class _MapScreenRootState extends ConsumerState<MapScreenRoot> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(mapViewModelProvider);
+
+    ref.listen<MapState>(mapViewModelProvider, (previous, next) {
+      if (previous?.nearbyTourSpots != next.nearbyTourSpots) {
+        unawaited(_updateTourSpotMarkers(next.nearbyTourSpots));
+      }
+    });
 
     return MapScreen(
       mapView: _mapView ?? _createMapView(),
