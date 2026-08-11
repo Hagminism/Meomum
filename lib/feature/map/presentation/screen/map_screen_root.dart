@@ -60,7 +60,7 @@ class _MapScreenRootState extends ConsumerState<MapScreenRoot> {
           left: 12,
           right: 12,
           top: 16,
-          bottom: 92,
+          bottom: 96,
         ),
         initialCameraPosition: NCameraPosition(
           target: NLatLng(defaultLatitude, defaultLongitude),
