@@ -27,9 +27,8 @@ class MapScreen extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
               child: Column(
-
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   MapSearchBar(
                     onTap: () => onAction(MapAction.searchBarPressed()),
