@@ -55,7 +55,6 @@ class _MapScreenRootState extends ConsumerState<MapScreenRoot> {
   Widget _createMapView() {
     return NaverMap(
       options: NaverMapViewOptions(
-        locationButtonEnable: true,
         logoMargin: const EdgeInsets.only(
           left: 12,
           right: 12,
