@@ -9,11 +9,19 @@ import 'package:meomum/feature/map/presentation/screen/map_event.dart';
 import 'package:meomum/feature/map/presentation/screen/map_state.dart';
 
 class MapViewModel extends Notifier<MapState> {
+  // 검색 반경
   static const int _nearbySearchRadiusMeter = 1000;
+  // 재검색 버튼 디바운스 설정 시간
+  static const Duration _researchCooldownDuration = Duration(seconds: 3);
+
+  Timer? _researchCooldownTimer;
 
   @override
   MapState build() {
-    ref.onDispose(() => _eventController.close());
+    ref.onDispose(() {
+      _researchCooldownTimer?.cancel();
+      _eventController.close();
+    });
 
     return const MapState();
   }
@@ -26,11 +34,32 @@ class MapViewModel extends Notifier<MapState> {
   void onAction(MapAction action) {
     switch (action) {
       case MapReady(:final location):
-        state = state.copyWith(isMapReady: true);
+        state = state.copyWith(
+          isMapReady: true,
+          isResearchButtonEnabled: false,
+        );
         _loadNearbyTourSpots(location);
+      case ResearchButtonPressed():
       case SearchBarPressed():
         break;
     }
+  }
+
+  void researchAt(GeoLocation location) {
+    // 재검색 버튼이 활성화 되어있거나 이미 가게를 찾는 중이면 리턴
+    if (!state.isResearchButtonEnabled || state.isLoadingNearbyTourSpots) {
+      return;
+    }
+
+    _researchCooldownTimer?.cancel();
+
+    state = state.copyWith(isResearchButtonEnabled: false);
+
+    _researchCooldownTimer = Timer(_researchCooldownDuration, () {
+      state = state.copyWith(isResearchButtonEnabled: true);
+    });
+
+    _loadNearbyTourSpots(location);
   }
 
   Future<void> _loadNearbyTourSpots(GeoLocation location) async {
@@ -49,10 +78,19 @@ class MapViewModel extends Notifier<MapState> {
           isLoadingNearbyTourSpots: false,
           nearbyTourSpots: data,
         );
+        _validateCooldown();
       case Failure(:final message):
         state = state.copyWith(isLoadingNearbyTourSpots: false);
+        _validateCooldown();
         _eventController.add(MapEvent.showError(message));
     }
+  }
+
+  // 타이머가 활성화 되어있지 않으면 재검색 버튼을 활성화
+  void _validateCooldown() {
+    if (_researchCooldownTimer?.isActive ?? false) return;
+
+    state = state.copyWith(isResearchButtonEnabled: true);
   }
 }
 

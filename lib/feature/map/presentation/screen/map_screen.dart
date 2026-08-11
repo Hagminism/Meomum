@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:meomum/feature/map/presentation/component/map_research_button.dart';
 import 'package:meomum/feature/map/presentation/component/map_search_bar.dart';
 import 'package:meomum/feature/map/presentation/screen/map_action.dart';
 import 'package:meomum/feature/map/presentation/screen/map_state.dart';
@@ -24,9 +25,25 @@ class MapScreen extends StatelessWidget {
           mapView,
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: MapSearchBar(
-                onTap: () => onAction(MapAction.searchBarPressed()),
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Column(
+
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  MapSearchBar(
+                    onTap: () => onAction(MapAction.searchBarPressed()),
+                  ),
+                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 100.0),
+                    child: MapResearchButton(
+                      isEnabled: state.isResearchButtonEnabled,
+                      isLoading: state.isLoadingNearbyTourSpots,
+                      onTap: () => onAction(MapAction.researchButtonPressed()),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

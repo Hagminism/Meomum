@@ -8,6 +8,7 @@ abstract class MapState with _$MapState {
   const factory MapState({
     @Default(false) bool isMapReady,
     @Default(false) bool isLoadingNearbyTourSpots,
+    @Default(false) bool isResearchButtonEnabled,
     @Default(<TourSpot>[]) List<TourSpot> nearbyTourSpots,
   }) = _MapState;
 }

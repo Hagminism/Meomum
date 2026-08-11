@@ -146,11 +146,29 @@ class _MapScreenRootState extends ConsumerState<MapScreenRoot> {
       onAction: (action) {
         switch (action) {
           case MapReady():
+            break;
+          case ResearchButtonPressed():
+            _handleResearchButtonPressed();
           case SearchBarPressed():
             // TODO: 검색 화면 이동 로직은 추후 추가
             break;
         }
       },
+    );
+  }
+
+  Future<void> _handleResearchButtonPressed() async {
+    final controller = _mapController;
+    if (controller == null) return;
+
+    final position = await controller.getCameraPosition();
+    if (!mounted) return;
+
+    ref.read(mapViewModelProvider.notifier).researchAt(
+      GeoLocation(
+        latitude: position.target.latitude,
+        longitude: position.target.longitude,
+      ),
     );
   }
 
