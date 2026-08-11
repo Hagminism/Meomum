@@ -34,7 +34,7 @@ class CustomBottomAppBar extends StatelessWidget {
               ),
             ),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(8, 4, 8, 20),
+              padding: const EdgeInsets.fromLTRB(8, 4, 8, 24),
               child: Row(
                 children: [
                   AppBarNavItem(
