@@ -50,6 +50,7 @@ class _HomeScreenRootState extends ConsumerState<HomeScreenRoot> {
           case TapCategory():
           case TapFeedItem():
             viewModel.onAction(action);
+            break;
         }
       },
     );

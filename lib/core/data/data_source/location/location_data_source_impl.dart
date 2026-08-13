@@ -6,6 +6,9 @@ import 'package:meomum/core/utils/result.dart';
 import 'package:meomum/di/di.dart';
 
 class LocationDataSourceImpl implements LocationDataSource {
+  static const Duration _lastKnownLocationMaxAge = Duration(seconds: 10);
+  static const Duration _currentLocationTimeout = Duration(seconds: 5);
+
   final GeolocatorPlatform _geolocator;
 
   LocationDataSourceImpl({
@@ -29,10 +32,23 @@ class LocationDataSourceImpl implements LocationDataSource {
       return const Result.failure('위치 권한이 허용되지 않았습니다.');
     }
 
+    final lastKnownPosition = await _geolocator.getLastKnownPosition();
+    if (lastKnownPosition != null &&
+        DateTime.now().difference(lastKnownPosition.timestamp).abs() <=
+            _lastKnownLocationMaxAge) {
+      return Result.success(
+        GeoLocation(
+          latitude: lastKnownPosition.latitude,
+          longitude: lastKnownPosition.longitude,
+        ),
+      );
+    }
+
     try {
       final position = await _geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.high,
+          timeLimit: _currentLocationTimeout,
         ),
       );
 
@@ -43,6 +59,15 @@ class LocationDataSourceImpl implements LocationDataSource {
         ),
       );
     } catch (e) {
+      if (lastKnownPosition != null) {
+        return Result.success(
+          GeoLocation(
+            latitude: lastKnownPosition.latitude,
+            longitude: lastKnownPosition.longitude,
+          ),
+        );
+      }
+
       return Result.failure('현재 위치를 가져오지 못했습니다. ($e)');
     }
   }

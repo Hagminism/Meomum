@@ -57,6 +57,7 @@ class _MyPageScreenRootState extends ConsumerState<MyPageScreenRoot> {
           case TapStayHistoryMenu():
           case TapLogout():
             viewModel.onAction(action);
+            break;
         }
       },
     );

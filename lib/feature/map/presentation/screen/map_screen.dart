@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:meomum/feature/map/presentation/component/drawer/map_bottom_drawer.dart';
 import 'package:meomum/feature/map/presentation/component/map_search_bar.dart';
 import 'package:meomum/feature/map/presentation/screen/map_action.dart';
 import 'package:meomum/feature/map/presentation/screen/map_state.dart';
@@ -24,11 +25,31 @@ class MapScreen extends StatelessWidget {
           mapView,
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: MapSearchBar(
-                onTap: () => onAction(MapAction.searchBarPressed()),
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  MapSearchBar(
+                    onTap: () => onAction(MapAction.searchBarPressed()),
+                  ),
+                ],
               ),
             ),
+          ),
+          MapBottomDrawer(
+            selectedCategory: state.selectedCategory,
+            isResearchEnabled: state.isResearchButtonEnabled,
+            isResearchLoading: state.isLoadingNearbyTourSpots,
+            onCategoryPressed: (category) {
+              onAction(MapAction.categoryFilterPressed(category));
+            },
+            onCurrentLocationPressed: () {
+              onAction(MapAction.currentLocationPressed());
+            },
+            onResearchPressed: () {
+              onAction(MapAction.researchButtonPressed());
+            },
           ),
           if (!state.isMapReady)
             ColoredBox(
