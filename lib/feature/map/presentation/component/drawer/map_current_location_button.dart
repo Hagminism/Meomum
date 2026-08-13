@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:meomum/ui/app_colors.dart';
 
+/// 지도를 사용자의 현재 위치로 이동시키는 컨트롤을 제공합니다.
 class MapCurrentLocationButton extends StatelessWidget {
   final void Function() onTap;
 

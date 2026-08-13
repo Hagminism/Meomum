@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:meomum/ui/app_colors.dart';
 
+/// 현재 지도 중심을 기준으로 관광정보를 다시 검색하는 버튼을 제공합니다.
 class MapResearchButton extends StatelessWidget {
   final bool isEnabled;
   final bool isLoading;
