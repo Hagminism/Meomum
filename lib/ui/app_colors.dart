@@ -26,6 +26,9 @@ class AppColors {
   static const Color signUpWithNaverButton = Color(0xFF03C75A);
   static const Color signUpWithKakaoButton = Color(0xFFFEE500);
 
+  // Map 관련 색상
+  static const Color mapCategoryButtonSelected = Color(0xFF003F00);
+
   // MyPage 관련 색상
   static const Color currentStayLabel = Color(0xFF007800);
   static const Color cardBackground = Color(0xFFF5F5F6);
