@@ -1,0 +1,114 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meomum/feature/community/data/mock/community_mock_data.dart';
+import 'package:meomum/feature/community/domain/model/community_region.dart';
+import 'package:meomum/feature/community/presentation/component/region/community_region_bottom_sheet.dart';
+import 'package:meomum/feature/community/presentation/screen/community_action.dart';
+import 'package:meomum/feature/community/presentation/screen/community_event.dart';
+import 'package:meomum/feature/community/presentation/screen/community_screen.dart';
+import 'package:meomum/feature/community/presentation/screen/community_view_model.dart';
+import 'package:meomum/ui/app_colors.dart';
+
+class CommunityScreenRoot extends ConsumerStatefulWidget {
+  const CommunityScreenRoot({super.key});
+
+  @override
+  ConsumerState<CommunityScreenRoot> createState() =>
+      _CommunityScreenRootState();
+}
+
+class _CommunityScreenRootState extends ConsumerState<CommunityScreenRoot> {
+  StreamSubscription<CommunityEvent>? _eventSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final viewModel = ref.read(communityViewModelProvider.notifier);
+
+      _eventSubscription = viewModel.eventStream.listen(
+        (CommunityEvent event) {
+          if (!mounted) {
+            return;
+          }
+
+          switch (event) {
+            case ShowMessage(:final message):
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(message)));
+          }
+        },
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(communityViewModelProvider);
+    final viewModel = ref.read(communityViewModelProvider.notifier);
+
+    return CommunityScreen(
+      state: state,
+      onAction: (CommunityAction action) {
+        switch (action) {
+          case TapRegionFilter():
+            _showRegionSelector(state.selectedRegion);
+            break;
+          case SelectRegion():
+          case SelectCategory():
+          case ChangeImagePage():
+          case ToggleLike():
+          case TapComment():
+          case TapShare():
+          case TapWrite():
+            viewModel.onAction(action);
+            break;
+        }
+      },
+    );
+  }
+
+  Future<void> _showRegionSelector(
+    CommunityRegion selectedRegion,
+  ) async {
+    final region = await showModalBottomSheet<CommunityRegion>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: AppColors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (BuildContext bottomSheetContext) {
+        return CommunityRegionBottomSheet(
+          regions: CommunityMockData.regions,
+          selectedRegion: selectedRegion,
+          onClose: () {
+            Navigator.of(bottomSheetContext).pop();
+          },
+          onConfirm: (CommunityRegion confirmedRegion) {
+            Navigator.of(bottomSheetContext).pop(confirmedRegion);
+          },
+        );
+      },
+    );
+
+    if (!mounted || region == null) {
+      return;
+    }
+
+    ref
+        .read(communityViewModelProvider.notifier)
+        .onAction(CommunityAction.selectRegion(region));
+  }
+
+  @override
+  void dispose() {
+    _eventSubscription?.cancel();
+    super.dispose();
+  }
+}
