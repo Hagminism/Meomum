@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:meomum/feature/community/domain/model/community_category.dart';
+import 'package:meomum/feature/community/domain/model/enum/community_category.dart';
 import 'package:meomum/feature/community/presentation/component/category/community_category_filter_bar.dart';
 import 'package:meomum/feature/community/presentation/component/post/community_post_card.dart';
 import 'package:meomum/feature/community/presentation/component/region/community_region_header.dart';

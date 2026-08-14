@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:meomum/feature/community/domain/model/community_category.dart';
+import 'package:meomum/feature/community/domain/model/enum/community_category.dart';
 import 'package:meomum/ui/app_colors.dart';
 
 class CommunityCategoryFilterBar extends StatelessWidget {

@@ -1,4 +1,4 @@
-import 'package:meomum/feature/community/domain/model/community_category.dart';
+import 'package:meomum/feature/community/domain/model/enum/community_category.dart';
 import 'package:meomum/feature/community/domain/model/community_place.dart';
 import 'package:meomum/feature/community/domain/model/community_post.dart';
 import 'package:meomum/feature/community/domain/model/community_region.dart';
