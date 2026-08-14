@@ -54,6 +54,8 @@ class MyPageViewModel extends Notifier<MyPageState> {
         );
       case TapLogout():
         _signOut();
+      case TapSettings():
+        break; // root에서 처리
     }
   }
 
