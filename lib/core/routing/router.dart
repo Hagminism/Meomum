@@ -5,6 +5,7 @@ import 'package:meomum/core/data/repository/auth/auth_repository_impl.dart';
 import 'package:meomum/core/presentation/component/custom_bottom_app_bar.dart';
 import 'package:meomum/core/routing/go_router_refresh_stream.dart';
 import 'package:meomum/core/routing/routes.dart';
+import 'package:meomum/feature/community/presentation/screen/community_screen_root.dart';
 import 'package:meomum/feature/home/presentation/screen/home_screen_root.dart';
 import 'package:meomum/feature/map/presentation/screen/map_screen_root.dart';
 import 'package:meomum/feature/my_page/presentation/screen/my_page_screen_root.dart';
@@ -41,7 +42,7 @@ final routerProvider = Provider<GoRouter>((Ref ref) {
             routes: [
               GoRoute(
                 path: Routes.community,
-                builder: (_, _) => const Placeholder(color: Colors.red),
+                builder: (_, _) => const CommunityScreenRoot(),
               ),
             ],
           ),
