@@ -25,6 +25,7 @@ class MyPageProfileHeader extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
+            color: AppColors.cardBackground,
             borderRadius: BorderRadius.circular(12),
             border: BoxBorder.all(color: AppColors.cardBackground)
         ),
@@ -122,7 +123,7 @@ class MyPageProfileHeader extends StatelessWidget {
                     style: TextStyle(
                       fontFamily: 'Pretendard',
                       fontSize: 16,
-                      fontWeight: FontWeight.w400,
+                      fontWeight: FontWeight.w500,
                       height: 1,
                       color: AppColors.black,
                     ),

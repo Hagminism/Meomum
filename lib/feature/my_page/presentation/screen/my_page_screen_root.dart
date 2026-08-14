@@ -58,6 +58,9 @@ class _MyPageScreenRootState extends ConsumerState<MyPageScreenRoot> {
           case TapLogout():
             viewModel.onAction(action);
             break;
+          case TapSettings():
+            // TODO: 설정 페이지 이동은 나중에 구현
+            break;
         }
       },
     );
