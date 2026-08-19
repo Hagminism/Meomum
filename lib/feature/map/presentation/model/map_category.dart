@@ -1,35 +1,31 @@
 enum MapCategory {
   restaurant(
     label: '음식점',
-    contentTypeIds: <String>{'39'},
+    indsLclsCodes: <String>{'I2'},
   ),
   convenienceStore(
     label: '마트∙편의점',
-    contentTypeIds: <String>{'38'},
+    indsLclsCodes: <String>{'G2'},
   ),
   space(
     label: '공간',
-    contentTypeIds: <String>{'14', '28'},
+    indsLclsCodes: <String>{'R1'},
   ),
   accommodation(
     label: '숙박',
-    contentTypeIds: <String>{'32'},
-  ),
-  tourism(
-    label: '관광',
-    contentTypeIds: <String>{'12', '15', '25'},
+    indsLclsCodes: <String>{'I1'},
   );
 
   final String label;
-  final Set<String> contentTypeIds;
+  final Set<String> indsLclsCodes;
 
   const MapCategory({
     required this.label,
-    required this.contentTypeIds,
+    required this.indsLclsCodes,
   });
 
-  /// contentTypeId가 contentTypeIds에 포함되어 있는지 확인
-  bool containsContentTypeId(String? contentTypeId) {
-    return contentTypeId != null && contentTypeIds.contains(contentTypeId);
+  /// 업종 대분류 코드가 해당 카테고리에 포함되어 있는지 확인
+  bool containsIndsLclsCd(String? indsLclsCd) {
+    return indsLclsCd != null && indsLclsCodes.contains(indsLclsCd);
   }
 }
