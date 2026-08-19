@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:meomum/feature/map/presentation/model/map_category.dart';
 import 'package:meomum/ui/app_colors.dart';
 
-/// 지도에 표시할 관광정보 카테고리를 가로 목록으로 제공합니다.
+/// 지도에 표시할 상가 업종 카테고리를 가로 목록으로 제공합니다.
 class MapCategoryFilterBar extends StatelessWidget {
   final MapCategory? selectedCategory;
   final void Function(MapCategory category) onCategoryPressed;
