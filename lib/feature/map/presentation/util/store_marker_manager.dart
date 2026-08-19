@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:meomum/ui/app_colors.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:meomum/core/domain/model/commercial_store/commercial_store.dart';
 
@@ -65,6 +67,8 @@ class StoreMarkerManager {
             id: store.id,
             position: NLatLng(store.latitude, store.longitude),
             caption: NOverlayCaption(text: store.name),
+            iconTintColor: AppColors.primary,
+            size: Size(30, 40),
           ),
         )
         .toSet();
