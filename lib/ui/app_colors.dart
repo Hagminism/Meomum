@@ -29,6 +29,12 @@ class AppColors {
   // Map 관련 색상
   static const Color mapCategoryButtonSelected = Color(0xFF003F00);
 
+  // Community 관련 색상
+  static const Color communityText = Color(0xFF030303);
+  static const Color communityLocationText = Color(0xFF002300);
+  static const Color communityMetaText = Color(0xFF7A7A7A);
+  static const Color communityCategoryBadge = Color(0xFFE9EDC1);
+
   // MyPage 관련 색상
   static const Color currentStayLabel = Color(0xFF007800);
   static const Color cardBackground = Color(0xFFF5F5F6);
