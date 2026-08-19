@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:meomum/core/data/repository/tour_info/tour_info_repository_impl.dart';
+import 'package:meomum/core/data/repository/commercial_store/commercial_store_repository_impl.dart';
 import 'package:meomum/core/domain/model/location/geo_location.dart';
 import 'package:meomum/core/utils/result.dart';
 import 'package:meomum/feature/map/presentation/model/map_category.dart';
@@ -47,36 +47,44 @@ class MapViewModel extends Notifier<MapState> {
   }
 
   void _initialize(GeoLocation location) {
-    state = state.copyWith(
-      isMapReady: true,
-      isResearchButtonEnabled: false,
-    );
+    state = state.copyWith(isMapReady: true, isResearchButtonEnabled: false);
 
-    _loadNearbyTourSpots(location);
+    _loadNearbyStores(location);
   }
 
-  /// 현 위치 주변의 관광정보를 불러옵니다.
-  Future<void> _loadNearbyTourSpots(GeoLocation location) async {
-    state = state.copyWith(isLoadingNearbyTourSpots: true);
+  /// 현 위치 주변의 상가 정보를 불러옵니다.
+  Future<void> _loadNearbyStores(GeoLocation location) async {
+    state = state.copyWith(isLoadingNearbyStores: true);
 
-    final result = await ref
-        .read(tourInfoRepositoryProvider)
-        .getNearbyTourSpots(
-          location: location,
-          radius: _nearbySearchRadiusMeter,
-        );
+    try {
+      final result = await ref
+          .read(commercialStoreRepositoryProvider)
+          .getNearbyStores(
+            location: location,
+            radius: _nearbySearchRadiusMeter,
+          );
 
-    switch (result) {
-      case Success(:final data):
-        state = state.copyWith(
-          isLoadingNearbyTourSpots: false,
-          nearbyTourSpots: data,
-        );
+      if (!ref.mounted) return;
+
+      switch (result) {
+        case Success(:final data):
+          state = state.copyWith(
+            isLoadingNearbyStores: false,
+            nearbyStores: data,
+          );
+        case Failure(:final message):
+          state = state.copyWith(isLoadingNearbyStores: false);
+          _eventController.add(MapEvent.showError(message));
+      }
+    } catch (error) {
+      if (!ref.mounted) return;
+
+      state = state.copyWith(isLoadingNearbyStores: false);
+      _eventController.add(MapEvent.showError('주변 상가를 가져오지 못했습니다. ($error)'));
+    } finally {
+      if (ref.mounted) {
         _validateCooldown();
-      case Failure(:final message):
-        state = state.copyWith(isLoadingNearbyTourSpots: false);
-        _validateCooldown();
-        _eventController.add(MapEvent.showError(message));
+      }
     }
   }
 
@@ -87,10 +95,10 @@ class MapViewModel extends Notifier<MapState> {
     state = state.copyWith(isResearchButtonEnabled: true);
   }
 
-  /// 재검색 버튼을 비활성화한 후, 현 위치 주변의 관광정보를 불러옵니다.
+  /// 재검색 버튼을 비활성화한 후, 현 위치 주변의 상가 정보를 불러옵니다.
   /// 재검색 버튼이 활성화 되어있거나 이미 가게를 찾는 중인 경우 리턴합니다.
   void researchAt(GeoLocation location) {
-    if (!state.isResearchButtonEnabled || state.isLoadingNearbyTourSpots) {
+    if (!state.isResearchButtonEnabled || state.isLoadingNearbyStores) {
       return;
     }
 
@@ -102,7 +110,7 @@ class MapViewModel extends Notifier<MapState> {
       state = state.copyWith(isResearchButtonEnabled: true);
     });
 
-    _loadNearbyTourSpots(location);
+    _loadNearbyStores(location);
   }
 
   void _toggleCategory(MapCategory category) {
@@ -113,6 +121,4 @@ class MapViewModel extends Notifier<MapState> {
 }
 
 final mapViewModelProvider =
-    NotifierProvider.autoDispose<MapViewModel, MapState>(
-      MapViewModel.new,
-    );
+    NotifierProvider.autoDispose<MapViewModel, MapState>(MapViewModel.new);

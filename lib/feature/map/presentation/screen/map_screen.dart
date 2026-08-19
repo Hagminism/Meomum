@@ -40,7 +40,7 @@ class MapScreen extends StatelessWidget {
           MapBottomDrawer(
             selectedCategory: state.selectedCategory,
             isResearchEnabled: state.isResearchButtonEnabled,
-            isResearchLoading: state.isLoadingNearbyTourSpots,
+            isResearchLoading: state.isLoadingNearbyStores,
             onCategoryPressed: (category) {
               onAction(MapAction.categoryFilterPressed(category));
             },

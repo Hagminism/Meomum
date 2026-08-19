@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:meomum/core/domain/model/tour_spot/tour_spot.dart';
+import 'package:meomum/core/domain/model/commercial_store/commercial_store.dart';
 import 'package:meomum/feature/map/presentation/model/map_category.dart';
 
 part 'map_state.freezed.dart';
@@ -10,24 +10,23 @@ abstract class MapState with _$MapState {
 
   const factory MapState({
     @Default(false) bool isMapReady,
-    @Default(false) bool isLoadingNearbyTourSpots,
+    @Default(false) bool isLoadingNearbyStores,
     @Default(false) bool isResearchButtonEnabled,
-    @Default(<TourSpot>[]) List<TourSpot> nearbyTourSpots,
+    @Default(<CommercialStore>[]) List<CommercialStore> nearbyStores,
     MapCategory? selectedCategory,
   }) = _MapState;
 
-
-  /// 선택된 카테고리에 해당하는 관광정보 목록을 반환합니다.
-  List<TourSpot> get visibleTourSpots {
+  /// 선택된 카테고리에 해당하는 상가 목록을 반환합니다.
+  List<CommercialStore> get visibleStores {
     final category = selectedCategory;
     if (category == null) {
-      return nearbyTourSpots;
+      return nearbyStores;
     }
 
-    return nearbyTourSpots
-        .where((tourSpot) {
-      return category.containsContentTypeId(tourSpot.contentTypeId);
-    })
+    return nearbyStores
+        .where((store) {
+          return category.containsIndsLclsCd(store.industryLargeCode);
+        })
         .toList(growable: false);
   }
 }
