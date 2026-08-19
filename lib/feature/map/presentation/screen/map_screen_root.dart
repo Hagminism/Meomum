@@ -5,13 +5,13 @@ import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meomum/core/data/repository/location/location_repository_impl.dart';
 import 'package:meomum/core/domain/model/location/geo_location.dart';
-import 'package:meomum/core/domain/model/tour_spot/tour_spot.dart';
 import 'package:meomum/core/utils/result.dart';
 import 'package:meomum/feature/map/presentation/screen/map_action.dart';
 import 'package:meomum/feature/map/presentation/screen/map_event.dart';
 import 'package:meomum/feature/map/presentation/screen/map_screen.dart';
 import 'package:meomum/feature/map/presentation/screen/map_state.dart';
 import 'package:meomum/feature/map/presentation/screen/map_view_model.dart';
+import 'package:meomum/feature/map/presentation/util/store_marker_manager.dart';
 
 class MapScreenRoot extends ConsumerStatefulWidget {
   const MapScreenRoot({super.key});
@@ -24,10 +24,12 @@ class _MapScreenRootState extends ConsumerState<MapScreenRoot> {
   static const double defaultLatitude = 37.5666;
   static const double defaultLongitude = 126.979;
   static const double _initialZoom = 14;
+  static const double _clusterMergeDistanceDp = 80;
 
   StreamSubscription<MapEvent>? _eventSubscription;
 
-  // Naver 관련 위젯들
+  // Naver 관련 위젯 및 마커 매니저
+  final StoreMarkerManager _markerManager = StoreMarkerManager();
   Widget? _mapView;
   NaverMapController? _mapController;
 
@@ -72,8 +74,20 @@ class _MapScreenRootState extends ConsumerState<MapScreenRoot> {
           zoom: _initialZoom,
         ),
       ),
+      clusterOptions: NaverMapClusteringOptions(
+        mergeStrategy: const NClusterMergeStrategy(
+          maxMergeableScreenDistance: _clusterMergeDistanceDp,
+          willMergedScreenDistance: {
+            NInclusiveRange(0, 10): 80,   
+            NInclusiveRange(11, 14): 50,
+            NInclusiveRange(15, 17): 30,
+            NInclusiveRange(18, 21): 15,
+          },
+        ),
+      ),
       onMapReady: (controller) {
         _mapController = controller;
+        _markerManager.setController(controller);
         controller.setMyLocationTracker(
           NDefaultMyLocationTracker(
             onPermissionDenied: _handleLocationPermissionDenied,
@@ -139,17 +153,15 @@ class _MapScreenRootState extends ConsumerState<MapScreenRoot> {
     final state = ref.watch(mapViewModelProvider);
     final viewModel = ref.read(mapViewModelProvider.notifier);
 
-
-    // 관광정보 목록에 변경이 있거나 카테고리가 변경되면,
+    // 상가 목록에 변경이 있거나 카테고리가 변경되면,
     // 화면에 표시되는 마커들을 전부 제거하고, 새로 확정된 내용을 기반으로 마커를 재표시합니다.
     ref.listen<MapState>(mapViewModelProvider, (previous, next) {
-      final tourSpotsChanged =
-          previous?.nearbyTourSpots != next.nearbyTourSpots;
+      final storesChanged = previous?.nearbyStores != next.nearbyStores;
       final categoryChanged =
           previous?.selectedCategory != next.selectedCategory;
 
-      if (tourSpotsChanged || categoryChanged) {
-        _updateTourSpotMarkers(next.visibleTourSpots);
+      if (storesChanged || categoryChanged) {
+        _markerManager.updateStores(next.visibleStores);
       }
     });
 
@@ -175,27 +187,7 @@ class _MapScreenRootState extends ConsumerState<MapScreenRoot> {
     );
   }
 
-  /// 화면에 존재하는 모든 마커를 제거하고, 새로 확정된 관광정보 리스트를 마커로 표시합니다.
-  Future<void> _updateTourSpotMarkers(List<TourSpot> tourSpots) async {
-    final controller = _mapController;
-    if (controller == null) return;
-
-    await controller.clearOverlays(type: NOverlayType.marker);
-
-    final markers = tourSpots
-        .map(
-          (spot) => NMarker(
-            id: spot.id,
-            position: NLatLng(spot.latitude, spot.longitude),
-            caption: NOverlayCaption(text: spot.title),
-          ),
-        )
-        .toSet();
-
-    await controller.addOverlayAll(markers);
-  }
-
-  /// 현위치 기준 관광정보 재검색을 실시합니다.
+  /// 현위치 기준 상가 재검색을 실시합니다.
   Future<void> _handleResearchButtonPressed() async {
     final controller = _mapController;
     if (controller == null) return;
@@ -267,6 +259,7 @@ class _MapScreenRootState extends ConsumerState<MapScreenRoot> {
 
   @override
   void dispose() {
+    _markerManager.detachController();
     _eventSubscription?.cancel();
     super.dispose();
   }
