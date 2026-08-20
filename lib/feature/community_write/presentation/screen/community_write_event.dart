@@ -5,8 +5,6 @@ part 'community_write_event.freezed.dart';
 
 @freezed
 sealed class CommunityWriteEvent with _$CommunityWriteEvent {
-  const factory CommunityWriteEvent.navigateToLocationSearch() =
-      NavigateToLocationSearch;
   const factory CommunityWriteEvent.postCreatedSuccess(CommunityPost post) =
       PostCreatedSuccess;
   const factory CommunityWriteEvent.showMessage(String message) = ShowMessage;

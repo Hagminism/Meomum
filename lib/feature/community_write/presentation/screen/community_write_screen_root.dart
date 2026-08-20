@@ -34,27 +34,23 @@ class _CommunityWriteScreenRootState
         if (!mounted) return;
 
         switch (event) {
-          case NavigateToLocationSearch():
-            final selectedPlace = await context.push<CommunityPlace>(
-              '${Routes.community}/${Routes.communityWrite}/${Routes.communityLocationSearch}',
-            );
-            if (selectedPlace != null && mounted) {
-              ref
-                  .read(communityWriteViewModelProvider.notifier)
-                  .onAction(CommunityWriteAction.setLocation(selectedPlace));
-            }
           case PostCreatedSuccess(:final post):
             ref.read(communityViewModelProvider.notifier).addPost(post);
+
             ScaffoldMessenger.of(
               context,
             ).showSnackBar(const SnackBar(content: Text('게시글이 등록되었습니다.')));
+
             context.pop();
+            break;
           case ShowMessage(:final message):
             ScaffoldMessenger.of(
               context,
             ).showSnackBar(SnackBar(content: Text(message)));
+            break;
           case Pop():
             context.pop();
+            break;
         }
       });
     });
@@ -67,12 +63,21 @@ class _CommunityWriteScreenRootState
 
     return CommunityWriteScreen(
       state: state,
-      onAction: (action) {
+      onAction: (action) async {
         switch (action) {
+          case TapLocationSearch():
+            final selectedPlace = await context.push<CommunityPlace>(
+              '${Routes.community}/${Routes.communityWrite}/${Routes.communityLocationSearch}',
+            );
+            if (selectedPlace != null && mounted) {
+              ref
+                  .read(communityWriteViewModelProvider.notifier)
+                  .onAction(CommunityWriteAction.setLocation(selectedPlace));
+            }
+            break;
           case SelectCategory():
           case PickMedia():
           case RemoveMedia():
-          case TapLocationSearch():
           case SetLocation():
           case ChangeTitle():
           case ChangeContent():

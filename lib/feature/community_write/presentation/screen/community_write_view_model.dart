@@ -32,9 +32,7 @@ class CommunityWriteViewModel extends Notifier<CommunityWriteState> {
       case RemoveMedia(:final index):
         _removeMedia(index);
       case TapLocationSearch():
-        _eventController.add(
-          const CommunityWriteEvent.navigateToLocationSearch(),
-        );
+        break;
       case SetLocation(:final place):
         state = state.copyWith(selectedPlace: place);
       case ChangeTitle(:final title):
