@@ -41,4 +41,12 @@ class AppColors {
   static const Color thumbnailPlaceholder = Color(0xFFE3E3E4);
   static const Color divider = Color(0xFFE3E3E4);
   static const Color profileAvatarPlaceholder = Color(0xFFE7DDDD);
+
+  // Write & Common Input 관련 색상
+  static const Color writeBackground = Color(0xFFFFFFFA);
+  static const Color inputBackground = Color(0xFFF5F5F6);
+  static const Color inputBorder = Color(0xFFD2D2D3);
+  static const Color placeholderText = Color(0xFF646465);
+  static const Color hintIcon = Color(0xFFA1A1A2);
+  static const Color uploadButton = Color(0xFF2AAC5A);
 }
