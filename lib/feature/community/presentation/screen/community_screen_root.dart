@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:meomum/core/routing/routes.dart';
 import 'package:meomum/feature/community/data/mock/community_mock_data.dart';
 import 'package:meomum/feature/community/domain/model/community_region.dart';
 import 'package:meomum/feature/community/presentation/component/region/community_region_bottom_sheet.dart';
@@ -64,8 +66,10 @@ class _CommunityScreenRootState extends ConsumerState<CommunityScreenRoot> {
           case ToggleLike():
           case TapComment():
           case TapShare():
-          case TapWrite():
             viewModel.onAction(action);
+            break;
+          case TapWrite():
+            context.push('${Routes.community}/${Routes.communityWrite}');
             break;
         }
       },

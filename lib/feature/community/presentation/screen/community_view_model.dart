@@ -79,6 +79,12 @@ class CommunityViewModel extends Notifier<CommunityState> {
 
     state = state.copyWith(posts: updatedPosts);
   }
+
+  void addPost(CommunityPost post) {
+    state = state.copyWith(
+      posts: [post, ...state.posts],
+    );
+  }
 }
 
 final communityViewModelProvider =
