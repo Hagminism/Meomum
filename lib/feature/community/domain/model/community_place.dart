@@ -10,6 +10,9 @@ abstract class CommunityPlace with _$CommunityPlace {
     required String name,
     required double latitude,
     required double longitude,
+    @Default('') String address,
+    @Default('') String roadAddress,
+    @Default('') String category,
   }) = _CommunityPlace;
 
   factory CommunityPlace.fromJson(Map<String, Object?> json) =>
