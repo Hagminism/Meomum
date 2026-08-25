@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:meomum/core/auth/auth0_session.dart';
 import 'package:meomum/core/routing/router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -22,22 +22,7 @@ Future<void> main() async {
   await Supabase.initialize(
     url: dotenv.env['SUPABASE_URL'] ?? '',
     publishableKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
-  );
-
-  // ------------ GoogleSignIn 초기화 ------------ //
-  final webClientId = dotenv.env['GOOGLE_WEB_CLIENT_ID'];
-  final iosClientId = dotenv.env['GOOGLE_IOS_CLIENT_ID'];
-
-  if (webClientId == null || webClientId.isEmpty) {
-    throw StateError('GOOGLE_WEB_CLIENT_ID가 .env에 설정되지 않았습니다.');
-  }
-
-  // webClientId는 웹과 Android 공통으로 사용되고,
-  // iOS의 경우 id 자동 매칭이 약하여 clientId에 명시.
-  // Android는 Google Cloud Console에 등록만 해두면 됨.
-  await GoogleSignIn.instance.initialize(
-    clientId: (iosClientId == null || iosClientId.isEmpty) ? null : iosClientId,
-    serverClientId: webClientId,
+    accessToken: Auth0Session.idToken,
   );
 
   // ------------ Naver Map SDK 초기화 ------------ //
