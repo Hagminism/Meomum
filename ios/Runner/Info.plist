@@ -74,6 +74,14 @@
 				<string>$(REVERSED_CLIENT_ID)</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.salmyeosi.meomum.meomum</string>
+			</array>
+		</dict>
 
 		<!-- 카카오 전용 Scheme-->
 		<dict>
