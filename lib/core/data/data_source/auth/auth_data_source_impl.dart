@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:auth0_flutter/auth0_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -50,12 +51,13 @@ class AuthDataSourceImpl implements AuthDataSource {
 
   /// 선택한 Auth0 Connection으로 Universal Login을 진행하고 앱 계정을 준비한다.
   ///
-  /// HTTPS 콜백은 Android App Link/iOS Universal Link로 검증되어 앱으로 돌아온다.
+  /// Android에서는 HTTPS App Link, iOS에서는 Custom URL Scheme으로 앱으로 돌아온다.
   @override
   Future<Result<bool>> signInWithOAuth(AuthProvider provider) async {
     try {
+      // TODO: 릴리즈 시 iOS에서도 Univerial Link 방식으로 수정
       final credentials = await _auth0.webAuthentication().login(
-        useHTTPS: true,
+        useHTTPS: !Platform.isIOS,
         parameters: {'connection': _connectionName(provider)},
       );
       await _setAuthenticatedUser(credentials, provider: provider);
@@ -74,7 +76,7 @@ class AuthDataSourceImpl implements AuthDataSource {
   @override
   Future<Result<bool>> signOut() async {
     try {
-      await _auth0.webAuthentication().logout(useHTTPS: true);
+      await _auth0.webAuthentication().logout(useHTTPS: !Platform.isIOS);
       await _auth0.credentialsManager.clearCredentials();
       _currentUser = null;
       _authStateController.add(AuthSessionStatus.signedOut);
