@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meomum/core/data/repository/auth/auth_repository_impl.dart';
+import 'package:meomum/core/domain/enum/auth_session_status.dart';
 import 'package:meomum/core/presentation/component/custom_bottom_app_bar.dart';
 import 'package:meomum/core/routing/go_router_refresh_stream.dart';
 import 'package:meomum/core/routing/routes.dart';
@@ -83,17 +84,20 @@ final routerProvider = Provider<GoRouter>((Ref ref) {
     ],
     refreshListenable: refreshListenable,
     redirect: (context, state) {
-      final isSignedIn = ref.read(authRepositoryProvider).isSignedIn;
+      final authRepository = ref.read(authRepositoryProvider);
+      final sessionStatus = authRepository.sessionStatus;
       final location = state.matchedLocation;
       final isSignInRoute = location == Routes.signIn;
-      final isOnBoardingRoute = location == Routes.onBoarding;
-      final isAuthEntryRoute = isSignInRoute || isOnBoardingRoute;
 
-      if (!isSignedIn && !isAuthEntryRoute) {
-        return Routes.signIn;
+      if (sessionStatus == AuthSessionStatus.initializing) {
+        return isSignInRoute ? null : Routes.signIn;
       }
 
-      if (isSignedIn && isSignInRoute) {
+      if (sessionStatus == AuthSessionStatus.signedOut) {
+        return isSignInRoute ? null : Routes.signIn;
+      }
+
+      if (sessionStatus == AuthSessionStatus.signedIn && isSignInRoute) {
         return Routes.home;
       }
 
