@@ -34,6 +34,9 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   bool get isSignedIn => _dataSource.isSignedIn;
+
+  @override
+  AuthSessionStatus get sessionStatus => _dataSource.sessionStatus;
 }
 
 final authRepositoryProvider = Provider<AuthRepository>((Ref ref) {
