@@ -13,6 +13,7 @@ import 'package:meomum/feature/location_search/presentation/screen/location_sear
 import 'package:meomum/feature/map/presentation/screen/map_screen_root.dart';
 import 'package:meomum/feature/my_page/presentation/screen/my_page_screen_root.dart';
 import 'package:meomum/feature/sign_in/presentation/screen/sign_in_screen_root.dart';
+import 'package:meomum/feature/splash/presentation/screen/splash_screen_root.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -21,9 +22,12 @@ final routerProvider = Provider<GoRouter>((Ref ref) {
 
   return GoRouter(
     navigatorKey: rootNavigatorKey,
-    initialLocation: Routes.signIn,
+    initialLocation: Routes.splash,
     routes: [
-      GoRoute(path: Routes.onBoarding, builder: (_, _) => const Placeholder()),
+      GoRoute(
+        path: Routes.splash,
+        builder: (_, _) => const SplashScreenRoot(),
+      ),
       GoRoute(path: Routes.signIn, builder: (_, _) => const SignInScreenRoot()),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
@@ -87,17 +91,19 @@ final routerProvider = Provider<GoRouter>((Ref ref) {
       final authRepository = ref.read(authRepositoryProvider);
       final sessionStatus = authRepository.sessionStatus;
       final location = state.matchedLocation;
+      final isSplashRoute = location == Routes.splash;
       final isSignInRoute = location == Routes.signIn;
 
       if (sessionStatus == AuthSessionStatus.initializing) {
-        return isSignInRoute ? null : Routes.signIn;
+        return isSplashRoute ? null : Routes.splash;
       }
 
       if (sessionStatus == AuthSessionStatus.signedOut) {
         return isSignInRoute ? null : Routes.signIn;
       }
 
-      if (sessionStatus == AuthSessionStatus.signedIn && isSignInRoute) {
+      if (sessionStatus == AuthSessionStatus.signedIn &&
+          (isSignInRoute || isSplashRoute)) {
         return Routes.home;
       }
 
