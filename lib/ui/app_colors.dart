@@ -49,4 +49,9 @@ class AppColors {
   static const Color placeholderText = Color(0xFF646465);
   static const Color hintIcon = Color(0xFFA1A1A2);
   static const Color uploadButton = Color(0xFF2AAC5A);
+
+  // AppSnackBar 관련 색상
+  static const Color snackBarSurface = Color(0xFF17351F);
+  static const Color snackBarError = Color(0xFFC94F4F);
+  static const Color snackBarInfo = Color(0xFF477A58);
 }
