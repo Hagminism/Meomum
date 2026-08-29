@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meomum/core/presentation/component/app_snackbar.dart';
 import 'package:meomum/feature/my_page/presentation/screen/my_page_action.dart';
 import 'package:meomum/feature/my_page/presentation/screen/my_page_event.dart';
 import 'package:meomum/feature/my_page/presentation/screen/my_page_screen.dart';
@@ -31,10 +32,9 @@ class _MyPageScreenRootState extends ConsumerState<MyPageScreenRoot> {
 
         switch (event) {
           case ShowError(:final message):
+            AppSnackBar.showError(context, message);
           case ShowMessage(:final message):
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(message)));
+            AppSnackBar.showInfo(context, message);
         }
       });
     });

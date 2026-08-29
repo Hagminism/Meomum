@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meomum/core/presentation/component/app_snackbar.dart';
 import 'package:meomum/feature/home/presentation/screen/home_action.dart';
 import 'package:meomum/feature/home/presentation/screen/home_event.dart';
 import 'package:meomum/feature/home/presentation/screen/home_screen.dart';
@@ -29,9 +30,7 @@ class _HomeScreenRootState extends ConsumerState<HomeScreenRoot> {
 
         switch (event) {
           case ShowMessage(:final message):
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(message)));
+            AppSnackBar.showInfo(context, message);
         }
       });
     });

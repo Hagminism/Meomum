@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meomum/core/presentation/component/app_snackbar.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meomum/feature/location_search/presentation/screen/location_search_action.dart';
 import 'package:meomum/feature/location_search/presentation/screen/location_search_event.dart';
@@ -28,18 +29,16 @@ class _LocationSearchScreenRootState
           .read(locationSearchViewModelProvider.notifier)
           .eventStream
           .listen((event) {
-        if (!mounted) return;
-        switch (event) {
-          case PopWithPlace(:final place):
-            context.pop(place);
-          case Pop():
-            context.pop();
-          case ShowMessage(:final message):
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(message)),
-            );
-        }
-      });
+            if (!mounted) return;
+            switch (event) {
+              case PopWithPlace(:final place):
+                context.pop(place);
+              case Pop():
+                context.pop();
+              case ShowMessage(:final message):
+                AppSnackBar.showInfo(context, message);
+            }
+          });
     });
   }
 
