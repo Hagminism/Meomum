@@ -76,6 +76,7 @@ class CommunityViewModel extends Notifier<CommunityState> {
     }
   }
 
+  /// 선택한 지역의 첫 페이지 게시글을 조회하고 상태를 갱신합니다.
   Future<void> _fetchPosts(CommunityRegion region) async {
     state = state.copyWith(isLoading: true);
 
@@ -98,6 +99,7 @@ class CommunityViewModel extends Notifier<CommunityState> {
     }
   }
 
+  /// 마지막 게시글을 기준으로 다음 페이지를 조회해 목록에 추가합니다.
   Future<void> _loadMore() async {
     if (state.isLoading || state.isLoadingMore || !state.hasMore) {
       return;
@@ -131,6 +133,7 @@ class CommunityViewModel extends Notifier<CommunityState> {
     }
   }
 
+  /// 좋아요 상태를 먼저 화면에 반영하고 서버 처리 실패 시 이전 상태로 되돌립니다.
   Future<void> _toggleLike(String postId) async {
     final targetIndex = state.posts.indexWhere((p) => p.id == postId);
     if (targetIndex == -1) return;
@@ -176,6 +179,7 @@ class CommunityViewModel extends Notifier<CommunityState> {
     }
   }
 
+  /// 현재 선택된 지역과 같은 게시글을 목록의 가장 앞에 추가합니다.
   void addPost(CommunityPost post) {
     // 현재 선택된 지역과 같은 경우 상단에 추가
     if (post.upperRegion == state.selectedRegion.upperRegion &&

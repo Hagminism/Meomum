@@ -77,6 +77,7 @@ class _CommunityScreenRootState extends ConsumerState<CommunityScreenRoot> {
     );
   }
 
+  /// 지역 선택 바텀 시트를 열고 선택 결과를 ViewModel에 전달합니다.
   Future<void> _showRegionSelector(
     CommunityRegion selectedRegion,
   ) async {
