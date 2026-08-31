@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meomum/core/domain/model/category/category.dart';
+import 'package:meomum/feature/community/domain/model/enum/community_category.dart';
 import 'package:meomum/feature/home/domain/model/home_banner.dart';
 import 'package:meomum/feature/home/domain/model/home_feed_item.dart';
 import 'package:meomum/feature/home/presentation/screen/home_action.dart';
@@ -15,7 +16,7 @@ class HomeViewModel extends Notifier<HomeState> {
 
     return HomeState(
       banners: _mockBanners,
-      categories: _mockCategories,
+      categories: _categories,
       feedItems: _mockFeedItems,
     );
   }
@@ -54,8 +55,7 @@ class HomeViewModel extends Notifier<HomeState> {
       id: 'banner-2',
       eyebrow: '매거진',
       title: '한달살기의 시작',
-      subtitle:
-          '새로운 지역에서 일상을 시작해보세요. 머뭄이 추천하는 한달살기 코스를 만나보세요.',
+      subtitle: '새로운 지역에서 일상을 시작해보세요. 머뭄이 추천하는 한달살기 코스를 만나보세요.',
       imageUrl:
           'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=750&q=80',
     ),
@@ -63,42 +63,21 @@ class HomeViewModel extends Notifier<HomeState> {
       id: 'banner-3',
       eyebrow: '매거진',
       title: '로컬과 함께하는 하루',
-      subtitle:
-          '현지인이 알려주는 숨은 맛집과 골목 산책 코스를 모아봤습니다.',
+      subtitle: '현지인이 알려주는 숨은 맛집과 골목 산책 코스를 모아봤습니다.',
       imageUrl:
           'https://images.unsplash.com/photo-1488646953015-85ad3880ee66?w=750&q=80',
     ),
   ];
 
-  static const List<Category> _mockCategories = [
-    Category(
-      id: 'category-1',
-      label: '지역추천',
-      backgroundColor: 0xFFE9F39B,
-      imageUrl:
-          'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=120&q=80',
-    ),
-    Category(
-      id: 'category-2',
-      label: '지역추천',
-      backgroundColor: 0xFFF2F2F2,
-    ),
-    Category(
-      id: 'category-3',
-      label: '자유게시판',
-      backgroundColor: 0xFFF2F2F2,
-    ),
-    Category(
-      id: 'category-4',
-      label: '일자리',
-      backgroundColor: 0xFFF2F2F2,
-    ),
-    Category(
-      id: 'category-5',
-      label: '일자리',
-      backgroundColor: 0xFFF2F2F2,
-    ),
-  ];
+  static final List<Category> _categories = List<Category>.unmodifiable([
+    for (final CommunityCategory category in CommunityCategory.values)
+      Category(
+        id: category.name,
+        label: category.label,
+        backgroundColor: 0xFFF2F2F2,
+        imageAssetPath: category.assetPath,
+      ),
+  ]);
 
   static const List<HomeFeedItem> _mockFeedItems = [
     HomeFeedItem(

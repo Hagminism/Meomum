@@ -49,7 +49,7 @@ class HomeScreen extends StatelessWidget {
             ),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.only(top: 40),
+                padding: const EdgeInsets.only(top: 30),
                 child: SizedBox(
                   height: 84,
                   child: ListView.separated(

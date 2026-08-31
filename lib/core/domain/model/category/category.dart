@@ -10,6 +10,7 @@ abstract class Category with _$Category {
     required String label,
     required int backgroundColor,
     String? imageUrl,
+    String? imageAssetPath,
   }) = _Category;
 
   factory Category.fromJson(Map<String, dynamic> json) =>
