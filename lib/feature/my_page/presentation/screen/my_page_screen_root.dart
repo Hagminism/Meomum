@@ -2,7 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:meomum/core/presentation/component/app_snackbar.dart';
+import 'package:meomum/core/routing/routes.dart';
+import 'package:meomum/feature/community/domain/model/enum/community_category.dart';
 import 'package:meomum/feature/my_page/presentation/screen/my_page_action.dart';
 import 'package:meomum/feature/my_page/presentation/screen/my_page_event.dart';
 import 'package:meomum/feature/my_page/presentation/screen/my_page_screen.dart';
@@ -52,11 +55,26 @@ class _MyPageScreenRootState extends ConsumerState<MyPageScreenRoot> {
           case TapMyFeed():
           case TapProfile():
           case TapCurrentStayMenu():
-          case TapCategory():
           case TapStayHistory():
           case TapStayHistoryMenu():
           case TapLogout():
             viewModel.onAction(action);
+            break;
+          case TapCategory(:final id):
+            final category = CommunityCategory.values.firstWhere(
+              (CommunityCategory category) => category.name == id,
+              orElse: () {
+                return CommunityCategory.free;
+              },
+            );
+            final location = Uri(
+              path: Routes.community,
+              queryParameters: {
+                Routes.communityCategoryQuery: category.name,
+              },
+            ).toString();
+
+            context.go(location);
             break;
           case TapSettings():
             // TODO: 설정 페이지 이동은 나중에 구현
