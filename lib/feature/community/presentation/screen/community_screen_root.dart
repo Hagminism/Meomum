@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meomum/core/presentation/component/app_snackbar.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meomum/core/routing/routes.dart';
+import 'package:meomum/feature/community/domain/model/enum/community_category.dart';
 import 'package:meomum/feature/community/domain/model/community_region.dart';
 import 'package:meomum/feature/community/domain/model/community_regions.dart';
 import 'package:meomum/feature/community/presentation/component/region/community_region_bottom_sheet.dart';
@@ -15,7 +16,12 @@ import 'package:meomum/feature/community/presentation/screen/community_view_mode
 import 'package:meomum/ui/app_colors.dart';
 
 class CommunityScreenRoot extends ConsumerStatefulWidget {
-  const CommunityScreenRoot({super.key});
+  final CommunityCategory initialCategory;
+
+  const CommunityScreenRoot({
+    super.key,
+    this.initialCategory = CommunityCategory.free,
+  });
 
   @override
   ConsumerState<CommunityScreenRoot> createState() =>
@@ -30,7 +36,13 @@ class _CommunityScreenRootState extends ConsumerState<CommunityScreenRoot> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
       final viewModel = ref.read(communityViewModelProvider.notifier);
+
+      viewModel.onAction(
+        CommunityAction.selectCategory(widget.initialCategory),
+      );
 
       _eventSubscription = viewModel.eventStream.listen(
         (CommunityEvent event) {
@@ -44,6 +56,23 @@ class _CommunityScreenRootState extends ConsumerState<CommunityScreenRoot> {
           }
         },
       );
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant CommunityScreenRoot oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.initialCategory == widget.initialCategory) {
+      return;
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      ref
+          .read(communityViewModelProvider.notifier)
+          .onAction(CommunityAction.selectCategory(widget.initialCategory));
     });
   }
 
