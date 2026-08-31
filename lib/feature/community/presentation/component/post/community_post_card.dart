@@ -25,7 +25,9 @@ class CommunityPostCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          const SizedBox(height: 4),
           CommunityPostHeader(post: post),
+          const SizedBox(height: 4),
           if (post.imageUrls.isNotEmpty)
             CommunityPostImageCarousel(
               postId: post.id,
