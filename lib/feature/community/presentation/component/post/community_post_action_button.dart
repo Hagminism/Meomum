@@ -20,16 +20,16 @@ class CommunityPostActionButton extends StatelessWidget {
       onTap: onPressed,
       borderRadius: BorderRadius.circular(8),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.symmetric(vertical: 8),
         child: Row(
           children: [
-            Icon(icon, size: 18, color: color),
+            Icon(icon, size: 24, color: color),
             const SizedBox(width: 4),
             Text(
               label,
               style: TextStyle(
                 fontFamily: 'Pretendard',
-                fontSize: 14,
+                fontSize: 16,
                 fontWeight: FontWeight.w500,
                 height: 1,
                 color: color,

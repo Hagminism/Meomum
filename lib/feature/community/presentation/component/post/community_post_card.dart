@@ -41,10 +41,10 @@ class CommunityPostCard extends StatelessWidget {
             post: post,
             onAction: onAction,
           ),
-          const Divider(
+          Divider(
             height: 1,
             thickness: 1,
-            color: AppColors.divider,
+            color: AppColors.divider.withValues(alpha: 0.5),
           ),
         ],
       ),
