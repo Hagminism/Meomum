@@ -17,6 +17,8 @@ android {
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.salmyeosi.meomum.meomum"
+        manifestPlaceholders["auth0Domain"] = "dev-lqczidymlaqvdnw4.us.auth0.com"
+        manifestPlaceholders["auth0Scheme"] = "https"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 24

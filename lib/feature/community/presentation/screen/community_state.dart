@@ -14,15 +14,15 @@ abstract class CommunityState with _$CommunityState {
     @Default(CommunityCategory.free) CommunityCategory selectedCategory,
     @Default([]) List<CommunityPost> posts,
     @Default({}) Map<String, int> imagePageByPostId,
+    @Default(false) bool isLoading,
+    @Default(false) bool isLoadingMore,
+    @Default(true) bool hasMore,
   }) = _CommunityState;
 
   List<CommunityPost> get visiblePosts {
     return posts
         .where(
-          (CommunityPost post) =>
-              post.region.upperRegion == selectedRegion.upperRegion &&
-              post.region.lowerRegion == selectedRegion.lowerRegion &&
-              post.category == selectedCategory,
+          (CommunityPost post) => post.category == selectedCategory,
         )
         .toList(growable: false);
   }

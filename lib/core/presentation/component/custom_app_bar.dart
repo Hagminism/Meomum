@@ -3,14 +3,20 @@ import 'package:meomum/ui/app_colors.dart';
 
 class CustomAppBar extends StatelessWidget {
   final String title;
-  final void Function() onTap;
+  final Color? titleColor;
   final bool? showSettingsButton;
+  final bool? showCloseButton;
+  final void Function()? onSettingsTap;
+  final void Function()? onClosePressed;
 
   const CustomAppBar({
     super.key,
-    required this.onTap,
     required this.title,
+    this.titleColor,
+    this.onSettingsTap,
+    this.onClosePressed,
     this.showSettingsButton,
+    this.showCloseButton,
   });
 
   @override
@@ -19,6 +25,8 @@ class CustomAppBar extends StatelessWidget {
       backgroundColor: AppColors.white,
       surfaceTintColor: AppColors.white,
       elevation: 0,
+      scrolledUnderElevation: 0,
+      automaticallyImplyLeading: false,
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -27,9 +35,9 @@ class CustomAppBar extends StatelessWidget {
             title,
             style: TextStyle(
               fontFamily: 'Pretendard',
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF003F00),
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+              color: (titleColor != null) ? titleColor : AppColors.black,
             ),
           ),
           if (showSettingsButton == true)
@@ -37,12 +45,24 @@ class CustomAppBar extends StatelessWidget {
               color: Colors.transparent,
               borderRadius: BorderRadius.circular(90),
               child: InkWell(
-                onTap: onTap,
+                onTap: onSettingsTap,
                 borderRadius: BorderRadius.circular(90),
-                child: Icon(
+                child: const Icon(
                   Icons.settings,
                   size: 24,
                   color: Color(0xFF646465),
+                ),
+              ),
+            ),
+          if (showCloseButton == true)
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onClosePressed,
+                child: const Icon(
+                  Icons.close,
+                  size: 24,
+                  color: AppColors.black,
                 ),
               ),
             ),

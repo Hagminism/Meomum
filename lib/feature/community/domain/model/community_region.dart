@@ -8,7 +8,6 @@ abstract class CommunityRegion with _$CommunityRegion {
   const factory CommunityRegion({
     required String upperRegion,
     required String lowerRegion,
-    @Default([]) List<String> neighborhoods,
   }) = _CommunityRegion;
 
   factory CommunityRegion.fromJson(Map<String, dynamic> json) =>

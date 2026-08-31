@@ -5,6 +5,7 @@ import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meomum/core/data/repository/location/location_repository_impl.dart';
 import 'package:meomum/core/domain/model/location/geo_location.dart';
+import 'package:meomum/core/presentation/component/app_snackbar.dart';
 import 'package:meomum/core/utils/result.dart';
 import 'package:meomum/feature/map/presentation/screen/map_action.dart';
 import 'package:meomum/feature/map/presentation/screen/map_event.dart';
@@ -50,10 +51,9 @@ class _MapScreenRootState extends ConsumerState<MapScreenRoot> {
 
         switch (event) {
           case ShowMessage(:final message):
+            AppSnackBar.showInfo(context, message);
           case ShowError(:final message):
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(message)));
+            AppSnackBar.showError(context, message);
         }
       });
     });
@@ -78,7 +78,7 @@ class _MapScreenRootState extends ConsumerState<MapScreenRoot> {
         mergeStrategy: const NClusterMergeStrategy(
           maxMergeableScreenDistance: _clusterMergeDistanceDp,
           willMergedScreenDistance: {
-            NInclusiveRange(0, 10): 80,   
+            NInclusiveRange(0, 10): 80,
             NInclusiveRange(11, 14): 50,
             NInclusiveRange(15, 17): 30,
             NInclusiveRange(18, 21): 15,
@@ -107,9 +107,7 @@ class _MapScreenRootState extends ConsumerState<MapScreenRoot> {
         ? '위치 권한이 차단되어 있습니다. 설정에서 위치 권한을 허용해 주세요.'
         : '현재 위치를 표시하려면 위치 권한이 필요합니다.';
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    AppSnackBar.showError(context, message);
   }
 
   /// 사용자의 현재 위치가 화면 중앙에 오도록 카메라를 조정합니다.
@@ -248,9 +246,7 @@ class _MapScreenRootState extends ConsumerState<MapScreenRoot> {
 
           controller.setLocationTrackingMode(NLocationTrackingMode.follow);
         case Failure(:final message):
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(message)));
+          AppSnackBar.showError(context, message);
       }
     } finally {
       _isUpdatingLocationTracking = false;

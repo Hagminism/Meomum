@@ -34,7 +34,7 @@ class MyPageScreen extends StatelessWidget {
                 slivers: [
                   SliverToBoxAdapter(
                     child: CustomAppBar(
-                      onTap: () {
+                      onSettingsTap: () {
                         onAction(const MyPageAction.tapSettings());
                       },
                       title: '나의 여행',

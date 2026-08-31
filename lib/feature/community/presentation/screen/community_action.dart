@@ -17,4 +17,6 @@ sealed class CommunityAction with _$CommunityAction {
   const factory CommunityAction.tapComment(String postId) = TapComment;
   const factory CommunityAction.tapShare(String postId) = TapShare;
   const factory CommunityAction.tapWrite() = TapWrite;
+  const factory CommunityAction.loadMore() = LoadMore;
+  const factory CommunityAction.refresh() = Refresh;
 }

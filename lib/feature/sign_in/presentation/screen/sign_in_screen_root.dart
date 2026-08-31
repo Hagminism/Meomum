@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meomum/core/presentation/component/app_snackbar.dart';
 import 'package:meomum/feature/sign_in/presentation/screen/sign_in_action.dart';
 import 'package:meomum/feature/sign_in/presentation/screen/sign_in_event.dart';
 import 'package:meomum/feature/sign_in/presentation/screen/sign_in_screen.dart';
@@ -31,13 +32,9 @@ class _SignInScreenRootState extends ConsumerState<SignInScreenRoot> {
 
         switch (event) {
           case ShowError(:final message):
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(message)));
+            AppSnackBar.showError(context, message);
           case ShowMessage(:final message):
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(message)));
+            AppSnackBar.showInfo(context, message);
         }
       });
     });

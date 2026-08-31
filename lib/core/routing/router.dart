@@ -2,29 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meomum/core/data/repository/auth/auth_repository_impl.dart';
+import 'package:meomum/core/domain/enum/auth_session_status.dart';
 import 'package:meomum/core/presentation/component/custom_bottom_app_bar.dart';
 import 'package:meomum/core/routing/go_router_refresh_stream.dart';
 import 'package:meomum/core/routing/routes.dart';
 import 'package:meomum/feature/community/presentation/screen/community_screen_root.dart';
+import 'package:meomum/feature/community_write/presentation/screen/community_write_screen_root.dart';
 import 'package:meomum/feature/home/presentation/screen/home_screen_root.dart';
+import 'package:meomum/feature/location_search/presentation/screen/location_search_screen_root.dart';
 import 'package:meomum/feature/map/presentation/screen/map_screen_root.dart';
 import 'package:meomum/feature/my_page/presentation/screen/my_page_screen_root.dart';
 import 'package:meomum/feature/sign_in/presentation/screen/sign_in_screen_root.dart';
+import 'package:meomum/feature/splash/presentation/screen/splash_screen_root.dart';
+
+final rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final routerProvider = Provider<GoRouter>((Ref ref) {
   final refreshListenable = ref.watch(goRouterRefreshStreamProvider);
 
   return GoRouter(
-    initialLocation: Routes.signIn,
+    navigatorKey: rootNavigatorKey,
+    initialLocation: Routes.splash,
     routes: [
       GoRoute(
-        path: Routes.onBoarding,
-        builder: (_, _) => const Placeholder(),
+        path: Routes.splash,
+        builder: (_, _) => const SplashScreenRoot(),
       ),
-      GoRoute(
-        path: Routes.signIn,
-        builder: (_, _) => const SignInScreenRoot(),
-      ),
+      GoRoute(path: Routes.signIn, builder: (_, _) => const SignInScreenRoot()),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return CustomBottomAppBar(navigationShell: navigationShell);
@@ -43,6 +47,23 @@ final routerProvider = Provider<GoRouter>((Ref ref) {
               GoRoute(
                 path: Routes.community,
                 builder: (_, _) => const CommunityScreenRoot(),
+                routes: [
+                  GoRoute(
+                    parentNavigatorKey: rootNavigatorKey,
+                    path: Routes.communityWrite,
+                    pageBuilder: (_, _) => MaterialPage(
+                      fullscreenDialog: true,
+                      child: const CommunityWriteScreenRoot(),
+                    ),
+                    routes: [
+                      GoRoute(
+                        parentNavigatorKey: rootNavigatorKey,
+                        path: Routes.communityLocationSearch,
+                        builder: (_, _) => const LocationSearchScreenRoot(),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ],
           ),
@@ -67,17 +88,22 @@ final routerProvider = Provider<GoRouter>((Ref ref) {
     ],
     refreshListenable: refreshListenable,
     redirect: (context, state) {
-      final isSignedIn = ref.read(authRepositoryProvider).isSignedIn;
+      final authRepository = ref.read(authRepositoryProvider);
+      final sessionStatus = authRepository.sessionStatus;
       final location = state.matchedLocation;
+      final isSplashRoute = location == Routes.splash;
       final isSignInRoute = location == Routes.signIn;
-      final isOnBoardingRoute = location == Routes.onBoarding;
-      final isAuthEntryRoute = isSignInRoute || isOnBoardingRoute;
 
-      if (!isSignedIn && !isAuthEntryRoute) {
-        return Routes.signIn;
+      if (sessionStatus == AuthSessionStatus.initializing) {
+        return isSplashRoute ? null : Routes.splash;
       }
 
-      if (isSignedIn && isSignInRoute) {
+      if (sessionStatus == AuthSessionStatus.signedOut) {
+        return isSignInRoute ? null : Routes.signIn;
+      }
+
+      if (sessionStatus == AuthSessionStatus.signedIn &&
+          (isSignInRoute || isSplashRoute)) {
         return Routes.home;
       }
 

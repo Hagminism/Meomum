@@ -36,9 +36,10 @@ class UserDto {
   UserDto.fromSupabaseUser(supabase.User user) {
     id = user.id;
     email = user.email;
-    authProvider = _extractAuthProvider(user);
-    nickname = _extractNickname(user);
-    avatarUrl = _extractAvatarUrl(user);
+    final provider = _extractAuthProvider(user);
+    authProvider = provider;
+    nickname = _extractNickname(user, provider);
+    avatarUrl = _extractAvatarUrl(user, provider);
   }
 
   String? _extractAuthProvider(supabase.User user) {
@@ -55,10 +56,17 @@ class UserDto {
     return null;
   }
 
-  String? _extractNickname(supabase.User user) {
+  String? _extractNickname(supabase.User user, String? provider) {
     final metadata = user.userMetadata ?? {};
 
-    for (final key in ['full_name', 'name', 'nickname', 'user_name']) {
+    // Provider별 우선순위 지정
+    final List<String> searchKeys = switch (provider) {
+      'kakao' => ['nickname', 'name', 'full_name', 'user_name'],
+      'naver' || 'custom:naver' => ['name', 'nickname', 'full_name', 'user_name'],
+      _ => ['full_name', 'name', 'nickname', 'user_name'],
+    };
+
+    for (final key in searchKeys) {
       final value = metadata[key];
       if (value is String && value.isNotEmpty) {
         return value;
@@ -68,10 +76,17 @@ class UserDto {
     return null;
   }
 
-  String? _extractAvatarUrl(supabase.User user) {
+  String? _extractAvatarUrl(supabase.User user, String? provider) {
     final metadata = user.userMetadata ?? {};
 
-    for (final key in ['avatar_url', 'picture', 'profile_image']) {
+    // Provider별 우선순위 지정
+    final List<String> searchKeys = switch (provider) {
+      'kakao' => ['avatar_url', 'profile_image', 'picture'],
+      'naver' || 'custom:naver' => ['picture', 'profile_image', 'avatar_url'],
+      _ => ['picture', 'avatar_url', 'profile_image'],
+    };
+
+    for (final key in searchKeys) {
       final value = metadata[key];
       if (value is String && value.isNotEmpty) {
         return value;

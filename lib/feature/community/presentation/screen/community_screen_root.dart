@@ -2,8 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:meomum/feature/community/data/mock/community_mock_data.dart';
+import 'package:meomum/core/presentation/component/app_snackbar.dart';
+import 'package:go_router/go_router.dart';
+import 'package:meomum/core/routing/routes.dart';
 import 'package:meomum/feature/community/domain/model/community_region.dart';
+import 'package:meomum/feature/community/domain/model/community_regions.dart';
 import 'package:meomum/feature/community/presentation/component/region/community_region_bottom_sheet.dart';
 import 'package:meomum/feature/community/presentation/screen/community_action.dart';
 import 'package:meomum/feature/community/presentation/screen/community_event.dart';
@@ -37,9 +40,7 @@ class _CommunityScreenRootState extends ConsumerState<CommunityScreenRoot> {
 
           switch (event) {
             case ShowMessage(:final message):
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(message)));
+              AppSnackBar.showError(context, message);
           }
         },
       );
@@ -64,14 +65,19 @@ class _CommunityScreenRootState extends ConsumerState<CommunityScreenRoot> {
           case ToggleLike():
           case TapComment():
           case TapShare():
-          case TapWrite():
+          case LoadMore():
+          case Refresh():
             viewModel.onAction(action);
+            break;
+          case TapWrite():
+            context.push('${Routes.community}/${Routes.communityWrite}');
             break;
         }
       },
     );
   }
 
+  /// 지역 선택 바텀 시트를 열고 선택 결과를 ViewModel에 전달합니다.
   Future<void> _showRegionSelector(
     CommunityRegion selectedRegion,
   ) async {
@@ -85,7 +91,7 @@ class _CommunityScreenRootState extends ConsumerState<CommunityScreenRoot> {
       ),
       builder: (BuildContext bottomSheetContext) {
         return CommunityRegionBottomSheet(
-          regions: CommunityMockData.regions,
+          regions: CommunityRegions.all,
           selectedRegion: selectedRegion,
           onClose: () {
             Navigator.of(bottomSheetContext).pop();

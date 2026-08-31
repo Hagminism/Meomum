@@ -13,4 +13,6 @@ abstract interface class AuthRepository {
   User? get currentUser;
 
   bool get isSignedIn;
+
+  AuthSessionStatus get sessionStatus;
 }
