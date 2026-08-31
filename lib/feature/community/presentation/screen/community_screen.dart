@@ -47,27 +47,70 @@ class CommunityScreen extends StatelessWidget {
                     },
                   ),
                   Expanded(
-                    child: state.visiblePosts.isEmpty
-                        ? CommunityEmptyView(
-                            regionLabel:
-                                '${state.selectedRegion.upperRegion} '
-                                '${state.selectedRegion.lowerRegion}',
-                          )
-                        : ListView.builder(
-                            padding: EdgeInsets.only(
-                              bottom: bottomSafeArea + 164,
+                    child: state.isLoading
+                        ? const Center(
+                            child: CircularProgressIndicator(
+                              color: AppColors.primary,
                             ),
-                            itemCount: state.visiblePosts.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              final post = state.visiblePosts[index];
-
-                              return CommunityPostCard(
-                                post: post,
-                                currentImageIndex:
-                                    state.imagePageByPostId[post.id] ?? 0,
-                                onAction: onAction,
-                              );
+                          )
+                        : RefreshIndicator(
+                            color: AppColors.primary,
+                            onRefresh: () async {
+                              onAction(const CommunityAction.refresh());
                             },
+                            child: state.visiblePosts.isEmpty
+                                ? CommunityEmptyView(
+                                    regionLabel:
+                                        '${state.selectedRegion.upperRegion} '
+                                        '${state.selectedRegion.lowerRegion}',
+                                  )
+                                : NotificationListener<ScrollNotification>(
+                                    onNotification:
+                                        (ScrollNotification notification) {
+                                      if (notification.metrics.pixels >=
+                                          notification.metrics.maxScrollExtent -
+                                              200) {
+                                        onAction(
+                                          const CommunityAction.loadMore(),
+                                        );
+                                      }
+                                      return false;
+                                    },
+                                    child: ListView.builder(
+                                      padding: EdgeInsets.only(
+                                        bottom: bottomSafeArea + 164,
+                                      ),
+                                      itemCount: state.visiblePosts.length +
+                                          (state.isLoadingMore ? 1 : 0),
+                                      itemBuilder:
+                                          (BuildContext context, int index) {
+                                        if (index ==
+                                            state.visiblePosts.length) {
+                                          return const Padding(
+                                            padding: EdgeInsets.symmetric(
+                                              vertical: 16,
+                                            ),
+                                            child: Center(
+                                              child: CircularProgressIndicator(
+                                                color: AppColors.primary,
+                                              ),
+                                            ),
+                                          );
+                                        }
+
+                                        final post = state.visiblePosts[index];
+
+                                        return CommunityPostCard(
+                                          post: post,
+                                          currentImageIndex:
+                                              state.imagePageByPostId[
+                                                  post.id] ??
+                                              0,
+                                          onAction: onAction,
+                                        );
+                                      },
+                                    ),
+                                  ),
                           ),
                   ),
                 ],

@@ -1,20 +1,32 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:meomum/feature/community/data/mock/community_mock_data.dart';
+import 'package:meomum/core/data/repository/community/community_post_repository_impl.dart';
+import 'package:meomum/core/domain/repository/community/community_post_repository.dart';
+import 'package:meomum/core/utils/result.dart';
 import 'package:meomum/feature/community/domain/model/community_post.dart';
+import 'package:meomum/feature/community/domain/model/community_region.dart';
+import 'package:meomum/feature/community/domain/model/community_regions.dart';
 import 'package:meomum/feature/community/presentation/screen/community_action.dart';
 import 'package:meomum/feature/community/presentation/screen/community_event.dart';
 import 'package:meomum/feature/community/presentation/screen/community_state.dart';
 
 class CommunityViewModel extends Notifier<CommunityState> {
+  late final CommunityPostRepository _repository;
+
+  static const int _pageSize = 20;
+
   @override
   CommunityState build() {
+    _repository = ref.watch(communityPostRepositoryProvider);
     ref.onDispose(() => _eventController.close());
 
+    Future.microtask(() => _fetchPosts(CommunityRegions.pohang));
+
     return const CommunityState(
-      selectedRegion: CommunityMockData.pohang,
-      posts: CommunityMockData.posts,
+      selectedRegion: CommunityRegions.pohang,
+      posts: [],
+      isLoading: true,
     );
   }
 
@@ -32,6 +44,7 @@ class CommunityViewModel extends Notifier<CommunityState> {
           selectedRegion: action.region,
           imagePageByPostId: const {},
         );
+        _fetchPosts(action.region);
       case SelectCategory():
         state = state.copyWith(
           selectedCategory: action.category,
@@ -55,35 +68,122 @@ class CommunityViewModel extends Notifier<CommunityState> {
           const CommunityEvent.showMessage('공유 기능은 추후 연결 예정입니다.'),
         );
       case TapWrite():
-        _eventController.add(
-          const CommunityEvent.showMessage('글쓰기 화면은 추후 연결 예정입니다.'),
-        );
+        break;
+      case LoadMore():
+        _loadMore();
+      case Refresh():
+        _fetchPosts(state.selectedRegion);
     }
   }
 
-  void _toggleLike(String postId) {
+  Future<void> _fetchPosts(CommunityRegion region) async {
+    state = state.copyWith(isLoading: true);
+
+    final result = await _repository.getPosts(
+      upperRegion: region.upperRegion,
+      lowerRegion: region.lowerRegion,
+      limit: _pageSize,
+    );
+
+    switch (result) {
+      case Success(data: final posts):
+        state = state.copyWith(
+          posts: posts,
+          isLoading: false,
+          hasMore: posts.length >= _pageSize,
+        );
+      case Failure(message: final message):
+        state = state.copyWith(isLoading: false);
+        _eventController.add(CommunityEvent.showMessage(message));
+    }
+  }
+
+  Future<void> _loadMore() async {
+    if (state.isLoading || state.isLoadingMore || !state.hasMore) {
+      return;
+    }
+
+    if (state.posts.isEmpty) {
+      return;
+    }
+
+    state = state.copyWith(isLoadingMore: true);
+
+    final lastPostCreatedAt = state.posts.last.createdAt;
+
+    final result = await _repository.getPosts(
+      upperRegion: state.selectedRegion.upperRegion,
+      lowerRegion: state.selectedRegion.lowerRegion,
+      limit: _pageSize,
+      cursor: lastPostCreatedAt,
+    );
+
+    switch (result) {
+      case Success(data: final newPosts):
+        state = state.copyWith(
+          posts: [...state.posts, ...newPosts],
+          isLoadingMore: false,
+          hasMore: newPosts.length >= _pageSize,
+        );
+      case Failure(message: final message):
+        state = state.copyWith(isLoadingMore: false);
+        _eventController.add(CommunityEvent.showMessage(message));
+    }
+  }
+
+  Future<void> _toggleLike(String postId) async {
+    final targetIndex = state.posts.indexWhere((p) => p.id == postId);
+    if (targetIndex == -1) return;
+
+    final targetPost = state.posts[targetIndex];
+    final currentIsLiked = targetPost.isLiked;
+
+    // Optimistic Update
     final updatedPosts = state.posts
-        .map((CommunityPost post) {
-          if (post.id != postId) {
-            return post;
-          }
-
-          final isLiked = !post.isLiked;
-
+        .map((post) {
+          if (post.id != postId) return post;
+          final nextIsLiked = !currentIsLiked;
           return post.copyWith(
-            isLiked: isLiked,
-            likeCount: isLiked ? post.likeCount + 1 : post.likeCount - 1,
+            isLiked: nextIsLiked,
+            likeCount: nextIsLiked
+                ? post.likeCount + 1
+                : (post.likeCount - 1).clamp(0, 999999),
           );
         })
         .toList(growable: false);
 
     state = state.copyWith(posts: updatedPosts);
+
+    final result = await _repository.toggleLike(
+      postId: postId,
+      isCurrentlyLiked: currentIsLiked,
+    );
+
+    if (result case Failure(message: final msg)) {
+      // Rollback on failure
+      final rollbackPosts = state.posts
+          .map((post) {
+            if (post.id != postId) return post;
+            return post.copyWith(
+              isLiked: currentIsLiked,
+              likeCount: targetPost.likeCount,
+            );
+          })
+          .toList(growable: false);
+
+      state = state.copyWith(posts: rollbackPosts);
+      _eventController.add(CommunityEvent.showMessage(msg));
+    }
   }
 
   void addPost(CommunityPost post) {
-    state = state.copyWith(
-      posts: [post, ...state.posts],
-    );
+    // 현재 선택된 지역과 같은 경우 상단에 추가
+    if (post.upperRegion == state.selectedRegion.upperRegion &&
+        post.lowerRegion == state.selectedRegion.lowerRegion) {
+      state = state.copyWith(
+        posts: [post, ...state.posts],
+      );
+    }
   }
 }
 
