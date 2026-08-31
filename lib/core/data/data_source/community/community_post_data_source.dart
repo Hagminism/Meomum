@@ -22,6 +22,11 @@ abstract interface class CommunityPostDataSource {
     DateTime? cursor,
   });
 
+  Future<Result<List<CommunityPostDto>>> getLatestPostsWithImages({
+    int limit = 20,
+    DateTime? cursor,
+  });
+
   Future<Result<CommunityPostDto>> getPostById({
     required String postId,
   });

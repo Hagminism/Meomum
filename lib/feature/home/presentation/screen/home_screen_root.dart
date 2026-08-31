@@ -50,6 +50,7 @@ class _HomeScreenRootState extends ConsumerState<HomeScreenRoot> {
         switch (action) {
           case ChangeBannerIndex():
           case TapFeedItem():
+          case LoadMore():
             viewModel.onAction(action);
             break;
           case TapCategory(:final id):
