@@ -40,8 +40,11 @@ class CommunityWriteScreen extends StatelessWidget {
                           title: '새 글 작성',
                           titleColor: Color(0xFF646465),
                           showCloseButton: true,
-                          onClosePressed: () =>
-                              onAction(const CommunityWriteAction.tapBack()),
+                          onClosePressed: state.isLoading
+                              ? null
+                              : () => onAction(
+                                  const CommunityWriteAction.tapBack(),
+                                ),
                         ),
                       ),
                       SliverPadding(
@@ -51,8 +54,53 @@ class CommunityWriteScreen extends StatelessWidget {
                         ),
                         sliver: SliverList(
                           delegate: SliverChildListDelegate([
+                            // 0. 게시할 지역
+                            _buildSectionLabel('게시할 지역', isRequired: true),
+                            const SizedBox(height: 8),
+                            InkWell(
+                              onTap: () => onAction(
+                                const CommunityWriteAction.tapRegionSelect(),
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                              child: Container(
+                                height: 50,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.inputBackground,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: AppColors.inputBorder,
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        '${state.selectedRegion.upperRegion} ${state.selectedRegion.lowerRegion}',
+                                        style: const TextStyle(
+                                          fontFamily: 'Pretendard',
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500,
+                                          color: AppColors.black,
+                                        ),
+                                      ),
+                                    ),
+                                    const Icon(
+                                      Icons.keyboard_arrow_down_rounded,
+                                      color: AppColors.hintIcon,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+
                             // 1. 게시판 카테고리
-                            _buildSectionLabel('게시판'),
+                            _buildSectionLabel('게시판', isRequired: true),
                             const SizedBox(height: 8),
                             CategoryDropdownButton(
                               selectedCategory: state.category,
@@ -113,11 +161,12 @@ class CommunityWriteScreen extends StatelessWidget {
                             const SizedBox(height: 20),
 
                             // 4. 제목 입력
-                            _buildSectionLabel('제목'),
+                            _buildSectionLabel('제목', isRequired: true),
                             const SizedBox(height: 8),
                             _buildInputField(
                               hintText: '제목을 입력해주세요',
                               initialValue: state.title,
+                              maxLength: 50,
                               onChanged: (val) => onAction(
                                 CommunityWriteAction.changeTitle(val),
                               ),
@@ -125,13 +174,14 @@ class CommunityWriteScreen extends StatelessWidget {
                             const SizedBox(height: 20),
 
                             // 5. 내용 입력
-                            _buildSectionLabel('내용'),
+                            _buildSectionLabel('내용', isRequired: true),
                             const SizedBox(height: 8),
                             _buildInputField(
                               hintText: '내용을 입력해주세요',
                               initialValue: state.content,
                               maxLines: 8,
                               height: 180,
+                              maxLength: 10000,
                               onChanged: (val) => onAction(
                                 CommunityWriteAction.changeContent(val),
                               ),
@@ -153,9 +203,21 @@ class CommunityWriteScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionLabel(String label) {
-    return Text(
-      label,
+  Widget _buildSectionLabel(
+    String label, {
+    bool isRequired = false,
+  }) {
+    return Text.rich(
+      TextSpan(
+        text: label,
+        children: [
+          if (isRequired)
+            const TextSpan(
+              text: ' *',
+              style: TextStyle(color: AppColors.snackBarError),
+            ),
+        ],
+      ),
       style: const TextStyle(
         fontFamily: 'Pretendard',
         fontSize: 14,
@@ -169,6 +231,7 @@ class CommunityWriteScreen extends StatelessWidget {
     required String hintText,
     required String initialValue,
     required void Function(String) onChanged,
+    required int maxLength,
     int maxLines = 1,
     double? height,
   }) {
@@ -183,6 +246,7 @@ class CommunityWriteScreen extends StatelessWidget {
       child: TextFormField(
         initialValue: initialValue,
         maxLines: maxLines,
+        maxLength: maxLength,
         onChanged: onChanged,
         onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
         style: const TextStyle(
@@ -202,6 +266,7 @@ class CommunityWriteScreen extends StatelessWidget {
           border: InputBorder.none,
           isDense: true,
           contentPadding: EdgeInsets.zero,
+          counterText: '',
         ),
       ),
     );
