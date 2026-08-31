@@ -32,7 +32,12 @@ class CategoryItem extends StatelessWidget {
                 borderRadius: BorderRadius.circular(30),
               ),
               clipBehavior: Clip.antiAlias,
-              child: category.imageUrl != null
+              child: category.imageAssetPath != null
+                  ? Image.asset(
+                      category.imageAssetPath!,
+                      fit: BoxFit.cover,
+                    )
+                  : category.imageUrl != null
                   ? Image.network(
                       category.imageUrl!,
                       fit: BoxFit.cover,

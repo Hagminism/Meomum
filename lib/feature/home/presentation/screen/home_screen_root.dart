@@ -2,7 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:meomum/core/presentation/component/app_snackbar.dart';
+import 'package:meomum/core/routing/routes.dart';
+import 'package:meomum/feature/community/domain/model/enum/community_category.dart';
 import 'package:meomum/feature/home/presentation/screen/home_action.dart';
 import 'package:meomum/feature/home/presentation/screen/home_event.dart';
 import 'package:meomum/feature/home/presentation/screen/home_screen.dart';
@@ -46,9 +49,25 @@ class _HomeScreenRootState extends ConsumerState<HomeScreenRoot> {
       onAction: (HomeAction action) {
         switch (action) {
           case ChangeBannerIndex():
-          case TapCategory():
           case TapFeedItem():
+          case LoadMore():
             viewModel.onAction(action);
+            break;
+          case TapCategory(:final id):
+            final category = CommunityCategory.values.firstWhere(
+              (CommunityCategory category) => category.name == id,
+              orElse: () {
+                return CommunityCategory.free;
+              },
+            );
+            final location = Uri(
+              path: Routes.community,
+              queryParameters: {
+                Routes.communityCategoryQuery: category.name,
+              },
+            ).toString();
+
+            context.go(location);
             break;
         }
       },

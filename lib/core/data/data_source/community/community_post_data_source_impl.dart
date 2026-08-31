@@ -23,6 +23,12 @@ class CommunityPostDataSourceImpl implements CommunityPostDataSource {
       'post_images(storage_path, public_url, sort_order), '
       'post_likes(account_id)';
 
+  /// 이미지가 하나 이상 연결된 게시글만 조회하기 위한 관계 선택문을 정의합니다.
+  static const String _postSelectWithImages =
+      '*, profiles!posts_author_id_fkey(nickname, profile_image_url), '
+      'post_images!inner(storage_path, public_url, sort_order), '
+      'post_likes(account_id)';
+
   final SupabaseClient _client;
   final AuthRepository _authRepository;
 
@@ -58,6 +64,41 @@ class CommunityPostDataSourceImpl implements CommunityPostDataSource {
       }
 
       // 최신 게시글부터 페이지 크기만큼 조회합니다.
+      final response = await query
+          .order('created_at', ascending: false)
+          .limit(limit);
+
+      final list = response as List<dynamic>;
+      final posts = list
+          .map(
+            (item) => CommunityPostDto.fromJson(item as Map<String, dynamic>),
+          )
+          .toList();
+
+      return Result.success(posts);
+    } on PostgrestException catch (error) {
+      return Result.failure('게시글을 불러오지 못했습니다: ${error.message}');
+    } catch (error) {
+      return Result.failure('오류가 발생했습니다: $error');
+    }
+  }
+
+  @override
+  /// 지역 조건 없이 이미지가 있는 최신 게시글 목록을 조회합니다.
+  /// 커서가 있으면 마지막으로 조회한 게시글보다 오래된 게시글만 조회합니다.
+  Future<Result<List<CommunityPostDto>>> getLatestPostsWithImages({
+    int limit = 20,
+    DateTime? cursor,
+  }) async {
+    try {
+      var query = _client.from('posts').select(_postSelectWithImages);
+
+      if (cursor != null) {
+        // 생성일을 커서로 사용해 다음 페이지의 게시글을 조회합니다.
+        query = query.lt('created_at', cursor.toIso8601String());
+      }
+
+      // 지역과 관계없이 이미지가 있는 최신 게시글부터 조회합니다.
       final response = await query
           .order('created_at', ascending: false)
           .limit(limit);

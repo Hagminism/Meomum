@@ -6,6 +6,7 @@ import 'package:meomum/core/domain/enum/auth_session_status.dart';
 import 'package:meomum/core/presentation/component/custom_bottom_app_bar.dart';
 import 'package:meomum/core/routing/go_router_refresh_stream.dart';
 import 'package:meomum/core/routing/routes.dart';
+import 'package:meomum/feature/community/domain/model/enum/community_category.dart';
 import 'package:meomum/feature/community/presentation/screen/community_screen_root.dart';
 import 'package:meomum/feature/community_write/presentation/screen/community_write_screen_root.dart';
 import 'package:meomum/feature/home/presentation/screen/home_screen_root.dart';
@@ -46,7 +47,21 @@ final routerProvider = Provider<GoRouter>((Ref ref) {
             routes: [
               GoRoute(
                 path: Routes.community,
-                builder: (_, _) => const CommunityScreenRoot(),
+                builder: (_, GoRouterState state) {
+                  final categoryName =
+                      state.uri.queryParameters[Routes.communityCategoryQuery];
+                  final initialCategory = CommunityCategory.values.firstWhere(
+                    (CommunityCategory category) =>
+                        category.name == categoryName,
+                    orElse: () {
+                      return CommunityCategory.free;
+                    },
+                  );
+
+                  return CommunityScreenRoot(
+                    initialCategory: initialCategory,
+                  );
+                },
                 routes: [
                   GoRoute(
                     parentNavigatorKey: rootNavigatorKey,
