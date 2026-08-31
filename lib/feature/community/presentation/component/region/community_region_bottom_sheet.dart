@@ -35,12 +35,19 @@ class _CommunityRegionBottomSheetState
   }
 
   List<CommunityRegion> get _lowerRegions {
-    return widget.regions
+    final lowerRegions = widget.regions
         .where(
           (CommunityRegion region) =>
               region.upperRegion == _selectedUpperRegion,
         )
-        .toList(growable: false);
+        .toList();
+
+    lowerRegions.sort(
+      (CommunityRegion first, CommunityRegion second) =>
+          first.lowerRegion.compareTo(second.lowerRegion),
+    );
+
+    return lowerRegions;
   }
 
   @override
@@ -170,7 +177,12 @@ class _CommunityRegionBottomSheetState
         .where(
           (CommunityRegion region) => region.upperRegion == upperRegion,
         )
-        .toList(growable: false);
+        .toList();
+
+    lowerRegions.sort(
+      (CommunityRegion first, CommunityRegion second) =>
+          first.lowerRegion.compareTo(second.lowerRegion),
+    );
 
     if (lowerRegions.isEmpty) {
       return;
