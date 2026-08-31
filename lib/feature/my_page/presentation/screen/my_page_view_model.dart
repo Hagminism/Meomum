@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meomum/core/data/repository/auth/auth_repository_impl.dart';
 import 'package:meomum/core/domain/model/category/category.dart';
 import 'package:meomum/core/utils/result.dart';
+import 'package:meomum/feature/community/domain/model/enum/community_category.dart';
 import 'package:meomum/feature/my_page/domain/model/current_stay.dart';
 import 'package:meomum/feature/my_page/domain/model/stay_history_item.dart';
 import 'package:meomum/feature/my_page/presentation/screen/my_page_action.dart';
@@ -20,7 +21,7 @@ class MyPageViewModel extends Notifier<MyPageState> {
     return MyPageState(
       user: authRepository.currentUser,
       currentStay: _mockCurrentStay,
-      categories: _mockCategories,
+      categories: _categories,
       stayHistories: _mockStayHistories,
     );
   }
@@ -86,35 +87,15 @@ class MyPageViewModel extends Notifier<MyPageState> {
         'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=144&q=80',
   );
 
-  static const List<Category> _mockCategories = [
-    Category(
-      id: 'category-1',
-      label: '지역추천',
-      backgroundColor: 0xFFE9F39B,
-      imageUrl:
-          'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=120&q=80',
-    ),
-    Category(
-      id: 'category-2',
-      label: '자유게시판',
-      backgroundColor: 0xFFF2F2F2,
-    ),
-    Category(
-      id: 'category-3',
-      label: '일자리',
-      backgroundColor: 0xFFF2F2F2,
-    ),
-    Category(
-      id: 'category-4',
-      label: '지역추천',
-      backgroundColor: 0xFFF2F2F2,
-    ),
-    Category(
-      id: 'category-5',
-      label: '일자리',
-      backgroundColor: 0xFFF2F2F2,
-    ),
-  ];
+  static final List<Category> _categories = List<Category>.unmodifiable([
+    for (final CommunityCategory category in CommunityCategory.values)
+      Category(
+        id: category.name,
+        label: category.label,
+        backgroundColor: 0xFFF2F2F2,
+        imageAssetPath: category.assetPath,
+      ),
+  ]);
 
   static const List<StayHistoryItem> _mockStayHistories = [
     StayHistoryItem(
