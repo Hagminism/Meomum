@@ -94,6 +94,11 @@ class _CommunityScreenRootState extends ConsumerState<CommunityScreenRoot> {
           case ToggleLike():
           case TapComment():
           case TapShare():
+            viewModel.onAction(action);
+            break;
+          case TapPost(:final postId):
+            context.push('${Routes.community}/post-detail/$postId');
+            break;
           case LoadMore():
           case Refresh():
             viewModel.onAction(action);
