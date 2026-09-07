@@ -43,10 +43,8 @@ class HomeViewModel extends Notifier<HomeState> {
         state = state.copyWith(currentBannerIndex: index);
       case TapCategory():
         break;
-      case TapFeedItem(:final id):
-        _eventController.add(
-          HomeEvent.showMessage('게시글($id)은 추후 연결 예정입니다.'),
-        );
+      case TapFeedItem():
+        break;
       case LoadMore():
         _loadMore();
     }
