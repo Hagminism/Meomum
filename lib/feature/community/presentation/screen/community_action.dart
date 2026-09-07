@@ -15,7 +15,7 @@ sealed class CommunityAction with _$CommunityAction {
       ChangeImagePage;
   const factory CommunityAction.toggleLike(String postId) = ToggleLike;
   const factory CommunityAction.tapComment(String postId) = TapComment;
-  const factory CommunityAction.tapShare(String postId) = TapShare;
+  const factory CommunityAction.tapPost(String postId) = TapPost;
   const factory CommunityAction.tapWrite() = TapWrite;
   const factory CommunityAction.loadMore() = LoadMore;
   const factory CommunityAction.refresh() = Refresh;

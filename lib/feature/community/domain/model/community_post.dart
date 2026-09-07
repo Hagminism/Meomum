@@ -34,9 +34,9 @@ abstract class CommunityPost with _$CommunityPost {
   String get timeLabel => createdAt.toTimeAgo();
 
   CommunityRegion get region => CommunityRegion(
-        upperRegion: upperRegion,
-        lowerRegion: lowerRegion,
-      );
+    upperRegion: upperRegion,
+    lowerRegion: lowerRegion,
+  );
 
   factory CommunityPost.fromJson(Map<String, dynamic> json) =>
       _$CommunityPostFromJson(json);

@@ -23,7 +23,8 @@ class MediaPreviewList extends StatelessWidget {
     return Row(
       children: List.generate(mediaFiles.length, (index) {
         final file = mediaFiles[index];
-        final isVideo = file.path.toLowerCase().endsWith('.mp4') ||
+        final isVideo =
+            file.path.toLowerCase().endsWith('.mp4') ||
             file.path.toLowerCase().endsWith('.mov');
 
         return Padding(

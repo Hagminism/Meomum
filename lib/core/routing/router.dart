@@ -10,6 +10,8 @@ import 'package:meomum/feature/community/domain/model/enum/community_category.da
 import 'package:meomum/feature/community/presentation/screen/community_screen_root.dart';
 import 'package:meomum/feature/community_write/presentation/screen/community_write_screen_root.dart';
 import 'package:meomum/feature/home/presentation/screen/home_screen_root.dart';
+import 'package:meomum/feature/home_post_detail/presentation/screen/home_post_detail_screen_root.dart';
+import 'package:meomum/feature/community_post_detail/presentation/screen/community_post_detail_screen_root.dart';
 import 'package:meomum/feature/location_search/presentation/screen/location_search_screen_root.dart';
 import 'package:meomum/feature/map/presentation/screen/map_screen_root.dart';
 import 'package:meomum/feature/my_page/presentation/screen/my_page_screen_root.dart';
@@ -40,6 +42,17 @@ final routerProvider = Provider<GoRouter>((Ref ref) {
               GoRoute(
                 path: Routes.home,
                 builder: (_, _) => const HomeScreenRoot(),
+                routes: [
+                  GoRoute(
+                    parentNavigatorKey: rootNavigatorKey,
+                    path: Routes.postDetail,
+                    builder: (_, GoRouterState state) {
+                      return HomePostDetailScreenRoot(
+                        postId: state.pathParameters[Routes.postId]!,
+                      );
+                    },
+                  ),
+                ],
               ),
             ],
           ),
@@ -63,6 +76,15 @@ final routerProvider = Provider<GoRouter>((Ref ref) {
                   );
                 },
                 routes: [
+                  GoRoute(
+                    parentNavigatorKey: rootNavigatorKey,
+                    path: Routes.postDetail,
+                    builder: (_, GoRouterState state) {
+                      return CommunityPostDetailScreenRoot(
+                        postId: state.pathParameters[Routes.postId]!,
+                      );
+                    },
+                  ),
                   GoRoute(
                     parentNavigatorKey: rootNavigatorKey,
                     path: Routes.communityWrite,

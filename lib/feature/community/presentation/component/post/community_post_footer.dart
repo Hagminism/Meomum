@@ -8,11 +8,13 @@ import 'package:meomum/ui/app_colors.dart';
 class CommunityPostFooter extends StatelessWidget {
   final CommunityPost post;
   final void Function(CommunityAction) onAction;
+  final void Function(CommunityPost, BuildContext) onShare;
 
   const CommunityPostFooter({
     super.key,
     required this.post,
     required this.onAction,
+    required this.onShare,
   });
 
   @override
@@ -92,23 +94,25 @@ class CommunityPostFooter extends StatelessWidget {
                   },
                 ),
                 const Spacer(),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Material(
-                    color: Colors.transparent,
-                    borderRadius: BorderRadius.circular(8),
-                    child: InkWell(
-                      onTap: () {
-                        onAction(CommunityAction.tapShare(post.id));
-                      },
-                      borderRadius: BorderRadius.circular(8),
-                      child: const Icon(
-                        Icons.ios_share_rounded,
-                        size: 24,
-                        color: AppColors.feedContentText,
+                Builder(
+                  builder: (BuildContext shareContext) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Material(
+                        color: Colors.transparent,
+                        borderRadius: BorderRadius.circular(8),
+                        child: InkWell(
+                          onTap: () => onShare(post, shareContext),
+                          borderRadius: BorderRadius.circular(8),
+                          child: const Icon(
+                            Icons.ios_share_rounded,
+                            size: 24,
+                            color: AppColors.feedContentText,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 ),
               ],
             ),

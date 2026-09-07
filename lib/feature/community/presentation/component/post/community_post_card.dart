@@ -10,43 +10,51 @@ class CommunityPostCard extends StatelessWidget {
   final CommunityPost post;
   final int currentImageIndex;
   final void Function(CommunityAction action) onAction;
+  final void Function(CommunityPost, BuildContext) onShare;
 
   const CommunityPostCard({
     super.key,
     required this.post,
     required this.currentImageIndex,
     required this.onAction,
+    required this.onShare,
   });
 
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(
-      color: AppColors.homeBackground,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const SizedBox(height: 4),
-          CommunityPostHeader(post: post),
-          const SizedBox(height: 4),
-          if (post.imageUrls.isNotEmpty)
-            CommunityPostImageCarousel(
-              postId: post.id,
-              imageUrls: post.imageUrls,
-              currentIndex: currentImageIndex,
-              onAction: (int index) {
-                onAction(CommunityAction.changeImagePage(post.id, index));
-              },
+    return InkWell(
+      onTap: () {
+        onAction(CommunityAction.tapPost(post.id));
+      },
+      child: ColoredBox(
+        color: AppColors.homeBackground,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SizedBox(height: 4),
+            CommunityPostHeader(post: post),
+            const SizedBox(height: 4),
+            if (post.imageUrls.isNotEmpty)
+              CommunityPostImageCarousel(
+                postId: post.id,
+                imageUrls: post.imageUrls,
+                currentIndex: currentImageIndex,
+                onAction: (int index) {
+                  onAction(CommunityAction.changeImagePage(post.id, index));
+                },
+              ),
+            CommunityPostFooter(
+              post: post,
+              onAction: onAction,
+              onShare: onShare,
             ),
-          CommunityPostFooter(
-            post: post,
-            onAction: onAction,
-          ),
-          Divider(
-            height: 1,
-            thickness: 1,
-            color: AppColors.divider.withValues(alpha: 0.5),
-          ),
-        ],
+            Divider(
+              height: 1,
+              thickness: 1,
+              color: AppColors.divider.withValues(alpha: 0.5),
+            ),
+          ],
+        ),
       ),
     );
   }

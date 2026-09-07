@@ -286,10 +286,9 @@ class CommunityPostDataSourceImpl implements CommunityPostDataSource {
 
   @override
   /// 현재 사용자의 좋아요 상태를 변경하고 게시글의 좋아요 수를 갱신합니다.
-  /// 좋아요 행과 게시글의 집계 값을 순서대로 처리합니다.
+  /// 좋아요 행과 게시글의 집계 값을 RPC에서 원자적으로 처리합니다.
   Future<Result<bool>> toggleLike({
     required String postId,
-    required bool isCurrentlyLiked,
   }) async {
     try {
       final userId = currentUserId;
@@ -297,49 +296,12 @@ class CommunityPostDataSourceImpl implements CommunityPostDataSource {
         return const Result.failure('로그인이 필요합니다.');
       }
 
-      if (isCurrentlyLiked) {
-        // 기존 좋아요 행을 삭제한 뒤 게시글의 좋아요 수를 감소시킵니다.
-        await _client
-            .from('post_likes')
-            .delete()
-            .eq('account_id', userId)
-            .eq('post_id', postId);
-
-        final post = await _client
-            .from('posts')
-            .select('like_count')
-            .eq('id', postId)
-            .single();
-        final currentCount = (post['like_count'] as int?) ?? 1;
-        final nextCount = (currentCount - 1).clamp(0, 999999);
-
-        await _client
-            .from('posts')
-            .update({'like_count': nextCount})
-            .eq('id', postId);
-
-        return const Result.success(false);
-      } else {
-        // 좋아요 행을 추가한 뒤 게시글의 좋아요 수를 증가시킵니다.
-        await _client.from('post_likes').insert({
-          'account_id': userId,
-          'post_id': postId,
-        });
-
-        final post = await _client
-            .from('posts')
-            .select('like_count')
-            .eq('id', postId)
-            .single();
-        final currentCount = (post['like_count'] as int?) ?? 0;
-
-        await _client
-            .from('posts')
-            .update({'like_count': currentCount + 1})
-            .eq('id', postId);
-
-        return const Result.success(true);
-      }
+      // 기존 좋아요 행을 확인해 삭제하거나 추가한 뒤 게시글의 좋아요 수를 갱신합니다.
+      final response = await _client.rpc(
+        'toggle_post_like',
+        params: {'p_post_id': postId},
+      );
+      return Result.success(response as bool);
     } on PostgrestException catch (error) {
       return Result.failure('좋아요 처리에 실패했습니다: ${error.message}');
     } catch (error) {

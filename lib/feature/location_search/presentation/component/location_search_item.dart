@@ -73,7 +73,9 @@ class LocationSearchItem extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    place.roadAddress.isNotEmpty ? place.roadAddress : place.address,
+                    place.roadAddress.isNotEmpty
+                        ? place.roadAddress
+                        : place.address,
                     style: const TextStyle(
                       fontFamily: 'Pretendard',
                       fontSize: 13,

@@ -8,6 +8,8 @@ import 'package:meomum/core/routing/routes.dart';
 import 'package:meomum/feature/community/domain/model/community_place.dart';
 import 'package:meomum/feature/community/domain/model/community_region.dart';
 import 'package:meomum/feature/community/domain/model/community_regions.dart';
+import 'package:meomum/feature/community/domain/model/enum/community_category.dart';
+import 'package:meomum/feature/community_write/presentation/component/category/community_category_bottom_sheet.dart';
 import 'package:meomum/feature/community/presentation/component/region/community_region_bottom_sheet.dart';
 import 'package:meomum/feature/community/presentation/screen/community_view_model.dart';
 import 'package:meomum/feature/community_write/presentation/screen/community_write_action.dart';
@@ -69,6 +71,9 @@ class _CommunityWriteScreenRootState
           case TapRegionSelect():
             _showRegionSelector(state.selectedRegion);
             break;
+          case TapCategorySelect():
+            _showCategorySelector(state.category);
+            break;
           case TapLocationSearch():
             final selectedPlace = await context.push<CommunityPlace>(
               '${Routes.community}/${Routes.communityWrite}/${Routes.communityLocationSearch}',
@@ -95,6 +100,42 @@ class _CommunityWriteScreenRootState
     );
   }
 
+  /// 게시판 선택 바텀 시트를 열고 선택 결과를 작성 상태에 반영합니다.
+  Future<void> _showCategorySelector(
+    CommunityCategory selectedCategory,
+  ) async {
+    final category = await showModalBottomSheet<CommunityCategory>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: false,
+      backgroundColor: AppColors.writeBackground,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      clipBehavior: Clip.antiAlias,
+      builder: (BuildContext bottomSheetContext) {
+        return CommunityCategoryBottomSheet(
+          categories: CommunityCategory.values,
+          selectedCategory: selectedCategory,
+          onClose: () {
+            Navigator.of(bottomSheetContext).pop();
+          },
+          onSelected: (CommunityCategory selected) {
+            Navigator.of(bottomSheetContext).pop(selected);
+          },
+        );
+      },
+    );
+
+    if (!mounted || category == null) {
+      return;
+    }
+
+    ref
+        .read(communityWriteViewModelProvider.notifier)
+        .onAction(CommunityWriteAction.selectCategory(category));
+  }
+
   /// 지역 선택 바텀 시트를 열고 선택 결과를 작성 상태에 반영합니다.
   Future<void> _showRegionSelector(CommunityRegion selectedRegion) async {
     final region = await showModalBottomSheet<CommunityRegion>(
@@ -109,6 +150,7 @@ class _CommunityWriteScreenRootState
         return CommunityRegionBottomSheet(
           regions: CommunityRegions.all,
           selectedRegion: selectedRegion,
+          showViewLabel: false,
           onClose: () {
             Navigator.of(bottomSheetContext).pop();
           },

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:meomum/feature/community/domain/model/community_post.dart';
 import 'package:meomum/feature/community/domain/model/enum/community_category.dart';
 import 'package:meomum/feature/community/presentation/component/category/community_category_filter_bar.dart';
 import 'package:meomum/feature/community/presentation/component/post/community_post_card.dart';
@@ -13,11 +14,13 @@ import 'package:meomum/ui/app_colors.dart';
 class CommunityScreen extends StatelessWidget {
   final CommunityState state;
   final void Function(CommunityAction action) onAction;
+  final void Function(CommunityPost, BuildContext) onShare;
 
   const CommunityScreen({
     super.key,
     required this.state,
     required this.onAction,
+    required this.onShare,
   });
 
   @override
@@ -67,48 +70,55 @@ class CommunityScreen extends StatelessWidget {
                                 : NotificationListener<ScrollNotification>(
                                     onNotification:
                                         (ScrollNotification notification) {
-                                      if (notification.metrics.pixels >=
-                                          notification.metrics.maxScrollExtent -
-                                              200) {
-                                        onAction(
-                                          const CommunityAction.loadMore(),
-                                        );
-                                      }
-                                      return false;
-                                    },
+                                          if (notification.metrics.pixels >=
+                                              notification
+                                                      .metrics
+                                                      .maxScrollExtent -
+                                                  200) {
+                                            onAction(
+                                              const CommunityAction.loadMore(),
+                                            );
+                                          }
+                                          return false;
+                                        },
                                     child: ListView.builder(
                                       padding: EdgeInsets.only(
                                         bottom: bottomSafeArea + 164,
                                       ),
-                                      itemCount: state.visiblePosts.length +
+                                      itemCount:
+                                          state.visiblePosts.length +
                                           (state.isLoadingMore ? 1 : 0),
                                       itemBuilder:
                                           (BuildContext context, int index) {
-                                        if (index ==
-                                            state.visiblePosts.length) {
-                                          return const Padding(
-                                            padding: EdgeInsets.symmetric(
-                                              vertical: 16,
-                                            ),
-                                            child: Center(
-                                              child: CircularProgressIndicator(
-                                                color: AppColors.primary,
-                                              ),
-                                            ),
-                                          );
-                                        }
+                                            if (index ==
+                                                state.visiblePosts.length) {
+                                              return const Padding(
+                                                padding: EdgeInsets.symmetric(
+                                                  vertical: 16,
+                                                ),
+                                                child: Center(
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                        color:
+                                                            AppColors.primary,
+                                                      ),
+                                                ),
+                                              );
+                                            }
 
-                                        final post = state.visiblePosts[index];
+                                            final post =
+                                                state.visiblePosts[index];
 
-                                        return CommunityPostCard(
-                                          post: post,
-                                          currentImageIndex:
-                                              state.imagePageByPostId[
-                                                  post.id] ??
-                                              0,
-                                          onAction: onAction,
-                                        );
-                                      },
+                                            return CommunityPostCard(
+                                              post: post,
+                                              currentImageIndex:
+                                                  state.imagePageByPostId[post
+                                                      .id] ??
+                                                  0,
+                                              onAction: onAction,
+                                              onShare: onShare,
+                                            );
+                                          },
                                     ),
                                   ),
                           ),

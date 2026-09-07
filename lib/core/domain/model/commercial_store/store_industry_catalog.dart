@@ -8,4 +8,3 @@ abstract final class StoreIndustryCatalog {
   /// 업종 소분류 코드
   static const List<String> smallCodes = ['G20404', 'G20405'];
 }
-

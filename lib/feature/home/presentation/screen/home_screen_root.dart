@@ -48,8 +48,10 @@ class _HomeScreenRootState extends ConsumerState<HomeScreenRoot> {
       state: state,
       onAction: (HomeAction action) {
         switch (action) {
+          case TapFeedItem(:final id):
+            context.push('${Routes.home}/post-detail/$id');
+            break;
           case ChangeBannerIndex():
-          case TapFeedItem():
           case LoadMore():
             viewModel.onAction(action);
             break;

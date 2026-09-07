@@ -34,9 +34,13 @@ class MyPageViewModel extends Notifier<MyPageState> {
   void onAction(MyPageAction action) {
     switch (action) {
       case TapMyFeed():
-        _eventController.add(const MyPageEvent.showMessage('내 피드는 추후 연결 예정입니다.'));
+        _eventController.add(
+          const MyPageEvent.showMessage('내 피드는 추후 연결 예정입니다.'),
+        );
       case TapProfile():
-        _eventController.add(const MyPageEvent.showMessage('프로필은 추후 연결 예정입니다.'));
+        _eventController.add(
+          const MyPageEvent.showMessage('프로필은 추후 연결 예정입니다.'),
+        );
       case TapCurrentStayMenu():
         _eventController.add(
           const MyPageEvent.showMessage('현재 머무는 중 메뉴는 추후 연결 예정입니다.'),

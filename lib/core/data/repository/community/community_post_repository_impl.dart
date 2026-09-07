@@ -160,11 +160,9 @@ class CommunityPostRepositoryImpl implements CommunityPostRepository {
   @override
   Future<Result<bool>> toggleLike({
     required String postId,
-    required bool isCurrentlyLiked,
   }) {
     return dataSource.toggleLike(
       postId: postId,
-      isCurrentlyLiked: isCurrentlyLiked,
     );
   }
 }

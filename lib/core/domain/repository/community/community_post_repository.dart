@@ -34,6 +34,5 @@ abstract interface class CommunityPostRepository {
 
   Future<Result<bool>> toggleLike({
     required String postId,
-    required bool isCurrentlyLiked,
   });
 }
