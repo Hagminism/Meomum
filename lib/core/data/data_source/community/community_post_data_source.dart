@@ -51,7 +51,6 @@ abstract interface class CommunityPostDataSource {
 
   Future<Result<bool>> toggleLike({
     required String postId,
-    required bool isCurrentlyLiked,
   });
 
   String? get currentUserId;
