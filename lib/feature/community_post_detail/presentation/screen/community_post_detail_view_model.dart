@@ -45,10 +45,6 @@ class CommunityPostDetailViewModel extends Notifier<CommunityPostDetailState> {
         _pickImage();
       case SubmitComment():
         _submitComment();
-      case TapShare():
-        _eventController.add(
-          const CommunityPostDetailEvent.showMessage('공유 기능은 추후 연결 예정입니다.'),
-        );
       case TapMenu(:final item):
         _handleMenu(item);
     }

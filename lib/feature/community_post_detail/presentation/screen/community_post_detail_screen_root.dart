@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meomum/core/presentation/component/app_snackbar.dart';
+import 'package:meomum/core/presentation/service/share_post_handler.dart';
 import 'package:meomum/feature/community_post_detail/presentation/screen/community_post_detail_action.dart';
 import 'package:meomum/feature/community_post_detail/presentation/screen/community_post_detail_event.dart';
 import 'package:meomum/feature/community_post_detail/presentation/screen/community_post_detail_screen.dart';
@@ -58,6 +59,17 @@ class _CommunityPostDetailScreenRootState
 
     return CommunityPostDetailScreen(
       state: state,
+      onShare: (BuildContext shareContext) {
+        final post = state.post;
+        if (post != null) {
+          ref
+              .read(sharePostHandlerProvider)
+              .sharePost(
+                post: post,
+                shareContext: shareContext,
+              );
+        }
+      },
       onAction: (CommunityPostDetailAction action) {
         switch (action) {
           case TapBack():
@@ -67,7 +79,6 @@ class _CommunityPostDetailScreenRootState
           case ChangeComment():
           case PickImage():
           case SubmitComment():
-          case TapShare():
           case TapMenu():
             viewModel.onAction(action);
             break;

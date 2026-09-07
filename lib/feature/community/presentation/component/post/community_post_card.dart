@@ -10,12 +10,14 @@ class CommunityPostCard extends StatelessWidget {
   final CommunityPost post;
   final int currentImageIndex;
   final void Function(CommunityAction action) onAction;
+  final void Function(CommunityPost, BuildContext) onShare;
 
   const CommunityPostCard({
     super.key,
     required this.post,
     required this.currentImageIndex,
     required this.onAction,
+    required this.onShare,
   });
 
   @override
@@ -44,6 +46,7 @@ class CommunityPostCard extends StatelessWidget {
             CommunityPostFooter(
               post: post,
               onAction: onAction,
+              onShare: onShare,
             ),
             Divider(
               height: 1,

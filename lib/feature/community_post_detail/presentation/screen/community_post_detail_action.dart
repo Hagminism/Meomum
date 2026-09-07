@@ -12,7 +12,6 @@ sealed class CommunityPostDetailAction with _$CommunityPostDetailAction {
       ChangeComment;
   const factory CommunityPostDetailAction.pickImage() = PickImage;
   const factory CommunityPostDetailAction.submitComment() = SubmitComment;
-  const factory CommunityPostDetailAction.tapShare() = TapShare;
   const factory CommunityPostDetailAction.tapMenu(
     CommunityPostDetailMenuItem item,
   ) = TapMenu;

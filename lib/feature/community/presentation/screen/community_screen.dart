@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:meomum/feature/community/domain/model/community_post.dart';
 import 'package:meomum/feature/community/domain/model/enum/community_category.dart';
 import 'package:meomum/feature/community/presentation/component/category/community_category_filter_bar.dart';
 import 'package:meomum/feature/community/presentation/component/post/community_post_card.dart';
@@ -13,11 +14,13 @@ import 'package:meomum/ui/app_colors.dart';
 class CommunityScreen extends StatelessWidget {
   final CommunityState state;
   final void Function(CommunityAction action) onAction;
+  final void Function(CommunityPost, BuildContext) onShare;
 
   const CommunityScreen({
     super.key,
     required this.state,
     required this.onAction,
+    required this.onShare,
   });
 
   @override
@@ -113,6 +116,7 @@ class CommunityScreen extends StatelessWidget {
                                                       .id] ??
                                                   0,
                                               onAction: onAction,
+                                              onShare: onShare,
                                             );
                                           },
                                     ),

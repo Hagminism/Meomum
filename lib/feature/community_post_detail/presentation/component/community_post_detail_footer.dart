@@ -6,7 +6,7 @@ import 'package:meomum/ui/app_colors.dart';
 class CommunityPostDetailFooter extends StatelessWidget {
   final CommunityPost post;
   final void Function() onLike;
-  final void Function() onShare;
+  final void Function(BuildContext) onShare;
 
   const CommunityPostDetailFooter({
     super.key,
@@ -71,11 +71,15 @@ class CommunityPostDetailFooter extends StatelessWidget {
                   ),
                 ],
               ),
-              IconButton(
-                onPressed: onShare,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                icon: const Icon(Icons.ios_share_rounded, size: 24),
+              Builder(
+                builder: (BuildContext shareContext) {
+                  return IconButton(
+                    onPressed: () => onShare(shareContext),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    icon: const Icon(Icons.ios_share_rounded, size: 24),
+                  );
+                },
               ),
             ],
           ),

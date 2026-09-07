@@ -63,10 +63,6 @@ class CommunityViewModel extends Notifier<CommunityState> {
         _eventController.add(
           const CommunityEvent.showMessage('댓글 기능은 추후 연결 예정입니다.'),
         );
-      case TapShare():
-        _eventController.add(
-          const CommunityEvent.showMessage('공유 기능은 추후 연결 예정입니다.'),
-        );
       case TapPost():
         break;
       case TapWrite():

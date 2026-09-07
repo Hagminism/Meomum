@@ -12,7 +12,6 @@ sealed class HomePostDetailAction with _$HomePostDetailAction {
       ChangeComment;
   const factory HomePostDetailAction.pickImage() = PickImage;
   const factory HomePostDetailAction.submitComment() = SubmitComment;
-  const factory HomePostDetailAction.tapShare() = TapShare;
   const factory HomePostDetailAction.tapMenu(HomePostDetailMenuItem item) =
       TapMenu;
 }

@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meomum/core/presentation/component/app_snackbar.dart';
+import 'package:meomum/core/presentation/service/share_post_handler.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meomum/core/routing/routes.dart';
+import 'package:meomum/feature/community/domain/model/community_post.dart';
 import 'package:meomum/feature/community/domain/model/enum/community_category.dart';
 import 'package:meomum/feature/community/domain/model/community_region.dart';
 import 'package:meomum/feature/community/domain/model/community_regions.dart';
@@ -83,6 +85,14 @@ class _CommunityScreenRootState extends ConsumerState<CommunityScreenRoot> {
 
     return CommunityScreen(
       state: state,
+      onShare: (CommunityPost post, BuildContext shareContext) {
+        ref
+            .read(sharePostHandlerProvider)
+            .sharePost(
+              post: post,
+              shareContext: shareContext,
+            );
+      },
       onAction: (CommunityAction action) {
         switch (action) {
           case TapRegionFilter():
@@ -93,7 +103,6 @@ class _CommunityScreenRootState extends ConsumerState<CommunityScreenRoot> {
           case ChangeImagePage():
           case ToggleLike():
           case TapComment():
-          case TapShare():
             viewModel.onAction(action);
             break;
           case TapPost(:final postId):

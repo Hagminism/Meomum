@@ -12,11 +12,13 @@ import 'package:meomum/ui/app_colors.dart';
 class HomePostDetailScreen extends StatelessWidget {
   final HomePostDetailState state;
   final void Function(HomePostDetailAction action) onAction;
+  final void Function(BuildContext) onShare;
 
   const HomePostDetailScreen({
     super.key,
     required this.state,
     required this.onAction,
+    required this.onShare,
   });
 
   @override
@@ -105,9 +107,7 @@ class HomePostDetailScreen extends StatelessWidget {
                               const HomePostDetailAction.toggleLike(),
                             );
                           },
-                          onShare: () {
-                            onAction(const HomePostDetailAction.tapShare());
-                          },
+                          onShare: onShare,
                         ),
                       ),
                       const SliverToBoxAdapter(
