@@ -31,6 +31,8 @@ class CommunityWriteViewModel extends Notifier<CommunityWriteState> {
     switch (action) {
       case TapRegionSelect():
         break;
+      case TapCategorySelect():
+        break;
       case SelectRegion(:final region):
         state = state.copyWith(selectedRegion: region);
       case SelectCategory(:final category):

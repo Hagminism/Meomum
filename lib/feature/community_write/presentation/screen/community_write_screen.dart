@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:meomum/core/presentation/component/custom_app_bar.dart';
+import 'package:meomum/feature/community_write/presentation/component/category/community_category_selector_button.dart';
 import 'package:meomum/feature/community_write/presentation/screen/community_write_action.dart';
 import 'package:meomum/feature/community_write/presentation/screen/community_write_state.dart';
-import 'package:meomum/feature/community_write/presentation/component/category_dropdown_button.dart';
 import 'package:meomum/feature/community_write/presentation/component/media_picker_button.dart';
 import 'package:meomum/feature/community_write/presentation/component/media_preview_list.dart';
 import 'package:meomum/feature/community_write/presentation/component/selected_location_field.dart';
@@ -102,13 +102,11 @@ class CommunityWriteScreen extends StatelessWidget {
                             // 1. 게시판 카테고리
                             _buildSectionLabel('게시판', isRequired: true),
                             const SizedBox(height: 8),
-                            CategoryDropdownButton(
+                            CommunityCategorySelectorButton(
                               selectedCategory: state.category,
-                              onSelected: (category) {
-                                onAction(
-                                  CommunityWriteAction.selectCategory(category),
-                                );
-                              },
+                              onTap: () => onAction(
+                                const CommunityWriteAction.tapCategorySelect(),
+                              ),
                             ),
                             const SizedBox(height: 20),
 

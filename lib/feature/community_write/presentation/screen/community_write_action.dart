@@ -8,6 +8,7 @@ part 'community_write_action.freezed.dart';
 @freezed
 sealed class CommunityWriteAction with _$CommunityWriteAction {
   const factory CommunityWriteAction.tapRegionSelect() = TapRegionSelect;
+  const factory CommunityWriteAction.tapCategorySelect() = TapCategorySelect;
   const factory CommunityWriteAction.selectRegion(
     CommunityRegion region,
   ) = SelectRegion;
