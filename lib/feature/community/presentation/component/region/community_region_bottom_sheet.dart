@@ -8,6 +8,7 @@ class CommunityRegionBottomSheet extends StatefulWidget {
   final CommunityRegion selectedRegion;
   final void Function() onClose;
   final void Function(CommunityRegion) onConfirm;
+  final bool showViewLabel;
 
   const CommunityRegionBottomSheet({
     super.key,
@@ -15,6 +16,7 @@ class CommunityRegionBottomSheet extends StatefulWidget {
     required this.selectedRegion,
     required this.onClose,
     required this.onConfirm,
+    this.showViewLabel = true,
   });
 
   @override
@@ -156,7 +158,8 @@ class _CommunityRegionBottomSheetState
                   ),
                   child: Text(
                     '${_selectedRegion.upperRegion} '
-                    '${_selectedRegion.lowerRegion} 보기',
+                    '${_selectedRegion.lowerRegion}'
+                    '${widget.showViewLabel ? ' 보기' : ''}',
                     style: TextStyle(
                       fontFamily: 'Pretendard',
                       fontSize: 16,
