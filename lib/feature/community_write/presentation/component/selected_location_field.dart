@@ -37,7 +37,9 @@ class SelectedLocationField extends StatelessWidget {
             Icon(
               hasPlace ? Icons.location_on : Icons.search,
               size: 20,
-              color: hasPlace ? AppColors.uploadButton : AppColors.placeholderText,
+              color: hasPlace
+                  ? AppColors.uploadButton
+                  : AppColors.placeholderText,
             ),
             const SizedBox(width: 10),
             Expanded(

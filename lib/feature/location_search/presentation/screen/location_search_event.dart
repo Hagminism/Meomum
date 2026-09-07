@@ -5,7 +5,8 @@ part 'location_search_event.freezed.dart';
 
 @freezed
 sealed class LocationSearchEvent with _$LocationSearchEvent {
-  const factory LocationSearchEvent.popWithPlace(CommunityPlace place) = PopWithPlace;
+  const factory LocationSearchEvent.popWithPlace(CommunityPlace place) =
+      PopWithPlace;
   const factory LocationSearchEvent.pop() = Pop;
   const factory LocationSearchEvent.showMessage(String message) = ShowMessage;
 }

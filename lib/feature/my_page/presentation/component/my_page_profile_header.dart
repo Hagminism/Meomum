@@ -25,9 +25,9 @@ class MyPageProfileHeader extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-            color: AppColors.cardBackground,
-            borderRadius: BorderRadius.circular(12),
-            border: BoxBorder.all(color: AppColors.cardBackground)
+          color: AppColors.cardBackground,
+          borderRadius: BorderRadius.circular(12),
+          border: BoxBorder.all(color: AppColors.cardBackground),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -40,10 +40,10 @@ class MyPageProfileHeader extends StatelessWidget {
                   : null,
               child: user?.avatarUrl == null
                   ? Icon(
-                Icons.person,
-                size: 32,
-                color: AppColors.black.withValues(alpha: 0.3),
-              )
+                      Icons.person,
+                      size: 32,
+                      color: AppColors.black.withValues(alpha: 0.3),
+                    )
                   : null,
             ),
             const SizedBox(width: 12),

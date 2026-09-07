@@ -49,12 +49,14 @@ class CategoryDropdownButton extends StatelessWidget {
                 onSelected(category);
               }
             },
-            items: CommunityCategory.values.map((category) {
-              return DropdownMenuItem<CommunityCategory>(
-                value: category,
-                child: Text(category.label),
-              );
-            }).toList(growable: false),
+            items: CommunityCategory.values
+                .map((category) {
+                  return DropdownMenuItem<CommunityCategory>(
+                    value: category,
+                    child: Text(category.label),
+                  );
+                })
+                .toList(growable: false),
           ),
         ),
       ),

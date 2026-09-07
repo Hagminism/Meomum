@@ -25,21 +25,23 @@ class NaverSearchRepositoryImpl implements NaverSearchRepository {
         start: start,
       );
 
-      final places = responseDto.items.map((item) {
-        final title = _stripHtmlTags(item.title);
-        final category = _stripHtmlTags(item.category);
-        final lat = _parseCoordinate(item.mapy);
-        final lng = _parseCoordinate(item.mapx);
+      final places = responseDto.items
+          .map((item) {
+            final title = _stripHtmlTags(item.title);
+            final category = _stripHtmlTags(item.category);
+            final lat = _parseCoordinate(item.mapy);
+            final lng = _parseCoordinate(item.mapx);
 
-        return CommunityPlace(
-          name: title,
-          latitude: lat,
-          longitude: lng,
-          address: item.address,
-          roadAddress: item.roadAddress,
-          category: category,
-        );
-      }).toList(growable: false);
+            return CommunityPlace(
+              name: title,
+              latitude: lat,
+              longitude: lng,
+              address: item.address,
+              roadAddress: item.roadAddress,
+              category: category,
+            );
+          })
+          .toList(growable: false);
 
       return Result.success(places);
     } catch (e) {
@@ -67,7 +69,9 @@ class NaverSearchRepositoryImpl implements NaverSearchRepository {
   }
 }
 
-final naverSearchRepositoryProvider = Provider<NaverSearchRepository>((Ref ref) {
+final naverSearchRepositoryProvider = Provider<NaverSearchRepository>((
+  Ref ref,
+) {
   final dataSource = ref.watch(naverSearchDataSourceProvider);
   return NaverSearchRepositoryImpl(dataSource: dataSource);
 });

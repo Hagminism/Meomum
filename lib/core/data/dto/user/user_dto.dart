@@ -62,7 +62,8 @@ class UserDto {
     // Provider별 우선순위 지정
     final List<String> searchKeys = switch (provider) {
       'kakao' => ['nickname', 'name', 'full_name', 'user_name'],
-      'naver' || 'custom:naver' => ['name', 'nickname', 'full_name', 'user_name'],
+      'naver' ||
+      'custom:naver' => ['name', 'nickname', 'full_name', 'user_name'],
       _ => ['full_name', 'name', 'nickname', 'user_name'],
     };
 
