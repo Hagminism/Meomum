@@ -17,6 +17,18 @@ extension CommunityPostDtoMapper on CommunityPostDto {
         (profile != null && profile['profile_image_url'] is String)
         ? profile['profile_image_url'] as String
         : null;
+    final profileUpperRegion =
+        (profile != null && profile['upper_region'] is String)
+        ? profile['upper_region'] as String
+        : null;
+    final profileLowerRegion =
+        (profile != null && profile['lower_region'] is String)
+        ? profile['lower_region'] as String
+        : null;
+    final profileRegion = [
+      profileUpperRegion,
+      profileLowerRegion,
+    ].whereType<String>().where((String region) => region.isNotEmpty).join(' ');
 
     final linkedImages = postImages.whereType<Map<String, dynamic>>().toList()
       ..sort(
@@ -65,7 +77,7 @@ extension CommunityPostDtoMapper on CommunityPostDto {
       upperRegion: upperRegion,
       lowerRegion: lowerRegion,
       nickname: nickname.isNotEmpty ? nickname : '동네이웃',
-      neighborhood: '동네이웃',
+      neighborhood: profileRegion.isNotEmpty ? profileRegion : '동네이웃',
       createdAt: parsedCreatedAt,
       category: resolvedCategory,
       title: title,
