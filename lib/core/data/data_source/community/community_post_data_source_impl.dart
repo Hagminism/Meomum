@@ -19,13 +19,15 @@ class CommunityPostDataSourceImpl implements CommunityPostDataSource {
 
   /// 게시글 목록과 상세 조회에서 함께 가져올 관계 데이터를 정의합니다.
   static const String _postSelect =
-      '*, profiles!posts_author_id_fkey(nickname, profile_image_url), '
+      '*, profiles!posts_author_id_fkey('
+      'nickname, profile_image_url, upper_region, lower_region), '
       'post_images(storage_path, public_url, sort_order), '
       'post_likes(account_id)';
 
   /// 이미지가 하나 이상 연결된 게시글만 조회하기 위한 관계 선택문을 정의합니다.
   static const String _postSelectWithImages =
-      '*, profiles!posts_author_id_fkey(nickname, profile_image_url), '
+      '*, profiles!posts_author_id_fkey('
+      'nickname, profile_image_url, upper_region, lower_region), '
       'post_images!inner(storage_path, public_url, sort_order), '
       'post_likes(account_id)';
 

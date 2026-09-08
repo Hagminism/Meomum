@@ -9,6 +9,8 @@ class CommunityRegionBottomSheet extends StatefulWidget {
   final void Function() onClose;
   final void Function(CommunityRegion) onConfirm;
   final bool showViewLabel;
+  final String title;
+  final String? confirmButtonLabel;
 
   const CommunityRegionBottomSheet({
     super.key,
@@ -17,6 +19,8 @@ class CommunityRegionBottomSheet extends StatefulWidget {
     required this.onClose,
     required this.onConfirm,
     this.showViewLabel = true,
+    this.title = '둘러볼 지역 선택',
+    this.confirmButtonLabel,
   });
 
   @override
@@ -73,7 +77,7 @@ class _CommunityRegionBottomSheetState
                 children: [
                   Expanded(
                     child: Text(
-                      '둘러볼 지역 선택',
+                      widget.title,
                       style: TextStyle(
                         fontFamily: 'Pretendard',
                         fontSize: 20,
@@ -150,16 +154,17 @@ class _CommunityRegionBottomSheetState
                     widget.onConfirm(_selectedRegion);
                   },
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+                    backgroundColor: AppColors.uploadButton,
                     foregroundColor: AppColors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
                   child: Text(
-                    '${_selectedRegion.upperRegion} '
-                    '${_selectedRegion.lowerRegion}'
-                    '${widget.showViewLabel ? ' 보기' : ''}',
+                    widget.confirmButtonLabel ??
+                        '${_selectedRegion.upperRegion} '
+                            '${_selectedRegion.lowerRegion}'
+                            '${widget.showViewLabel ? ' 보기' : ''}',
                     style: TextStyle(
                       fontFamily: 'Pretendard',
                       fontSize: 16,
