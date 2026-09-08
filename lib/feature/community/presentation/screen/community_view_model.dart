@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meomum/core/data/repository/auth/auth_repository_impl.dart';
 import 'package:meomum/core/data/repository/community/community_post_repository_impl.dart';
 import 'package:meomum/core/domain/repository/community/community_post_repository.dart';
 import 'package:meomum/core/utils/result.dart';
@@ -21,10 +22,18 @@ class CommunityViewModel extends Notifier<CommunityState> {
     _repository = ref.watch(communityPostRepositoryProvider);
     ref.onDispose(() => _eventController.close());
 
-    Future.microtask(() => _fetchPosts(CommunityRegions.pohang));
+    final currentUser = ref.read(authRepositoryProvider).currentUser;
+    final initialRegion = currentUser?.hasSelectedRegion == true
+        ? CommunityRegion(
+            upperRegion: currentUser!.upperRegion!,
+            lowerRegion: currentUser.lowerRegion!,
+          )
+        : CommunityRegions.pohang;
 
-    return const CommunityState(
-      selectedRegion: CommunityRegions.pohang,
+    Future.microtask(() => _fetchPosts(initialRegion));
+
+    return CommunityState(
+      selectedRegion: initialRegion,
       posts: [],
       isLoading: true,
     );
