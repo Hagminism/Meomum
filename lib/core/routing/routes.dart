@@ -1,6 +1,9 @@
 class Routes {
   static const String splash = '/splash';
   static const String signIn = '/sign-in';
+  static const String onBoarding = '/on-boarding';
+  static const String onBoardingCreateProfile = 'create-profile';
+  static const String onBoardingSelectRegion = 'select-region';
 
   static const String home = '/home';
   static const String community = '/community';
