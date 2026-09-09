@@ -20,6 +20,7 @@ import 'package:meomum/feature/my_page_detail/presentation/screen/my_page_detail
 import 'package:meomum/feature/on_boarding/feature/create_profile/presentation/screen/create_profile_screen_root.dart';
 import 'package:meomum/feature/on_boarding/feature/on_boarding/presentation/screen/on_boarding_screen_root.dart';
 import 'package:meomum/feature/on_boarding/feature/select_region/presentation/screen/select_region_screen_root.dart';
+import 'package:meomum/feature/report/presentation/screen/report_screen_root.dart';
 import 'package:meomum/feature/sign_in/presentation/screen/sign_in_screen_root.dart';
 import 'package:meomum/feature/splash/presentation/screen/splash_screen_root.dart';
 
@@ -70,6 +71,7 @@ final routerProvider = Provider<GoRouter>((Ref ref) {
                         postId: state.pathParameters[Routes.postId]!,
                       );
                     },
+                    routes: [_buildReportRoute()],
                   ),
                 ],
               ),
@@ -103,6 +105,7 @@ final routerProvider = Provider<GoRouter>((Ref ref) {
                         postId: state.pathParameters[Routes.postId]!,
                       );
                     },
+                    routes: [_buildReportRoute()],
                   ),
                   GoRoute(
                     parentNavigatorKey: rootNavigatorKey,
@@ -155,6 +158,7 @@ final routerProvider = Provider<GoRouter>((Ref ref) {
                             postId: state.pathParameters[Routes.postId]!,
                           );
                         },
+                        routes: [_buildReportRoute()],
                       ),
                     ],
                   ),
@@ -209,3 +213,16 @@ final routerProvider = Provider<GoRouter>((Ref ref) {
     },
   );
 });
+
+GoRoute _buildReportRoute() {
+  return GoRoute(
+    parentNavigatorKey: rootNavigatorKey,
+    path: Routes.report,
+    pageBuilder: (_, GoRouterState state) => MaterialPage(
+      fullscreenDialog: true,
+      child: ReportScreenRoot(
+        postId: state.pathParameters[Routes.postId]!,
+      ),
+    ),
+  );
+}
