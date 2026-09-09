@@ -86,6 +86,47 @@ class CommunityPostDataSourceImpl implements CommunityPostDataSource {
   }
 
   @override
+  /// 현재 로그인한 사용자가 작성한 게시글을 조회합니다.
+  /// 커서가 있으면 마지막으로 조회한 게시글보다 오래된 게시글만 조회합니다.
+  Future<Result<List<CommunityPostDto>>> getMyPosts({
+    int limit = 20,
+    DateTime? cursor,
+  }) async {
+    try {
+      final userId = currentUserId;
+      if (userId == null) {
+        return const Result.failure('로그인이 필요합니다.');
+      }
+
+      var query = _client
+          .from('posts')
+          .select(_postSelect)
+          .eq('author_id', userId);
+
+      if (cursor != null) {
+        query = query.lt('created_at', cursor.toIso8601String());
+      }
+
+      final response = await query
+          .order('created_at', ascending: false)
+          .limit(limit);
+
+      final list = response as List<dynamic>;
+      final posts = list
+          .map(
+            (item) => CommunityPostDto.fromJson(item as Map<String, dynamic>),
+          )
+          .toList();
+
+      return Result.success(posts);
+    } on PostgrestException catch (error) {
+      return Result.failure('게시글을 불러오지 못했습니다: ${error.message}');
+    } catch (error) {
+      return Result.failure('오류가 발생했습니다: $error');
+    }
+  }
+
+  @override
   /// 지역 조건 없이 이미지가 있는 최신 게시글 목록을 조회합니다.
   /// 커서가 있으면 마지막으로 조회한 게시글보다 오래된 게시글만 조회합니다.
   Future<Result<List<CommunityPostDto>>> getLatestPostsWithImages({
