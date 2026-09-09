@@ -12,6 +12,7 @@ class Routes {
   static const String postId = 'postId';
   static const String communityWrite = 'write';
   static const String communityLocationSearch = 'location-search';
+  static const String report = 'report';
   static const String map = '/map';
   static const String jobs = '/jobs';
   static const String myPage = '/my-page';
