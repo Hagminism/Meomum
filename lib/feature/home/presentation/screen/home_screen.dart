@@ -46,7 +46,7 @@ class HomeScreen extends StatelessWidget {
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
                 SliverAppBar(
-                  expandedHeight: 400,
+                  expandedHeight: 470,
                   stretch: true,
                   pinned: false,
                   floating: false,
