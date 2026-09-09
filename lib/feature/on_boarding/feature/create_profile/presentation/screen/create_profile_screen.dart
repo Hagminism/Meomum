@@ -21,29 +21,47 @@ class CreateProfileScreen extends StatelessWidget {
       value: SystemUiOverlayStyle.dark,
       child: Scaffold(
         backgroundColor: AppColors.homeBackground,
+        resizeToAvoidBottomInset: false,
         body: SafeArea(
-          child: ProfileEditor(
-            title: '프로필을 만들어보세요',
-            description:
-                '커뮤니티에서 사용할 프로필을 만들어보세요.\n'
-                '프로필은 커뮤니티에서 다른 사람에게 보여요.',
-            nickname: state.nickname,
-            avatarUrl: state.avatarUrl,
-            selectedImagePath: state.selectedImagePath,
-            isLoading: state.isLoading,
-            isValid: state.isValid,
-            submitLabel: '이 닉네임을 사용할게요',
-            onAvatarTap: () {
-              onAction(const CreateProfileAction.tapAvatar());
-            },
-            onNicknameChanged: (String nickname) {
-              onAction(CreateProfileAction.changeNickname(nickname));
-            },
-            onBack: () {
-              onAction(const CreateProfileAction.tapBack());
-            },
-            onSubmit: () {
-              onAction(const CreateProfileAction.tapSubmit());
+          maintainBottomViewPadding: true,
+          child: LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) {
+              return SingleChildScrollView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.viewInsetsOf(context).bottom,
+                ),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: IntrinsicHeight(
+                    child: ProfileEditor(
+                      title: '프로필을 만들어보세요',
+                      description:
+                          '커뮤니티에서 사용할 프로필을 만들어보세요.\n'
+                          '프로필은 커뮤니티에서 다른 사람에게 보여요.',
+                      nickname: state.nickname,
+                      avatarUrl: state.avatarUrl,
+                      selectedImagePath: state.selectedImagePath,
+                      isLoading: state.isLoading,
+                      isValid: state.isValid,
+                      submitLabel: '이 닉네임을 사용할게요',
+                      onAvatarTap: () {
+                        onAction(const CreateProfileAction.tapAvatar());
+                      },
+                      onNicknameChanged: (String nickname) {
+                        onAction(CreateProfileAction.changeNickname(nickname));
+                      },
+                      onBack: () {
+                        onAction(const CreateProfileAction.tapBack());
+                      },
+                      onSubmit: () {
+                        onAction(const CreateProfileAction.tapSubmit());
+                      },
+                    ),
+                  ),
+                ),
+              );
             },
           ),
         ),
