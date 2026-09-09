@@ -15,4 +15,7 @@ class Routes {
   static const String map = '/map';
   static const String jobs = '/jobs';
   static const String myPage = '/my-page';
+  static const String myPageFeed = 'feed';
+  static const String myPageFeedEditProfile = 'edit-profile';
+  static const String myPageFeedPostDetail = 'post-detail/:postId';
 }
