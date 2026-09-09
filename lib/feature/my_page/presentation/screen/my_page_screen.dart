@@ -28,6 +28,7 @@ class MyPageScreen extends StatelessWidget {
       child: Scaffold(
         backgroundColor: AppColors.homeBackground,
         body: SafeArea(
+          bottom: false,
           child: Stack(
             children: [
               CustomScrollView(

@@ -34,6 +34,7 @@ class MyPageServiceSection extends StatelessWidget {
           const SizedBox(height: 12),
           GridView.builder(
             shrinkWrap: true,
+            padding: EdgeInsets.zero,
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 4,
