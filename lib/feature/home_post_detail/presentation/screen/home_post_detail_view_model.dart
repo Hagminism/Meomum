@@ -126,9 +126,7 @@ class HomePostDetailViewModel extends Notifier<HomePostDetailState> {
           const HomePostDetailEvent.showMessage('게시글 삭제 기능은 추후 연결 예정입니다.'),
         );
       case HomePostDetailMenuItem.report:
-        _eventController.add(
-          const HomePostDetailEvent.showMessage('신고 기능은 추후 연결 예정입니다.'),
-        );
+        break;
     }
   }
 }

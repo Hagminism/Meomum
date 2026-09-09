@@ -130,9 +130,7 @@ class CommunityPostDetailViewModel extends Notifier<CommunityPostDetailState> {
           ),
         );
       case CommunityPostDetailMenuItem.report:
-        _eventController.add(
-          const CommunityPostDetailEvent.showMessage('신고 기능은 추후 연결 예정입니다.'),
-        );
+        break;
     }
   }
 }
