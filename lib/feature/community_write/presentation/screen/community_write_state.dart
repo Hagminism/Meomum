@@ -2,7 +2,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meomum/feature/community/domain/model/community_place.dart';
 import 'package:meomum/feature/community/domain/model/community_region.dart';
-import 'package:meomum/feature/community/domain/model/community_regions.dart';
 import 'package:meomum/feature/community/domain/model/enum/community_category.dart';
 
 part 'community_write_state.freezed.dart';
@@ -12,7 +11,7 @@ abstract class CommunityWriteState with _$CommunityWriteState {
   const CommunityWriteState._();
 
   const factory CommunityWriteState({
-    @Default(CommunityRegions.pohang) CommunityRegion selectedRegion,
+    required CommunityRegion selectedRegion,
     @Default(CommunityCategory.free) CommunityCategory category,
     @Default([]) List<XFile> mediaFiles,
     CommunityPlace? selectedPlace,

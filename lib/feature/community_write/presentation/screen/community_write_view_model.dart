@@ -3,9 +3,11 @@ import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:meomum/core/data/repository/auth/auth_repository_impl.dart';
 import 'package:meomum/core/data/repository/community/community_post_repository_impl.dart';
 import 'package:meomum/core/domain/repository/community/community_post_repository.dart';
 import 'package:meomum/core/utils/result.dart';
+import 'package:meomum/feature/community/domain/model/community_region.dart';
 import 'package:meomum/feature/community_write/presentation/screen/community_write_action.dart';
 import 'package:meomum/feature/community_write/presentation/screen/community_write_event.dart';
 import 'package:meomum/feature/community_write/presentation/screen/community_write_state.dart';
@@ -19,7 +21,17 @@ class CommunityWriteViewModel extends Notifier<CommunityWriteState> {
     _repository = ref.watch(communityPostRepositoryProvider);
     ref.onDispose(() => _eventController.close());
 
-    return const CommunityWriteState();
+    final currentUser = ref.read(authRepositoryProvider).currentUser;
+    if (currentUser == null || !currentUser.hasSelectedRegion) {
+      throw StateError('거주 지역이 설정된 사용자만 글을 작성할 수 있습니다.');
+    }
+
+    return CommunityWriteState(
+      selectedRegion: CommunityRegion(
+        upperRegion: currentUser.upperRegion!,
+        lowerRegion: currentUser.lowerRegion!,
+      ),
+    );
   }
 
   final StreamController<CommunityWriteEvent> _eventController =
