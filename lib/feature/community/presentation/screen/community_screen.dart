@@ -58,6 +58,7 @@ class CommunityScreen extends StatelessWidget {
                           )
                         : RefreshIndicator(
                             color: AppColors.primary,
+                            backgroundColor: AppColors.white,
                             onRefresh: () async {
                               onAction(const CommunityAction.refresh());
                             },
