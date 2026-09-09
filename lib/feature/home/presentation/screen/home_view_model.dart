@@ -50,13 +50,24 @@ class HomeViewModel extends Notifier<HomeState> {
     }
   }
 
-  Future<void> _fetchInitialPosts() async {
+  Future<void> refresh() async {
+    if (state.isLoading || state.isRefreshing || state.isLoadingMore) {
+      return;
+    }
+
+    await _fetchInitialPosts(preserveFeedItems: true);
+  }
+
+  Future<void> _fetchInitialPosts({bool preserveFeedItems = false}) async {
+    final previousCursor = _cursor;
+    final previousHasMore = state.hasMore;
     _cursor = null;
     state = state.copyWith(
-      feedItems: const [],
-      isLoading: true,
+      feedItems: preserveFeedItems ? state.feedItems : const [],
+      isLoading: !preserveFeedItems,
+      isRefreshing: preserveFeedItems,
       isLoadingMore: false,
-      hasMore: true,
+      hasMore: preserveFeedItems ? state.hasMore : true,
     );
 
     final result = await _repository.getLatestPostsWithImages(
@@ -73,16 +84,28 @@ class HomeViewModel extends Notifier<HomeState> {
         state = state.copyWith(
           feedItems: posts.map(_toHomeFeedItem).toList(growable: false),
           isLoading: false,
+          isRefreshing: false,
           hasMore: posts.length >= _pageSize,
         );
       case Failure(message: final message):
-        state = state.copyWith(isLoading: false);
+        if (preserveFeedItems) {
+          _cursor = previousCursor;
+        }
+
+        state = state.copyWith(
+          isLoading: false,
+          isRefreshing: false,
+          hasMore: preserveFeedItems ? previousHasMore : state.hasMore,
+        );
         _eventController.add(HomeEvent.showMessage(message));
     }
   }
 
   Future<void> _loadMore() async {
-    if (state.isLoading || state.isLoadingMore || !state.hasMore) {
+    if (state.isLoading ||
+        state.isRefreshing ||
+        state.isLoadingMore ||
+        !state.hasMore) {
       return;
     }
 
