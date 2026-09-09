@@ -89,7 +89,17 @@ class _BannerPage extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          if (banner.imageUrl != null)
+          if (banner.imageUrl?.startsWith('assets/') ?? false)
+            Image.asset(
+              alignment: AlignmentGeometry.xy(0, 0.28),
+              banner.imageUrl!,
+              fit: BoxFit.cover,
+              errorBuilder:
+                  (BuildContext context, Object error, StackTrace? stackTrace) {
+                    return ColoredBox(color: AppColors.black);
+                  },
+            )
+          else if (banner.imageUrl != null)
             Image.network(
               banner.imageUrl!,
               fit: BoxFit.cover,
@@ -109,7 +119,7 @@ class _BannerPage extends StatelessWidget {
                   AppColors.black.withValues(alpha: 0),
                   AppColors.bannerOverlay,
                 ],
-                stops: const [0.58, 1.0],
+                stops: const [0.38, 1.0],
               ),
             ),
           ),

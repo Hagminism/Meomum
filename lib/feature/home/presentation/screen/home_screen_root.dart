@@ -46,6 +46,7 @@ class _HomeScreenRootState extends ConsumerState<HomeScreenRoot> {
 
     return HomeScreen(
       state: state,
+      onRefresh: viewModel.refresh,
       onAction: (HomeAction action) {
         switch (action) {
           case TapFeedItem(:final id):

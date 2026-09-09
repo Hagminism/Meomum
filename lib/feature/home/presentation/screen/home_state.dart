@@ -13,6 +13,7 @@ abstract class HomeState with _$HomeState {
     @Default([]) List<HomeFeedItem> feedItems,
     @Default(0) int currentBannerIndex,
     @Default(false) bool isLoading,
+    @Default(false) bool isRefreshing,
     @Default(false) bool isLoadingMore,
     @Default(true) bool hasMore,
   }) = _HomeState;

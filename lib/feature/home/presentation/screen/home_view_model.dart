@@ -50,13 +50,24 @@ class HomeViewModel extends Notifier<HomeState> {
     }
   }
 
-  Future<void> _fetchInitialPosts() async {
+  Future<void> refresh() async {
+    if (state.isLoading || state.isRefreshing || state.isLoadingMore) {
+      return;
+    }
+
+    await _fetchInitialPosts(preserveFeedItems: true);
+  }
+
+  Future<void> _fetchInitialPosts({bool preserveFeedItems = false}) async {
+    final previousCursor = _cursor;
+    final previousHasMore = state.hasMore;
     _cursor = null;
     state = state.copyWith(
-      feedItems: const [],
-      isLoading: true,
+      feedItems: preserveFeedItems ? state.feedItems : const [],
+      isLoading: !preserveFeedItems,
+      isRefreshing: preserveFeedItems,
       isLoadingMore: false,
-      hasMore: true,
+      hasMore: preserveFeedItems ? state.hasMore : true,
     );
 
     final result = await _repository.getLatestPostsWithImages(
@@ -73,16 +84,28 @@ class HomeViewModel extends Notifier<HomeState> {
         state = state.copyWith(
           feedItems: posts.map(_toHomeFeedItem).toList(growable: false),
           isLoading: false,
+          isRefreshing: false,
           hasMore: posts.length >= _pageSize,
         );
       case Failure(message: final message):
-        state = state.copyWith(isLoading: false);
+        if (preserveFeedItems) {
+          _cursor = previousCursor;
+        }
+
+        state = state.copyWith(
+          isLoading: false,
+          isRefreshing: false,
+          hasMore: preserveFeedItems ? previousHasMore : state.hasMore,
+        );
         _eventController.add(HomeEvent.showMessage(message));
     }
   }
 
   Future<void> _loadMore() async {
-    if (state.isLoading || state.isLoadingMore || !state.hasMore) {
+    if (state.isLoading ||
+        state.isRefreshing ||
+        state.isLoadingMore ||
+        !state.hasMore) {
       return;
     }
 
@@ -139,28 +162,24 @@ class HomeViewModel extends Notifier<HomeState> {
   static const List<HomeBanner> _mockBanners = [
     HomeBanner(
       id: 'banner-1',
-      eyebrow: '매거진',
-      title: '대한민국 구석구석',
-      subtitle:
-          'Lorem ipsum dolor sit amet consectetur. Viverra at urna duis tincidunt. Quis nec aliquam amet quis.',
-      imageUrl:
-          'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=750&q=80',
+      eyebrow: '로컬라이프',
+      title: '한 달쯤, 여기서 살아볼까?',
+      subtitle: '여행보다 오래, 이주보다 가볍게.\n나에게 맞는 지역에서 새로운 일상을 시작해보세요.',
+      imageUrl: 'assets/images/home_carousel/page1.png',
     ),
     HomeBanner(
       id: 'banner-2',
-      eyebrow: '매거진',
-      title: '한달살기의 시작',
-      subtitle: '새로운 지역에서 일상을 시작해보세요. 머뭄이 추천하는 한달살기 코스를 만나보세요.',
-      imageUrl:
-          'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=750&q=80',
+      eyebrow: '정착가이드',
+      title: '낯선 동네에서 살아가는 법',
+      subtitle: '어디서 살고, 어디서 일하고, 어떻게 생활할까?\n지역 생활에 필요한 정보를 한곳에서 만나보세요.',
+      imageUrl: 'assets/images/home_carousel/page2.png',
     ),
     HomeBanner(
       id: 'banner-3',
-      eyebrow: '매거진',
-      title: '로컬과 함께하는 하루',
-      subtitle: '현지인이 알려주는 숨은 맛집과 골목 산책 코스를 모아봤습니다.',
-      imageUrl:
-          'https://images.unsplash.com/photo-1488646953015-85ad3880ee66?w=750&q=80',
+      eyebrow: '지역발견',
+      title: '주말에 왔다가, 살고 싶어졌다',
+      subtitle: '스쳐 지나가기엔 아쉬운 동네들.\n오래 머물수록 좋아지는 지역을 발견해보세요.',
+      imageUrl: 'assets/images/home_carousel/page3.png',
     ),
   ];
 
