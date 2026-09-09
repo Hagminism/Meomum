@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:meomum/feature/on_boarding/feature/create_profile/presentation/screen/create_profile_action.dart';
-import 'package:meomum/feature/on_boarding/feature/create_profile/presentation/screen/create_profile_state.dart';
+import 'package:meomum/feature/edit_profile/presentation/screen/edit_profile_action.dart';
+import 'package:meomum/feature/edit_profile/presentation/screen/edit_profile_state.dart';
 import 'package:meomum/core/presentation/component/profile_editor.dart';
 import 'package:meomum/ui/app_colors.dart';
 
-class CreateProfileScreen extends StatelessWidget {
-  final CreateProfileState state;
-  final void Function(CreateProfileAction) onAction;
+class EditProfileScreen extends StatelessWidget {
+  final EditProfileState state;
+  final void Function(EditProfileAction) onAction;
 
-  const CreateProfileScreen({
+  const EditProfileScreen({
     super.key,
     required this.state,
     required this.onAction,
@@ -23,27 +23,27 @@ class CreateProfileScreen extends StatelessWidget {
         backgroundColor: AppColors.homeBackground,
         body: SafeArea(
           child: ProfileEditor(
-            title: '프로필을 만들어보세요',
+            title: '프로필을 수정해보세요',
             description:
-                '커뮤니티에서 사용할 프로필을 만들어보세요.\n'
+                '커뮤니티에서 사용할 프로필을 수정해보세요.\n'
                 '프로필은 커뮤니티에서 다른 사람에게 보여요.',
             nickname: state.nickname,
             avatarUrl: state.avatarUrl,
             selectedImagePath: state.selectedImagePath,
             isLoading: state.isLoading,
             isValid: state.isValid,
-            submitLabel: '이 닉네임을 사용할게요',
+            submitLabel: '변경사항을 저장할게요',
             onAvatarTap: () {
-              onAction(const CreateProfileAction.tapAvatar());
+              onAction(const EditProfileAction.tapAvatar());
             },
             onNicknameChanged: (String nickname) {
-              onAction(CreateProfileAction.changeNickname(nickname));
+              onAction(EditProfileAction.changeNickname(nickname));
             },
             onBack: () {
-              onAction(const CreateProfileAction.tapBack());
+              onAction(const EditProfileAction.tapBack());
             },
             onSubmit: () {
-              onAction(const CreateProfileAction.tapSubmit());
+              onAction(const EditProfileAction.tapSubmit());
             },
           ),
         ),

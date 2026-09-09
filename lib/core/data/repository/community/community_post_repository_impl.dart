@@ -47,6 +47,30 @@ class CommunityPostRepositoryImpl implements CommunityPostRepository {
   }
 
   @override
+  Future<Result<List<CommunityPost>>> getMyPosts({
+    int limit = 20,
+    DateTime? cursor,
+  }) async {
+    final result = await dataSource.getMyPosts(
+      limit: limit,
+      cursor: cursor,
+    );
+
+    return switch (result) {
+      Success(data: final dtoList) => Result.success(
+        dtoList
+            .map(
+              (CommunityPostDto dto) => dto.toModel(
+                currentUserId: dataSource.currentUserId,
+              ),
+            )
+            .toList(),
+      ),
+      Failure(message: final msg) => Result.failure(msg),
+    };
+  }
+
+  @override
   Future<Result<List<CommunityPost>>> getLatestPostsWithImages({
     int limit = 20,
     DateTime? cursor,
