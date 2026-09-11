@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:meomum/core/domain/enum/auth_provider.dart';
 import 'package:meomum/core/domain/enum/auth_session_status.dart';
+import 'package:meomum/core/domain/model/user/user.dart';
 import 'package:meomum/core/utils/result.dart';
 
 abstract interface class AuthRepository {
@@ -9,5 +12,23 @@ abstract interface class AuthRepository {
 
   Stream<AuthSessionStatus> watchAuthState();
 
+  Future<void> retrySessionRestore();
+
+  String? get sessionErrorMessage;
+
+  Future<Result<User>> updateProfile({
+    required String nickname,
+    File? profileImage,
+  });
+
+  Future<Result<User>> updateRegion({
+    required String upperRegion,
+    required String lowerRegion,
+  });
+
+  User? get currentUser;
+
   bool get isSignedIn;
+
+  AuthSessionStatus get sessionStatus;
 }

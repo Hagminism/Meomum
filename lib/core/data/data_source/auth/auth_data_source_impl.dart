@@ -1,129 +1,117 @@
+import 'dart:io';
+
+import 'package:auth0_flutter/auth0_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:meomum/core/auth/auth0_session.dart';
 import 'package:meomum/core/data/data_source/auth/auth_data_source.dart';
 import 'package:meomum/core/domain/enum/auth_provider.dart';
-import 'package:meomum/core/domain/enum/auth_session_status.dart';
-import 'package:meomum/core/utils/auth_constants.dart';
+import 'package:meomum/core/domain/model/user/auth_identity.dart';
 import 'package:meomum/core/utils/result.dart';
 import 'package:meomum/di/di.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide User;
 
+/// Auth0 세션을 복원하고, Auth0 사용자와 앱의 accounts 레코드를 연결한다.
+///
+/// 로그인 토큰의 보관과 갱신은 Auth0 CredentialsManager에 맡기고,
+/// Supabase는 인증된 토큰으로 앱 데이터와 accounts를 관리한다.
 class AuthDataSourceImpl implements AuthDataSource {
-  final GoTrueClient _auth;
-  final GoogleSignIn _googleSignIn;
+  final SupabaseClient _client;
+  final Auth0 _auth0;
 
   AuthDataSourceImpl({
-    required this._auth,
-    required this._googleSignIn,
+    required this._client,
+    required this._auth0,
   });
 
+  /// 선택한 Auth0 Connection으로 Universal Login을 진행하고 앱 계정을 준비한다.
+  ///
+  /// Android에서는 HTTPS App Link, iOS에서는 Custom URL Scheme으로 앱으로 돌아온다.
   @override
-  Future<Result<bool>> signInWithOAuth(AuthProvider provider) async {
-    return switch (provider) {
-      AuthProvider.google => _signInWithGoogle(),
-      AuthProvider.kakao => _signInWithOAuthBrowser(OAuthProvider.kakao),
-      AuthProvider.apple => const Result.failure(
-        '애플 로그인은 추후 지원 예정입니다.',
-      ),
-      AuthProvider.naver => const Result.failure(
-        '네이버 로그인은 추후 지원 예정입니다.',
-      ),
-    };
-  }
-
-  Future<Result<bool>> _signInWithGoogle() async {
+  Future<Result<AuthIdentity>> signInWithOAuth(AuthProvider provider) async {
     try {
-      const scopes = ['email', 'profile'];
-
-      final lightweightAccount = await _googleSignIn
-          .attemptLightweightAuthentication();
-      final googleAccount =
-          lightweightAccount ?? await _googleSignIn.authenticate();
-
-      final googleAuthorization =
-          await googleAccount.authorizationClient.authorizationForScopes(
-            scopes,
-          ) ??
-          await googleAccount.authorizationClient.authorizeScopes(scopes);
-      final idToken = googleAccount.authentication.idToken;
-      final accessToken = googleAuthorization.accessToken;
-
-      if (idToken == null) {
-        return const Result.failure('Google ID Token을 가져오지 못했습니다.');
-      }
-
-      await _auth.signInWithIdToken(
-        provider: OAuthProvider.google,
-        idToken: idToken,
-        accessToken: accessToken,
+      // TODO: 릴리즈 시 iOS에서도 Univerial Link 방식으로 수정
+      final credentials = await _auth0.webAuthentication().login(
+        useHTTPS: !Platform.isIOS,
+        parameters: {'connection': _connectionName(provider)},
       );
-
-      return const Result.success(true);
-    } on GoogleSignInException catch (error) {
-      if (error.code == GoogleSignInExceptionCode.canceled) {
-        return Result.failure(error.toString());
-      }
-      return Result.failure(error.description ?? error.toString());
-    } on AuthException catch (error) {
+      return Result.success(
+        await _createAuthIdentity(credentials, provider: provider),
+      );
+    } on WebAuthenticationException catch (error) {
       return Result.failure(error.message);
+    } on PostgrestException catch (error) {
+      return Result.failure('계정을 준비하지 못했습니다: ${error.message}');
     } catch (error) {
       return Result.failure(error.toString());
     }
   }
 
-  Future<Result<bool>> _signInWithOAuthBrowser(OAuthProvider provider) async {
+  @override
+  Future<Result<AuthIdentity?>> restoreSession() async {
     try {
-      final launched = await _auth.signInWithOAuth(
-        provider,
-        redirectTo: AuthConstants.redirectUrl,
-        authScreenLaunchMode: LaunchMode.externalApplication,
-      );
-
-      if (!launched) {
-        return const Result.failure('OAuth 화면을 열지 못했습니다.');
+      final hasValidCredentials = await _auth0.credentialsManager
+          .hasValidCredentials(minTtl: 60);
+      if (!hasValidCredentials) {
+        return const Result.success(null);
       }
 
-      return const Result.success(true);
-    } on AuthException catch (error) {
-      return Result.failure(error.message);
-    } catch (error) {
-      return Result.failure(error.toString());
+      final credentials = await _auth0.credentialsManager.credentials(
+        minTtl: 60,
+      );
+      return Result.success(await _createAuthIdentity(credentials));
+    } on CredentialsManagerException {
+      // 만료되었거나 복원할 수 없는 인증 자격 증명은 재로그인으로 처리한다.
+      return const Result.success(null);
+    } catch (_) {
+      return const Result.failure('인증 상태를 복원하지 못했습니다. 다시 시도해주세요.');
     }
   }
 
+  /// Auth0 브라우저 세션과 기기에 저장된 자격 증명을 모두 종료·삭제한다.
   @override
   Future<Result<bool>> signOut() async {
     try {
-      await Future.wait([
-        _auth.signOut(),
-        _googleSignIn.signOut(),
-      ]);
+      await _auth0.webAuthentication().logout(useHTTPS: !Platform.isIOS);
+      await _auth0.credentialsManager.clearCredentials();
       return const Result.success(true);
-    } on AuthException catch (error) {
+    } on WebAuthenticationException catch (error) {
       return Result.failure(error.message);
     } catch (error) {
       return Result.failure(error.toString());
     }
   }
 
-  @override
-  Stream<AuthSessionStatus> watchAuthState() {
-    return _auth.onAuthStateChange.map((AuthState data) {
-      final session = data.session;
-      if (session != null) {
-        return AuthSessionStatus.signedIn;
-      }
-      return AuthSessionStatus.signedOut;
-    });
+  /// Auth0 사용자 정보를 Supabase accounts 레코드와 연결해 인증 식별자를 만든다.
+  ///
+  /// `ensure_account` RPC는 Auth0 JWT의 subject를 이용해 계정을 생성하거나 찾는다.
+  Future<AuthIdentity> _createAuthIdentity(
+    Credentials credentials, {
+    AuthProvider? provider,
+  }) async {
+    final accountId = await _client.rpc('ensure_account') as String;
+    final auth0User = credentials.user;
+    return AuthIdentity(
+      accountId: accountId,
+      email: auth0User.email,
+      avatarUrl: auth0User.pictureUrl?.toString(),
+      authProvider: provider,
+    );
   }
 
-  @override
-  bool get isSignedIn => _auth.currentSession != null;
+  /// 앱의 로그인 공급자 enum을 Auth0 Dashboard에 등록한 Connection 이름으로 변환한다.
+  String _connectionName(AuthProvider provider) {
+    return switch (provider) {
+      AuthProvider.google => 'google-oauth2',
+      AuthProvider.kakao => 'Kakao',
+      AuthProvider.naver => 'Naver',
+    };
+  }
 }
 
 final authDataSourceProvider = Provider<AuthDataSource>((Ref ref) {
+  final supabaseClient = ref.watch(supabaseClientProvider);
   return AuthDataSourceImpl(
-    auth: ref.watch(supabaseClientProvider).auth,
-    googleSignIn: ref.watch(googleSignInProvider),
+    client: supabaseClient,
+    auth0: Auth0Session.client,
   );
 });

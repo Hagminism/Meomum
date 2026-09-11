@@ -2,6 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:meomum/core/presentation/component/app_snackbar.dart';
+import 'package:meomum/core/routing/routes.dart';
+import 'package:meomum/feature/community/domain/model/enum/community_category.dart';
 import 'package:meomum/feature/my_page/presentation/screen/my_page_action.dart';
 import 'package:meomum/feature/my_page/presentation/screen/my_page_event.dart';
 import 'package:meomum/feature/my_page/presentation/screen/my_page_screen.dart';
@@ -31,9 +35,9 @@ class _MyPageScreenRootState extends ConsumerState<MyPageScreenRoot> {
 
         switch (event) {
           case ShowError(:final message):
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(message)));
+            AppSnackBar.showError(context, message);
+          case ShowMessage(:final message):
+            AppSnackBar.showInfo(context, message);
         }
       });
     });
@@ -48,8 +52,35 @@ class _MyPageScreenRootState extends ConsumerState<MyPageScreenRoot> {
       state: state,
       onAction: (MyPageAction action) {
         switch (action) {
+          case TapMyFeed():
+            context.push('${Routes.myPage}/${Routes.myPageFeed}');
+            break;
+          case TapProfile():
+          case TapCurrentStayMenu():
+          case TapStayHistory():
+          case TapStayHistoryMenu():
           case TapLogout():
             viewModel.onAction(action);
+            break;
+          case TapCategory(:final id):
+            final category = CommunityCategory.values.firstWhere(
+              (CommunityCategory category) => category.name == id,
+              orElse: () {
+                return CommunityCategory.free;
+              },
+            );
+            final location = Uri(
+              path: Routes.community,
+              queryParameters: {
+                Routes.communityCategoryQuery: category.name,
+              },
+            ).toString();
+
+            context.go(location);
+            break;
+          case TapSettings():
+            // TODO: 설정 페이지 이동은 나중에 구현
+            break;
         }
       },
     );

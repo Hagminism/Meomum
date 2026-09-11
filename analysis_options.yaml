@@ -1,4 +1,12 @@
 include: package:flutter_lints/flutter.yaml
 
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "build/**"
+    - ".dart_tool/**"
+    - "**/*.mocks.dart" # mockito 사용 시
+
 formatter:
   trailing_commas: preserve

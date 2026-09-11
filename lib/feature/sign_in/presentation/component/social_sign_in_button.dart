@@ -6,11 +6,6 @@ class SocialSignInButton extends StatelessWidget {
   final AuthProvider authProvider;
   final void Function() onTap;
 
-  static const String googleAsset = 'assets/icons/google.png';
-  static const String appleAsset = 'assets/icons/apple.png';
-  static const String naverAsset = 'assets/icons/naver.png';
-  static const String kakaoAsset = 'assets/icons/kakao.png';
-
   const SocialSignInButton({
     super.key,
     required this.authProvider,
@@ -19,24 +14,34 @@ class SocialSignInButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(90),
-        child: Ink(
-          width: 56,
-          height: 56,
-          decoration: BoxDecoration(
-            color: buildColor(authProvider),
-            borderRadius: BorderRadius.circular(90),
+    return Container(
+      height: 50,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: buildColor(authProvider),
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x1A000000),
+            offset: Offset(0, 2),
+            blurRadius: 3,
+            spreadRadius: 1,
           ),
-          child: Center(
-            child: Image.asset(
-              width: (authProvider == AuthProvider.naver) ? 48 : 36,
-              height: (authProvider == AuthProvider.naver) ? 48 : 36,
-              buildAsset(authProvider),
-            ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              buildIcon(authProvider),
+              SizedBox(width: (authProvider == AuthProvider.naver) ? 2 : 10),
+              buildText(authProvider),
+            ],
           ),
         ),
       ),
@@ -47,8 +52,6 @@ class SocialSignInButton extends StatelessWidget {
     switch (authProvider) {
       case AuthProvider.google:
         return AppColors.signUpWithGoogleButton;
-      case AuthProvider.apple:
-        return AppColors.signUpWithAppleButton;
       case AuthProvider.naver:
         return AppColors.signUpWithNaverButton;
       case AuthProvider.kakao:
@@ -56,16 +59,51 @@ class SocialSignInButton extends StatelessWidget {
     }
   }
 
-  String buildAsset(AuthProvider authProvider) {
+  Color buildTextColor(AuthProvider authProvider) {
     switch (authProvider) {
       case AuthProvider.google:
-        return googleAsset;
-      case AuthProvider.apple:
-        return appleAsset;
+        return AppColors.black;
       case AuthProvider.naver:
-        return naverAsset;
+        return AppColors.white;
       case AuthProvider.kakao:
-        return kakaoAsset;
+        return AppColors.black;
     }
+  }
+
+  Widget buildIcon(AuthProvider authProvider) {
+    switch (authProvider) {
+      case AuthProvider.google:
+        return Image.asset(
+          'assets/icons/google.png',
+          width: 22,
+          height: 22,
+        );
+      case AuthProvider.naver:
+        return Image.asset(
+          'assets/icons/naver.png',
+          width: 36,
+          height: 36,
+        );
+      case AuthProvider.kakao:
+        return Image.asset(
+          'assets/icons/kakao.png',
+          width: 22,
+          height: 22,
+        );
+    }
+  }
+
+  Widget buildText(AuthProvider authProvider) {
+    final title = '${authProvider.toDisplayName()}로 시작하기';
+
+    return Text(
+      title,
+      style: TextStyle(
+        fontFamily: 'Pretendard',
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
+        color: buildTextColor(authProvider),
+      ),
+    );
   }
 }

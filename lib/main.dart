@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:meomum/core/auth/auth0_session.dart';
+import 'package:meomum/core/presentation/service/community_image_cleanup_lifecycle.dart';
 import 'package:meomum/core/routing/router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // ------------ 화면 방향 고정 ------------ //
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
 
   // ------------ .env 로드 ------------ //
   await dotenv.load(fileName: '.env');
@@ -15,22 +23,27 @@ Future<void> main() async {
   await Supabase.initialize(
     url: dotenv.env['SUPABASE_URL'] ?? '',
     publishableKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
+    accessToken: Auth0Session.idToken,
   );
 
-  // ------------ GoogleSignIn 초기화 ------------ //
-  final webClientId = dotenv.env['GOOGLE_WEB_CLIENT_ID'];
-  final iosClientId = dotenv.env['GOOGLE_IOS_CLIENT_ID'];
-
-  if (webClientId == null || webClientId.isEmpty) {
-    throw StateError('GOOGLE_WEB_CLIENT_ID가 .env에 설정되지 않았습니다.');
+  // ------------ Naver Map SDK 초기화 ------------ //
+  final naverMapClientId = dotenv.env['NAVER_MAP_CLIENT_ID'];
+  if (naverMapClientId == null || naverMapClientId.isEmpty) {
+    throw StateError('NAVER_MAP_CLIENT_ID가 .env에 설정되지 않았습니다.');
   }
 
-  // webClientId는 웹과 Android 공통으로 사용되고,
-  // iOS의 경우 id 자동 매칭이 약하여 clientId에 명시.
-  // Android는 Google Cloud Console에 등록만 해두면 됨.
-  await GoogleSignIn.instance.initialize(
-    clientId: (iosClientId == null || iosClientId.isEmpty) ? null : iosClientId,
-    serverClientId: webClientId,
+  await FlutterNaverMap().init(
+    clientId: naverMapClientId,
+    onAuthFailed: (ex) {
+      switch (ex) {
+        case NQuotaExceededException(:final message):
+          debugPrint('Naver Map 사용량 초과 (message: $message)');
+        case NUnauthorizedClientException() ||
+            NClientUnspecifiedException() ||
+            NAnotherAuthFailedException():
+          debugPrint('Naver Map 인증 실패: $ex');
+      }
+    },
   );
 
   // ------------ main 앱 실행 ------------ //
@@ -42,6 +55,7 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(communityImageCleanupLifecycleProvider);
     final router = ref.watch(routerProvider);
 
     return MaterialApp.router(
