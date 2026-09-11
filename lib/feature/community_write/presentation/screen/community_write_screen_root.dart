@@ -12,7 +12,8 @@ import 'package:meomum/feature/community/domain/model/enum/community_category.da
 import 'package:meomum/feature/community_write/presentation/component/category/community_category_bottom_sheet.dart';
 import 'package:meomum/feature/community/presentation/component/region/community_region_bottom_sheet.dart';
 import 'package:meomum/feature/community/presentation/screen/community_view_model.dart';
-import 'package:meomum/feature/community_write/presentation/screen/community_write_action.dart';
+import 'package:meomum/core/presentation/component/dialog/two_button_dialog/two_button_dialog.dart';
+import 'package:meomum/feature/community_post_form/presentation/screen/community_post_form_action.dart';
 import 'package:meomum/feature/community_write/presentation/screen/community_write_event.dart';
 import 'package:meomum/feature/community_write/presentation/screen/community_write_screen.dart';
 import 'package:meomum/feature/community_write/presentation/screen/community_write_view_model.dart';
@@ -81,7 +82,9 @@ class _CommunityWriteScreenRootState
             if (selectedPlace != null && mounted) {
               ref
                   .read(communityWriteViewModelProvider.notifier)
-                  .onAction(CommunityWriteAction.setLocation(selectedPlace));
+                  .onAction(
+                    CommunityPostFormAction.setLocation(selectedPlace),
+                  );
             }
             break;
           case SelectRegion():
@@ -92,8 +95,10 @@ class _CommunityWriteScreenRootState
           case ChangeTitle():
           case ChangeContent():
           case TapUpload():
-          case TapBack():
             viewModel.onAction(action);
+            break;
+          case TapBack():
+            await _handleBack(state.hasChanges, state.isLoading);
             break;
         }
       },
@@ -133,7 +138,7 @@ class _CommunityWriteScreenRootState
 
     ref
         .read(communityWriteViewModelProvider.notifier)
-        .onAction(CommunityWriteAction.selectCategory(category));
+        .onAction(CommunityPostFormAction.selectCategory(category));
   }
 
   /// 지역 선택 바텀 시트를 열고 선택 결과를 작성 상태에 반영합니다.
@@ -167,7 +172,22 @@ class _CommunityWriteScreenRootState
 
     ref
         .read(communityWriteViewModelProvider.notifier)
-        .onAction(CommunityWriteAction.selectRegion(region));
+        .onAction(CommunityPostFormAction.selectRegion(region));
+  }
+
+  Future<void> _handleBack(bool hasChanges, bool isLoading) async {
+    if (isLoading) return;
+
+    if (!hasChanges ||
+        await TwoButtonDialog.show(
+          context,
+          title: '작성 중인 내용이 있습니다.',
+          message: '저장하지 않고 나가시겠습니까?',
+          cancelLabel: '취소',
+          confirmLabel: '나가기',
+        )) {
+      if (mounted) context.pop();
+    }
   }
 
   @override

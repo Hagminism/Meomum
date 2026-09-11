@@ -12,6 +12,7 @@ abstract class CommunityWriteState with _$CommunityWriteState {
 
   const factory CommunityWriteState({
     required CommunityRegion selectedRegion,
+    CommunityRegion? initialRegion,
     @Default(CommunityCategory.free) CommunityCategory category,
     @Default([]) List<XFile> mediaFiles,
     CommunityPlace? selectedPlace,
@@ -26,4 +27,12 @@ abstract class CommunityWriteState with _$CommunityWriteState {
       content.trim().isNotEmpty &&
       content.trim().length <= 10000 &&
       !isLoading;
+
+  bool get hasChanges =>
+      selectedRegion != (initialRegion ?? selectedRegion) ||
+      category != CommunityCategory.free ||
+      mediaFiles.isNotEmpty ||
+      selectedPlace != null ||
+      title.trim().isNotEmpty ||
+      content.trim().isNotEmpty;
 }
