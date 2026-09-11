@@ -12,6 +12,7 @@ import 'package:meomum/feature/community_write/presentation/screen/community_wri
 import 'package:meomum/feature/home/presentation/screen/home_screen_root.dart';
 import 'package:meomum/feature/home_post_detail/presentation/screen/home_post_detail_screen_root.dart';
 import 'package:meomum/feature/community_post_detail/presentation/screen/community_post_detail_screen_root.dart';
+import 'package:meomum/feature/community_edit_post/presentation/screen/community_edit_post_screen_root.dart';
 import 'package:meomum/feature/location_search/presentation/screen/location_search_screen_root.dart';
 import 'package:meomum/feature/map/presentation/screen/map_screen_root.dart';
 import 'package:meomum/feature/edit_profile/presentation/screen/edit_profile_screen_root.dart';
@@ -105,7 +106,10 @@ final routerProvider = Provider<GoRouter>((Ref ref) {
                         postId: state.pathParameters[Routes.postId]!,
                       );
                     },
-                    routes: [_buildReportRoute()],
+                    routes: [
+                      _buildReportRoute(),
+                      _buildCommunityPostEditRoute(),
+                    ],
                   ),
                   GoRoute(
                     parentNavigatorKey: rootNavigatorKey,
@@ -158,7 +162,10 @@ final routerProvider = Provider<GoRouter>((Ref ref) {
                             postId: state.pathParameters[Routes.postId]!,
                           );
                         },
-                        routes: [_buildReportRoute()],
+                        routes: [
+                          _buildReportRoute(),
+                          _buildCommunityPostEditRoute(),
+                        ],
                       ),
                     ],
                   ),
@@ -224,5 +231,24 @@ GoRoute _buildReportRoute() {
         postId: state.pathParameters[Routes.postId]!,
       ),
     ),
+  );
+}
+
+GoRoute _buildCommunityPostEditRoute() {
+  return GoRoute(
+    parentNavigatorKey: rootNavigatorKey,
+    path: Routes.postEdit,
+    builder: (_, GoRouterState state) {
+      return CommunityEditPostScreenRoot(
+        postId: state.pathParameters[Routes.postId]!,
+      );
+    },
+    routes: [
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: Routes.communityLocationSearch,
+        builder: (_, _) => const LocationSearchScreenRoot(),
+      ),
+    ],
   );
 }

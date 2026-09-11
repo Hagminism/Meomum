@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meomum/core/data/repository/auth/auth_repository_impl.dart';
 import 'package:meomum/core/data/data_source/community/community_post_data_source.dart';
 import 'package:meomum/core/data/dto/community/community_post_dto.dart';
+import 'package:meomum/core/data/model/community/community_image_cleanup_item.dart';
+import 'package:meomum/core/data/model/community/community_post_update_result.dart';
 import 'package:meomum/core/domain/repository/auth/auth_repository.dart';
 import 'package:meomum/core/utils/result.dart';
 import 'package:meomum/di/di.dart';
@@ -239,6 +241,74 @@ class CommunityPostDataSourceImpl implements CommunityPostDataSource {
   }
 
   @override
+  /// 게시글과 이미지 메타데이터를 수정 RPC로 원자적으로 갱신합니다.
+  Future<Result<CommunityPostUpdateResult>> updatePost({
+    required String postId,
+    required String upperRegion,
+    required String lowerRegion,
+    required String category,
+    required String title,
+    required String content,
+    List<CommunityUploadedImage> images = const [],
+    CommunityPlace? place,
+  }) async {
+    try {
+      final userId = currentUserId;
+      if (userId == null) {
+        return const Result.failure('로그인이 필요합니다.');
+      }
+
+      // Repository가 구성한 최종 이미지 목록을 게시글·이미지 메타데이터와 함께 원자적으로 수정합니다.
+      final response = await _client.rpc(
+        'update_post_with_images',
+        params: {
+          'p_post_id': postId,
+          'p_upper_region': upperRegion,
+          'p_lower_region': lowerRegion,
+          'p_category': category,
+          'p_title': title,
+          'p_content': content,
+          'p_images': images
+              .asMap()
+              .entries
+              .map(
+                (entry) => {
+                  'storage_path': entry.value.storagePath,
+                  'public_url': entry.value.publicUrl,
+                  'sort_order': entry.key,
+                },
+              )
+              .toList(growable: false),
+          'p_place_name': place?.name,
+          'p_place_latitude': place?.latitude,
+          'p_place_longitude': place?.longitude,
+          'p_place_address': place?.address,
+          'p_place_road_address': place?.roadAddress,
+          'p_place_category': place?.category,
+        },
+      );
+      final responseMap = response as Map<String, dynamic>;
+      // RPC가 반환한 삭제 대상은 DB 반영 이후 Storage에서 별도로 정리합니다.
+      final removedPaths =
+          (responseMap['removed_storage_paths'] as List<dynamic>? ??
+                  const <dynamic>[])
+              .whereType<String>()
+              .toList(growable: false);
+
+      return Result.success(
+        CommunityPostUpdateResult(
+          postId: responseMap['post_id'] as String,
+          removedStoragePaths: removedPaths,
+        ),
+      );
+    } on PostgrestException catch (error) {
+      return Result.failure('게시글 수정에 실패했습니다: ${error.message}');
+    } catch (error) {
+      return Result.failure('게시글 수정 중 오류가 발생했습니다: $error');
+    }
+  }
+
+  @override
   /// 선택한 이미지 파일을 현재 계정 전용 Storage 경로에 업로드합니다.
   /// 일부 파일 업로드 또는 이후 게시글 저장이 실패하면 이미 업로드된 파일을 정리합니다.
   Future<Result<List<CommunityUploadedImage>>> uploadImages({
@@ -260,6 +330,7 @@ class CommunityPostDataSourceImpl implements CommunityPostDataSource {
         final fileExtension = file.path.split('.').last;
         final storagePath = 'accounts/$userId/${timestamp}_$i.$fileExtension';
 
+        // 파일마다 고유한 계정 전용 경로를 사용해 부분 업로드도 추적할 수 있게 합니다.
         await _client.storage.from(_bucketName).upload(storagePath, file);
 
         // 업로드가 완료된 파일의 공개 URL을 생성해 게시글 메타데이터에 사용합니다.
@@ -296,6 +367,7 @@ class CommunityPostDataSourceImpl implements CommunityPostDataSource {
       return '';
     }
 
+    // 업로드 중간 실패 시 완료된 파일부터 삭제하고, 삭제 실패분은 큐 등록으로 넘깁니다.
     final result = await deleteImages(
       storagePaths: uploadedImages
           .map((CommunityUploadedImage image) => image.storagePath)
@@ -304,7 +376,28 @@ class CommunityPostDataSourceImpl implements CommunityPostDataSource {
 
     return switch (result) {
       Success() => '',
-      Failure(message: final message) => ' 업로드한 이미지 정리에도 실패했습니다: $message',
+      Failure(message: final message) => await _enqueueCleanupAndReturnMessage(
+        uploadedImages: uploadedImages,
+        message: message,
+      ),
+    };
+  }
+
+  Future<String> _enqueueCleanupAndReturnMessage({
+    required List<CommunityUploadedImage> uploadedImages,
+    required String message,
+  }) async {
+    // 동일 경로는 큐 테이블의 unique 제약으로 중복 등록되지 않습니다.
+    final enqueueResult = await enqueueImageCleanup(
+      storagePaths: uploadedImages
+          .map((CommunityUploadedImage image) => image.storagePath)
+          .toList(growable: false),
+    );
+
+    return switch (enqueueResult) {
+      Success() => ' 업로드한 이미지 정리에 실패했습니다. 다음 실행 시 재시도합니다: $message',
+      Failure(message: final enqueueMessage) =>
+        ' 업로드한 이미지 정리와 재시도 등록에 실패했습니다: $message ($enqueueMessage)',
     };
   }
 
@@ -324,6 +417,120 @@ class CommunityPostDataSourceImpl implements CommunityPostDataSource {
       return Result.failure('업로드한 이미지 정리에 실패했습니다: ${error.message}');
     } catch (error) {
       return Result.failure('업로드한 이미지 정리 중 오류가 발생했습니다: $error');
+    }
+  }
+
+  @override
+  Future<Result<List<CommunityImageCleanupItem>>>
+  getPendingImageCleanup() async {
+    try {
+      final userId = currentUserId;
+      if (userId == null) {
+        return const Result.success([]);
+      }
+
+      final response = await _client
+          .from('community_image_cleanup_queue')
+          .select('storage_path')
+          .eq('account_id', userId)
+          .lte('next_retry_at', DateTime.now().toUtc().toIso8601String())
+          .order('next_retry_at')
+          .limit(20);
+      // 만료된 항목만 최대 20개씩 가져와 앱 재개 시 요청량을 제한합니다.
+      final list = response as List<dynamic>;
+
+      return Result.success(
+        list
+            .map(
+              (item) => CommunityImageCleanupItem(
+                storagePath:
+                    (item as Map<String, dynamic>)['storage_path'] as String,
+              ),
+            )
+            .toList(growable: false),
+      );
+    } on PostgrestException catch (error) {
+      return Result.failure('이미지 정리 대상을 불러오지 못했습니다: ${error.message}');
+    } catch (error) {
+      return Result.failure('이미지 정리 대상을 불러오는 중 오류가 발생했습니다: $error');
+    }
+  }
+
+  @override
+  Future<Result<bool>> enqueueImageCleanup({
+    required List<String> storagePaths,
+  }) async {
+    if (storagePaths.isEmpty) {
+      return const Result.success(true);
+    }
+
+    // RPC가 현재 계정 소유 경로인지 검증한 뒤 큐에 등록합니다.
+    try {
+      await _client.rpc(
+        'enqueue_community_image_cleanup',
+        params: {
+          'p_storage_paths': storagePaths,
+        },
+      );
+      return const Result.success(true);
+    } on PostgrestException catch (error) {
+      return Result.failure('이미지 정리 재시도 등록에 실패했습니다: ${error.message}');
+    } catch (error) {
+      return Result.failure('이미지 정리 재시도 등록 중 오류가 발생했습니다: $error');
+    }
+  }
+
+  @override
+  Future<Result<bool>> completeImageCleanup({
+    required List<String> storagePaths,
+  }) async {
+    if (storagePaths.isEmpty) {
+      return const Result.success(true);
+    }
+
+    // 실제 삭제에 성공한 경로만 큐에서 제거해 실패 항목은 보존합니다.
+    try {
+      final userId = currentUserId;
+      if (userId == null) {
+        return const Result.failure('로그인이 필요합니다.');
+      }
+
+      await _client
+          .from('community_image_cleanup_queue')
+          .delete()
+          .eq('account_id', userId)
+          .inFilter('storage_path', storagePaths);
+      return const Result.success(true);
+    } on PostgrestException catch (error) {
+      return Result.failure('이미지 정리 완료 처리에 실패했습니다: ${error.message}');
+    } catch (error) {
+      return Result.failure('이미지 정리 완료 처리 중 오류가 발생했습니다: $error');
+    }
+  }
+
+  @override
+  Future<Result<bool>> recordImageCleanupFailure({
+    required List<String> storagePaths,
+    required String message,
+  }) async {
+    if (storagePaths.isEmpty) {
+      return const Result.success(true);
+    }
+
+    // 재시도 간격과 실패 횟수는 DB RPC에서 계산해 모든 호출 경로에 동일하게 적용합니다.
+    try {
+      await _client.rpc(
+        'record_community_image_cleanup_failure',
+        params: {
+          'p_storage_paths': storagePaths,
+          'p_message': message,
+        },
+      );
+      return const Result.success(true);
+    } on PostgrestException catch (error) {
+      return Result.failure('이미지 정리 실패 기록에 실패했습니다: ${error.message}');
+    } catch (error) {
+      return Result.failure('이미지 정리 실패 기록 중 오류가 발생했습니다: $error');
     }
   }
 

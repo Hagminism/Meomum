@@ -9,52 +9,50 @@ import 'package:meomum/feature/community/domain/model/community_place.dart';
 import 'package:meomum/feature/community/domain/model/community_region.dart';
 import 'package:meomum/feature/community/domain/model/community_regions.dart';
 import 'package:meomum/feature/community/domain/model/enum/community_category.dart';
-import 'package:meomum/feature/community_write/presentation/component/category/community_category_bottom_sheet.dart';
 import 'package:meomum/feature/community/presentation/component/region/community_region_bottom_sheet.dart';
-import 'package:meomum/feature/community/presentation/screen/community_view_model.dart';
 import 'package:meomum/core/presentation/component/dialog/two_button_dialog/two_button_dialog.dart';
 import 'package:meomum/feature/community_post_form/presentation/screen/community_post_form_action.dart';
-import 'package:meomum/feature/community_write/presentation/screen/community_write_event.dart';
-import 'package:meomum/feature/community_write/presentation/screen/community_write_screen.dart';
-import 'package:meomum/feature/community_write/presentation/screen/community_write_view_model.dart';
+import 'package:meomum/feature/community_write/presentation/component/category/community_category_bottom_sheet.dart';
+import 'package:meomum/feature/community_edit_post/presentation/screen/community_edit_post_event.dart';
+import 'package:meomum/feature/community_edit_post/presentation/screen/community_edit_post_screen.dart';
+import 'package:meomum/feature/community_edit_post/presentation/screen/community_edit_post_view_model.dart';
 import 'package:meomum/ui/app_colors.dart';
 
-class CommunityWriteScreenRoot extends ConsumerStatefulWidget {
-  const CommunityWriteScreenRoot({super.key});
+class CommunityEditPostScreenRoot extends ConsumerStatefulWidget {
+  final String postId;
+
+  const CommunityEditPostScreenRoot({
+    super.key,
+    required this.postId,
+  });
 
   @override
-  ConsumerState<CommunityWriteScreenRoot> createState() =>
-      _CommunityWriteScreenRootState();
+  ConsumerState<CommunityEditPostScreenRoot> createState() =>
+      _CommunityEditPostScreenRootState();
 }
 
-class _CommunityWriteScreenRootState
-    extends ConsumerState<CommunityWriteScreenRoot> {
-  StreamSubscription<CommunityWriteEvent>? _subscription;
+class _CommunityEditPostScreenRootState
+    extends ConsumerState<CommunityEditPostScreenRoot> {
+  StreamSubscription<CommunityEditPostEvent>? _subscription;
 
   @override
   void initState() {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final viewModel = ref.read(communityWriteViewModelProvider.notifier);
+      if (!mounted) return;
 
-      _subscription = viewModel.eventStream.listen((event) async {
+      final viewModel = ref.read(
+        communityEditPostViewModelProvider(widget.postId).notifier,
+      );
+      _subscription = viewModel.eventStream.listen((event) {
         if (!mounted) return;
 
         switch (event) {
-          case PostCreatedSuccess(:final post):
-            ref.read(communityViewModelProvider.notifier).addPost(post);
-
-            AppSnackBar.showSuccess(context, '게시글이 등록되었습니다.');
-
-            context.pop();
-            break;
+          case PostUpdatedSuccess():
+            context.pop(true);
           case ShowMessage(:final message):
             AppSnackBar.showError(context, message);
-            break;
-          case Pop():
-            context.pop();
-            break;
         }
       });
     });
@@ -62,12 +60,16 @@ class _CommunityWriteScreenRootState
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(communityWriteViewModelProvider);
-    final viewModel = ref.read(communityWriteViewModelProvider.notifier);
+    final state = ref.watch(
+      communityEditPostViewModelProvider(widget.postId),
+    );
+    final viewModel = ref.read(
+      communityEditPostViewModelProvider(widget.postId).notifier,
+    );
 
-    return CommunityWriteScreen(
+    return CommunityEditPostScreen(
       state: state,
-      onAction: (action) async {
+      onAction: (CommunityPostFormAction action) async {
         switch (action) {
           case TapRegionSelect():
             _showRegionSelector(state.selectedRegion);
@@ -77,15 +79,16 @@ class _CommunityWriteScreenRootState
             break;
           case TapLocationSearch():
             final selectedPlace = await context.push<CommunityPlace>(
-              '${Routes.community}/${Routes.communityWrite}/${Routes.communityLocationSearch}',
+              '${GoRouterState.of(context).uri.path}/${Routes.communityLocationSearch}',
             );
             if (selectedPlace != null && mounted) {
-              ref
-                  .read(communityWriteViewModelProvider.notifier)
-                  .onAction(
-                    CommunityPostFormAction.setLocation(selectedPlace),
-                  );
+              viewModel.onAction(
+                CommunityPostFormAction.setLocation(selectedPlace),
+              );
             }
+            break;
+          case TapBack():
+            await _handleBack(state.hasChanges, state.isLoading);
             break;
           case SelectRegion():
           case SelectCategory():
@@ -97,15 +100,11 @@ class _CommunityWriteScreenRootState
           case TapUpload():
             viewModel.onAction(action);
             break;
-          case TapBack():
-            await _handleBack(state.hasChanges, state.isLoading);
-            break;
         }
       },
     );
   }
 
-  /// 게시판 선택 바텀 시트를 열고 선택 결과를 작성 상태에 반영합니다.
   Future<void> _showCategorySelector(
     CommunityCategory selectedCategory,
   ) async {
@@ -122,9 +121,7 @@ class _CommunityWriteScreenRootState
         return CommunityCategoryBottomSheet(
           categories: CommunityCategory.values,
           selectedCategory: selectedCategory,
-          onClose: () {
-            Navigator.of(bottomSheetContext).pop();
-          },
+          onClose: () => Navigator.of(bottomSheetContext).pop(),
           onSelected: (CommunityCategory selected) {
             Navigator.of(bottomSheetContext).pop(selected);
           },
@@ -132,16 +129,13 @@ class _CommunityWriteScreenRootState
       },
     );
 
-    if (!mounted || category == null) {
-      return;
-    }
+    if (!mounted || category == null) return;
 
     ref
-        .read(communityWriteViewModelProvider.notifier)
+        .read(communityEditPostViewModelProvider(widget.postId).notifier)
         .onAction(CommunityPostFormAction.selectCategory(category));
   }
 
-  /// 지역 선택 바텀 시트를 열고 선택 결과를 작성 상태에 반영합니다.
   Future<void> _showRegionSelector(CommunityRegion selectedRegion) async {
     final region = await showModalBottomSheet<CommunityRegion>(
       context: context,
@@ -156,9 +150,7 @@ class _CommunityWriteScreenRootState
           regions: CommunityRegions.all,
           selectedRegion: selectedRegion,
           showViewLabel: false,
-          onClose: () {
-            Navigator.of(bottomSheetContext).pop();
-          },
+          onClose: () => Navigator.of(bottomSheetContext).pop(),
           onConfirm: (CommunityRegion confirmedRegion) {
             Navigator.of(bottomSheetContext).pop(confirmedRegion);
           },
@@ -166,12 +158,10 @@ class _CommunityWriteScreenRootState
       },
     );
 
-    if (!mounted || region == null) {
-      return;
-    }
+    if (!mounted || region == null) return;
 
     ref
-        .read(communityWriteViewModelProvider.notifier)
+        .read(communityEditPostViewModelProvider(widget.postId).notifier)
         .onAction(CommunityPostFormAction.selectRegion(region));
   }
 

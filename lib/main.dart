@@ -4,6 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meomum/core/auth/auth0_session.dart';
+import 'package:meomum/core/presentation/service/community_image_cleanup_lifecycle.dart';
 import 'package:meomum/core/routing/router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -54,6 +55,7 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(communityImageCleanupLifecycleProvider);
     final router = ref.watch(routerProvider);
 
     return MaterialApp.router(
