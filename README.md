@@ -1,5 +1,14 @@
 # 머뭄 (Meomum)
 
+<table>
+  <td><img width="512" height="512" alt="로고(R값 x)_waifu2x_noise0_scale4x (1)" src="https://github.com/user-attachments/assets/8a630115-f018-409e-8b0c-7a85945b83ce" /></td>
+  <td><img width="850" height="500" alt="로그인 (2)" src="https://github.com/user-attachments/assets/c25f548e-33a0-43c4-97aa-9d418ff0ea8b" /></td>
+</table>
+
+
+
+
+
 ### 낯선 동네에서도, 잠깐의 여행이 생활이 되도록.
 
 머뭄은 한 달 살기, 워케이션, 단기 체류를 시작한 사람들이 낯선 지역에 조금 더 쉽게 머물 수 있도록 돕는 앱입니다.
