@@ -238,11 +238,12 @@ GoRoute _buildCommunityPostEditRoute() {
   return GoRoute(
     parentNavigatorKey: rootNavigatorKey,
     path: Routes.postEdit,
-    builder: (_, GoRouterState state) {
-      return CommunityEditPostScreenRoot(
+    pageBuilder: (_, GoRouterState state) => MaterialPage(
+      fullscreenDialog: true,
+      child: CommunityEditPostScreenRoot(
         postId: state.pathParameters[Routes.postId]!,
-      );
-    },
+      ),
+    ),
     routes: [
       GoRoute(
         parentNavigatorKey: rootNavigatorKey,
