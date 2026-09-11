@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:meomum/core/utils/result.dart';
 import 'package:meomum/feature/community/domain/model/community_place.dart';
 import 'package:meomum/feature/community/domain/model/community_post.dart';
+import 'package:meomum/feature/community/domain/model/community_post_image.dart';
 import 'package:meomum/feature/community/domain/model/enum/community_category.dart';
 
 abstract interface class CommunityPostRepository {
@@ -37,7 +38,21 @@ abstract interface class CommunityPostRepository {
     CommunityPlace? place,
   });
 
+  Future<Result<bool>> updatePost({
+    required String postId,
+    required String upperRegion,
+    required String lowerRegion,
+    required CommunityCategory category,
+    required String title,
+    required String content,
+    List<CommunityPostImage> existingImages = const [],
+    List<File> newImageFiles = const [],
+    CommunityPlace? place,
+  });
+
   Future<Result<bool>> toggleLike({
     required String postId,
   });
+
+  Future<Result<bool>> retryPendingImageCleanup();
 }
