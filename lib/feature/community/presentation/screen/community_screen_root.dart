@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meomum/core/presentation/component/app_snackbar.dart';
 import 'package:meomum/core/presentation/service/share_post_handler.dart';
+import 'package:meomum/core/presentation/service/community_image_cleanup_lifecycle.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meomum/core/routing/routes.dart';
 import 'package:meomum/feature/community/domain/model/community_post.dart';
@@ -39,6 +40,10 @@ class _CommunityScreenRootState extends ConsumerState<CommunityScreenRoot> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+
+      unawaited(
+        ref.read(communityImageCleanupLifecycleProvider).runNow(force: true),
+      );
 
       final viewModel = ref.read(communityViewModelProvider.notifier);
 
