@@ -309,6 +309,35 @@ class CommunityPostDataSourceImpl implements CommunityPostDataSource {
   }
 
   @override
+  /// 게시글을 삭제하고 Storage 이미지 정리 대상 경로를 반환합니다.
+  Future<Result<List<String>>> deletePost({
+    required String postId,
+  }) async {
+    try {
+      final userId = currentUserId;
+      if (userId == null) {
+        return const Result.failure('로그인이 필요합니다.');
+      }
+
+      final response = await _client.rpc(
+        'delete_post_with_images',
+        params: {'p_post_id': postId},
+      );
+      final responseMap = response as Map<String, dynamic>;
+      final storagePaths =
+          (responseMap['storage_paths'] as List<dynamic>? ?? const <dynamic>[])
+              .whereType<String>()
+              .toList(growable: false);
+
+      return Result.success(storagePaths);
+    } on PostgrestException catch (error) {
+      return Result.failure('게시글 삭제에 실패했습니다: ${error.message}');
+    } catch (error) {
+      return Result.failure('게시글 삭제 중 오류가 발생했습니다: $error');
+    }
+  }
+
+  @override
   /// 선택한 이미지 파일을 현재 계정 전용 Storage 경로에 업로드합니다.
   /// 일부 파일 업로드 또는 이후 게시글 저장이 실패하면 이미 업로드된 파일을 정리합니다.
   Future<Result<List<CommunityUploadedImage>>> uploadImages({

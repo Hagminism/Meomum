@@ -210,6 +210,22 @@ class CommunityPostRepositoryImpl implements CommunityPostRepository {
     }
   }
 
+  @override
+  Future<Result<bool>> deletePost({
+    required String postId,
+  }) async {
+    final result = await dataSource.deletePost(postId: postId);
+
+    switch (result) {
+      case Failure(message: final message):
+        return Result.failure(message);
+      case Success(data: final storagePaths):
+        // 게시글 삭제는 DB에서 완료되었으므로 Storage 정리는 보상 작업으로 처리합니다.
+        await _cleanupRemovedImages(storagePaths);
+        return const Result.success(true);
+    }
+  }
+
   Future<Result<CommunityPost>> _getCreatedPost(String postId) async {
     final result = await getPostById(postId: postId);
 

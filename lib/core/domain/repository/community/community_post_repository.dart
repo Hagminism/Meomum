@@ -50,6 +50,10 @@ abstract interface class CommunityPostRepository {
     CommunityPlace? place,
   });
 
+  Future<Result<bool>> deletePost({
+    required String postId,
+  });
+
   Future<Result<bool>> toggleLike({
     required String postId,
   });
