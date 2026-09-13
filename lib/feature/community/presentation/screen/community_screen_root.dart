@@ -111,7 +111,7 @@ class _CommunityScreenRootState extends ConsumerState<CommunityScreenRoot> {
             viewModel.onAction(action);
             break;
           case TapPost(:final postId):
-            context.push('${Routes.community}/post-detail/$postId');
+            unawaited(_openPost(postId, viewModel));
             break;
           case LoadMore():
           case Refresh():
@@ -123,6 +123,21 @@ class _CommunityScreenRootState extends ConsumerState<CommunityScreenRoot> {
         }
       },
     );
+  }
+
+  Future<void> _openPost(
+    String postId,
+    CommunityViewModel viewModel,
+  ) async {
+    final didDelete = await context.push<bool>(
+      '${Routes.community}/post-detail/$postId',
+    );
+    if (!mounted || didDelete != true) return;
+
+    await viewModel.refresh();
+    if (mounted) {
+      AppSnackBar.showSuccess(context, '게시글이 삭제되었습니다.');
+    }
   }
 
   /// 지역 선택 바텀 시트를 열고 선택 결과를 ViewModel에 전달합니다.

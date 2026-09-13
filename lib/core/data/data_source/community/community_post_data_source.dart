@@ -59,6 +59,10 @@ abstract interface class CommunityPostDataSource {
     CommunityPlace? place,
   });
 
+  Future<Result<List<String>>> deletePost({
+    required String postId,
+  });
+
   Future<Result<List<CommunityUploadedImage>>> uploadImages({
     required List<File> files,
   });

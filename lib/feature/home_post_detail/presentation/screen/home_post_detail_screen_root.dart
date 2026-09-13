@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meomum/core/presentation/component/app_snackbar.dart';
+import 'package:meomum/core/presentation/component/dialog/two_button_dialog/two_button_dialog.dart';
 import 'package:meomum/core/presentation/service/share_post_handler.dart';
 import 'package:meomum/core/routing/routes.dart';
+import 'package:meomum/core/utils/result.dart';
 import 'package:meomum/feature/home_post_detail/presentation/screen/home_post_detail_action.dart';
 import 'package:meomum/feature/home_post_detail/presentation/screen/home_post_detail_event.dart';
 import 'package:meomum/feature/home_post_detail/presentation/screen/home_post_detail_screen.dart';
@@ -72,7 +74,9 @@ class _HomePostDetailScreenRootState
       onAction: (HomePostDetailAction action) {
         switch (action) {
           case TapBack():
-            context.pop();
+            if (!state.isDeleting) {
+              context.pop();
+            }
             break;
           case ToggleLike():
           case ChangeComment():
@@ -85,7 +89,7 @@ class _HomePostDetailScreenRootState
               _openReport();
               break;
             }
-            viewModel.onAction(action);
+            unawaited(_confirmDelete(viewModel));
             break;
         }
       },
@@ -100,6 +104,27 @@ class _HomePostDetailScreenRootState
     if (!mounted || didSubmit != true) return;
 
     AppSnackBar.showSuccess(context, '신고가 접수되었습니다.');
+  }
+
+  Future<void> _confirmDelete(HomePostDetailViewModel viewModel) async {
+    final shouldDelete = await TwoButtonDialog.show(
+      context,
+      title: '게시글을 삭제하시겠습니까?',
+      message: '삭제한 게시글은 복구할 수 없습니다.',
+      cancelLabel: '취소',
+      confirmLabel: '삭제',
+    );
+    if (!mounted || !shouldDelete) return;
+
+    final result = await viewModel.deletePost();
+    if (!mounted) return;
+
+    switch (result) {
+      case Success():
+        context.pop(true);
+      case Failure(message: final message):
+        AppSnackBar.showError(context, message);
+    }
   }
 
   @override
