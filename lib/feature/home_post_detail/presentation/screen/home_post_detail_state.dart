@@ -11,6 +11,7 @@ abstract class HomePostDetailState with _$HomePostDetailState {
   const factory HomePostDetailState({
     CommunityPost? post,
     @Default(false) bool isLoading,
+    @Default(false) bool isDeleting,
     @Default(false) bool isOwner,
     @Default('') String commentContent,
     XFile? commentImage,

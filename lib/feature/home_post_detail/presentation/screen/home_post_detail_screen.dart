@@ -25,105 +25,128 @@ class HomePostDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final post = state.post;
 
-    return Scaffold(
-      backgroundColor: AppColors.homeBackground,
-      appBar: CustomAppBar(
-        title: post == null ? '커뮤니티' : post.category.label,
-        titleColor: AppColors.feedContentText,
-        toolbarHeight: 44,
-        showBackButton: true,
-        onBackPressed: () {
-          onAction(const HomePostDetailAction.tapBack());
-        },
-        showMoreButton: post != null,
-        moreItemBuilder: (BuildContext context) {
-          return [
-            if (state.isOwner)
-              const PopupMenuItem<Object>(
-                value: HomePostDetailMenuItem.edit,
-                child: Text('글 수정'),
-              ),
-            if (state.isOwner)
-              const PopupMenuItem<Object>(
-                value: HomePostDetailMenuItem.delete,
-                child: Text('글 삭제'),
-              ),
-            const PopupMenuItem<Object>(
-              value: HomePostDetailMenuItem.report,
-              child: Text('신고하기'),
-            ),
-          ];
-        },
-        onMoreSelected: (Object value) {
-          onAction(
-            HomePostDetailAction.tapMenu(value as HomePostDetailMenuItem),
-          );
-        },
-      ),
-      body: Column(
+    return PopScope(
+      canPop: state.isDeleting ? false : true,
+      child: Stack(
         children: [
-          Expanded(
-            child: state.isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(
-                      color: AppColors.primary,
+          Scaffold(
+            backgroundColor: AppColors.homeBackground,
+            appBar: CustomAppBar(
+              title: post == null ? '커뮤니티' : post.category.label,
+              titleColor: AppColors.feedContentText,
+              toolbarHeight: 44,
+              showBackButton: true,
+              onBackPressed: () {
+                if (!state.isDeleting) {
+                  onAction(const HomePostDetailAction.tapBack());
+                }
+              },
+              showMoreButton: post != null && !state.isDeleting,
+              moreItemBuilder: (BuildContext context) {
+                return [
+                  if (state.isOwner)
+                    const PopupMenuItem<Object>(
+                      value: HomePostDetailMenuItem.edit,
+                      child: Text('글 수정'),
                     ),
-                  )
-                : post == null
-                ? const Center(child: Text('게시글을 불러오지 못했습니다.'))
-                : CustomScrollView(
-                    slivers: [
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 8,
-                          ),
-                          child: Text(
-                            post.title,
-                            style: const TextStyle(
-                              fontFamily: 'Pretendard',
-                              fontSize: 24,
-                              fontWeight: FontWeight.w600,
-                              height: 1.4,
-                              color: AppColors.communityText,
-                            ),
-                          ),
-                        ),
-                      ),
-                      SliverToBoxAdapter(
-                        child: CommunityPostHeader(post: post),
-                      ),
-                      SliverToBoxAdapter(child: const SizedBox(height: 12)),
-                      if (post.imageUrls.isNotEmpty)
-                        SliverToBoxAdapter(
-                          child: HomePostDetailImages(post: post),
-                        ),
-                      SliverToBoxAdapter(
-                        child: HomePostDetailFooter(
-                          post: post,
-                          onLike: () {
-                            onAction(
-                              const HomePostDetailAction.toggleLike(),
-                            );
-                          },
-                          onShare: onShare,
-                        ),
-                      ),
-                      const SliverToBoxAdapter(
-                        child: ColoredBox(
-                          color: AppColors.inputBackground,
-                          child: SizedBox(height: 2),
-                        ),
-                      ),
-                      const SliverToBoxAdapter(
-                        child: HomePostDetailComments(),
-                      ),
-                    ],
+                  if (state.isOwner)
+                    const PopupMenuItem<Object>(
+                      value: HomePostDetailMenuItem.delete,
+                      child: Text('글 삭제'),
+                    ),
+                  const PopupMenuItem<Object>(
+                    value: HomePostDetailMenuItem.report,
+                    child: Text('신고하기'),
                   ),
+                ];
+              },
+              onMoreSelected: (Object value) {
+                onAction(
+                  HomePostDetailAction.tapMenu(value as HomePostDetailMenuItem),
+                );
+              },
+            ),
+            body: Column(
+              children: [
+                if (state.isDeleting)
+                  const LinearProgressIndicator(
+                    minHeight: 2,
+                    color: AppColors.primary,
+                  ),
+                Expanded(
+                  child: state.isLoading
+                      ? const Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.primary,
+                          ),
+                        )
+                      : post == null
+                      ? const Center(child: Text('게시글을 불러오지 못했습니다.'))
+                      : CustomScrollView(
+                          slivers: [
+                            SliverToBoxAdapter(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 8,
+                                ),
+                                child: Text(
+                                  post.title,
+                                  style: const TextStyle(
+                                    fontFamily: 'Pretendard',
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.w600,
+                                    height: 1.4,
+                                    color: AppColors.communityText,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SliverToBoxAdapter(
+                              child: CommunityPostHeader(post: post),
+                            ),
+                            SliverToBoxAdapter(
+                              child: const SizedBox(height: 12),
+                            ),
+                            if (post.imageUrls.isNotEmpty)
+                              SliverToBoxAdapter(
+                                child: HomePostDetailImages(post: post),
+                              ),
+                            SliverToBoxAdapter(
+                              child: HomePostDetailFooter(
+                                post: post,
+                                onLike: () {
+                                  onAction(
+                                    const HomePostDetailAction.toggleLike(),
+                                  );
+                                },
+                                onShare: onShare,
+                              ),
+                            ),
+                            const SliverToBoxAdapter(
+                              child: ColoredBox(
+                                color: AppColors.inputBackground,
+                                child: SizedBox(height: 2),
+                              ),
+                            ),
+                            const SliverToBoxAdapter(
+                              child: HomePostDetailComments(),
+                            ),
+                          ],
+                        ),
+                ),
+                if (post != null && !state.isLoading && !state.isDeleting)
+                  HomePostDetailCommentInput(state: state, onAction: onAction),
+              ],
+            ),
           ),
-          if (post != null && !state.isLoading)
-            HomePostDetailCommentInput(state: state, onAction: onAction),
+          if (state.isDeleting)
+            ColoredBox(
+              color: AppColors.black.withValues(alpha: 0.3),
+              child: Center(
+                child: CircularProgressIndicator(color: AppColors.primary),
+              ),
+            ),
         ],
       ),
     );

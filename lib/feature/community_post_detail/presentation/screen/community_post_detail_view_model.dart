@@ -24,6 +24,35 @@ class CommunityPostDetailViewModel extends Notifier<CommunityPostDetailState> {
 
   Stream<CommunityPostDetailEvent> get eventStream => _eventController.stream;
 
+  Future<Result<bool>> deletePost() async {
+    if (state.isDeleting) {
+      return const Result.failure('게시글 삭제가 진행 중입니다.');
+    }
+
+    final post = state.post;
+    if (post == null) {
+      return const Result.failure('게시글을 찾을 수 없습니다.');
+    }
+
+    if (!state.isOwner) {
+      return const Result.failure('게시글을 삭제할 권한이 없습니다.');
+    }
+
+    state = state.copyWith(isDeleting: true);
+    late final Result<bool> result;
+    try {
+      result = await _repository.deletePost(postId: post.id);
+    } catch (error) {
+      result = Result.failure('게시글 삭제 중 오류가 발생했습니다: $error');
+    }
+
+    if (ref.mounted) {
+      state = state.copyWith(isDeleting: false);
+    }
+
+    return result;
+  }
+
   @override
   CommunityPostDetailState build() {
     _repository = ref.watch(communityPostRepositoryProvider);
@@ -34,6 +63,8 @@ class CommunityPostDetailViewModel extends Notifier<CommunityPostDetailState> {
   }
 
   void onAction(CommunityPostDetailAction action) {
+    if (state.isDeleting) return;
+
     switch (action) {
       case TapBack():
         break;
@@ -131,11 +162,7 @@ class CommunityPostDetailViewModel extends Notifier<CommunityPostDetailState> {
           ),
         );
       case CommunityPostDetailMenuItem.delete:
-        _eventController.add(
-          const CommunityPostDetailEvent.showMessage(
-            '게시글 삭제 기능은 추후 연결 예정입니다.',
-          ),
-        );
+        break;
       case CommunityPostDetailMenuItem.report:
         break;
     }
