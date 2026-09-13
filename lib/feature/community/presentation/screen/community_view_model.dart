@@ -83,6 +83,11 @@ class CommunityViewModel extends Notifier<CommunityState> {
     }
   }
 
+  /// 현재 선택된 지역의 게시글을 명시적으로 새로고침합니다.
+  Future<void> refresh() {
+    return _fetchPosts(state.selectedRegion);
+  }
+
   /// 선택한 지역의 첫 페이지 게시글을 조회하고 상태를 갱신합니다.
   Future<void> _fetchPosts(CommunityRegion region) async {
     state = state.copyWith(isLoading: true);

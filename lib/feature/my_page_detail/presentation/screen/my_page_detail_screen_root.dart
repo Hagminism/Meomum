@@ -66,9 +66,7 @@ class _MyPageDetailScreenRootState
             context.pop();
             break;
           case TapPost(:final postId):
-            context.push(
-              '${Routes.myPage}/${Routes.myPageFeed}/post-detail/$postId',
-            );
+            unawaited(_openPost(postId, viewModel));
             break;
           case TapEditProfile():
             _openEditProfile();
@@ -84,6 +82,21 @@ class _MyPageDetailScreenRootState
         }
       },
     );
+  }
+
+  Future<void> _openPost(
+    String postId,
+    MyPageDetailViewModel viewModel,
+  ) async {
+    final didDelete = await context.push<bool>(
+      '${Routes.myPage}/${Routes.myPageFeed}/post-detail/$postId',
+    );
+    if (!mounted || didDelete != true) return;
+
+    await viewModel.refresh();
+    if (mounted) {
+      AppSnackBar.showSuccess(context, '게시글이 삭제되었습니다.');
+    }
   }
 
   Future<void> _openEditProfile() async {

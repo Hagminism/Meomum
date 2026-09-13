@@ -50,7 +50,7 @@ class _HomeScreenRootState extends ConsumerState<HomeScreenRoot> {
       onAction: (HomeAction action) {
         switch (action) {
           case TapFeedItem(:final id):
-            context.push('${Routes.home}/post-detail/$id');
+            unawaited(_openPost(id, viewModel));
             break;
           case ChangeBannerIndex():
           case LoadMore():
@@ -75,6 +75,18 @@ class _HomeScreenRootState extends ConsumerState<HomeScreenRoot> {
         }
       },
     );
+  }
+
+  Future<void> _openPost(String postId, HomeViewModel viewModel) async {
+    final didDelete = await context.push<bool>(
+      '${Routes.home}/post-detail/$postId',
+    );
+    if (!mounted || didDelete != true) return;
+
+    await viewModel.refresh();
+    if (mounted) {
+      AppSnackBar.showSuccess(context, '게시글이 삭제되었습니다.');
+    }
   }
 
   @override
