@@ -74,7 +74,10 @@ final routerProvider = Provider<GoRouter>((Ref ref) {
                         postId: state.pathParameters[Routes.postId]!,
                       );
                     },
-                    routes: [_buildReportRoute()],
+                    routes: [
+                      _buildReportRoute(),
+                      _buildCommunityPostEditRoute(),
+                    ],
                   ),
                 ],
               ),

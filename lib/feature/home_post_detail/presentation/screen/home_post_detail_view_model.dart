@@ -99,6 +99,13 @@ class HomePostDetailViewModel extends Notifier<HomePostDetailState> {
     }
   }
 
+  Future<void> refresh() async {
+    if (!ref.mounted) return;
+
+    state = state.copyWith(isLoading: true);
+    await _fetchPost();
+  }
+
   Future<void> _toggleLike() async {
     final post = state.post;
     if (post == null) return;
