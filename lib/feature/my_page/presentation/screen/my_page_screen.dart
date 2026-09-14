@@ -76,27 +76,17 @@ class MyPageScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (BuildContext context, int index) {
-                        return MyPageStayHistoryItem(
-                          item: state.stayHistories[index],
-                          onAction: onAction,
-                        );
-                      },
-                      childCount: state.stayHistories.length,
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(16, 24, 16, bottomPadding),
-                      child: OutlinedButton(
-                        onPressed: state.isLoading
-                            ? null
-                            : () {
-                                onAction(const MyPageAction.tapLogout());
-                              },
-                        child: const Text('로그아웃'),
+                  SliverPadding(
+                    padding: EdgeInsets.only(bottom: bottomPadding),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (BuildContext context, int index) {
+                          return MyPageStayHistoryItem(
+                            item: state.stayHistories[index],
+                            onAction: onAction,
+                          );
+                        },
+                        childCount: state.stayHistories.length,
                       ),
                     ),
                   ),
