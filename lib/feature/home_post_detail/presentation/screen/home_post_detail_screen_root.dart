@@ -89,6 +89,10 @@ class _HomePostDetailScreenRootState
               _openReport();
               break;
             }
+            if (item == HomePostDetailMenuItem.edit) {
+              _openEdit(viewModel);
+              break;
+            }
             unawaited(_confirmDelete(viewModel));
             break;
         }
@@ -104,6 +108,19 @@ class _HomePostDetailScreenRootState
     if (!mounted || didSubmit != true) return;
 
     AppSnackBar.showSuccess(context, '신고가 접수되었습니다.');
+  }
+
+  Future<void> _openEdit(HomePostDetailViewModel viewModel) async {
+    final currentPath = GoRouterState.of(context).uri.path;
+    final didUpdate = await context.push<bool>(
+      '$currentPath/${Routes.postEdit}',
+    );
+    if (!mounted || didUpdate != true) return;
+
+    await viewModel.refresh();
+    if (mounted) {
+      AppSnackBar.showSuccess(context, '게시글이 수정되었습니다.');
+    }
   }
 
   Future<void> _confirmDelete(HomePostDetailViewModel viewModel) async {

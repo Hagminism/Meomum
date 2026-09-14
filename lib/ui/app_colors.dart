@@ -42,6 +42,13 @@ class AppColors {
   static const Color divider = Color(0xFFE3E3E4);
   static const Color profileAvatarPlaceholder = Color(0xFFE7DDDD);
 
+  // Settings 관련 색상
+  static const Color settingsSectionLabel = Color(0xFF777772);
+  static const Color settingsChevron = Color(0xFF969690);
+  static const Color settingsPressedSurface = Color(0xFFF1F6EF);
+  static const Color settingsExpandedSurface = Color(0xFFF8FAF5);
+  static const Color settingsContentText = Color(0xFF5F605C);
+
   // Write & Common Input 관련 색상
   static const Color writeBackground = Color(0xFFFFFFFA);
   static const Color inputBackground = Color(0xFFF5F5F6);
