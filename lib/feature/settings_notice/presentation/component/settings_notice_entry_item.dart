@@ -31,7 +31,7 @@ class SettingsNoticeEntryItem extends StatelessWidget {
                     style: TextStyle(
                       fontFamily: 'Pretendard',
                       fontSize: 15,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w400,
                       height: 1.4,
                       color: AppColors.communityText,
                     ),
