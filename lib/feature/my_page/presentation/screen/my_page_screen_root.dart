@@ -79,7 +79,7 @@ class _MyPageScreenRootState extends ConsumerState<MyPageScreenRoot> {
             context.go(location);
             break;
           case TapSettings():
-            // TODO: 설정 페이지 이동은 나중에 구현
+            context.push('${Routes.myPage}/${Routes.myPageSettings}');
             break;
         }
       },

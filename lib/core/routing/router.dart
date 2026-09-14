@@ -22,6 +22,8 @@ import 'package:meomum/feature/on_boarding/feature/create_profile/presentation/s
 import 'package:meomum/feature/on_boarding/feature/on_boarding/presentation/screen/on_boarding_screen_root.dart';
 import 'package:meomum/feature/on_boarding/feature/select_region/presentation/screen/select_region_screen_root.dart';
 import 'package:meomum/feature/report/presentation/screen/report_screen_root.dart';
+import 'package:meomum/feature/settings_notice/presentation/screen/settings_notice_screen_root.dart';
+import 'package:meomum/feature/settings/presentation/screen/settings_screen_root.dart';
 import 'package:meomum/feature/sign_in/presentation/screen/sign_in_screen_root.dart';
 import 'package:meomum/feature/splash/presentation/screen/splash_screen_root.dart';
 
@@ -144,6 +146,18 @@ final routerProvider = Provider<GoRouter>((Ref ref) {
                 path: Routes.myPage,
                 builder: (_, _) => const MyPageScreenRoot(),
                 routes: [
+                  GoRoute(
+                    parentNavigatorKey: rootNavigatorKey,
+                    path: Routes.myPageSettings,
+                    builder: (_, _) => const SettingsScreenRoot(),
+                    routes: [
+                      GoRoute(
+                        parentNavigatorKey: rootNavigatorKey,
+                        path: Routes.myPageSettingsNotices,
+                        builder: (_, _) => const SettingsNoticeScreenRoot(),
+                      ),
+                    ],
+                  ),
                   GoRoute(
                     parentNavigatorKey: rootNavigatorKey,
                     path: Routes.myPageFeed,
