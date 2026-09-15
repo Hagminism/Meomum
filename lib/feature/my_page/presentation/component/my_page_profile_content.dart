@@ -48,7 +48,7 @@ class MyPageProfileContent extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontFamily: 'Pretendard',
-                        fontSize: 20,
+                        fontSize: 18,
                         fontWeight: FontWeight.w500,
                         height: 1,
                         color: AppColors.black,
@@ -63,7 +63,7 @@ class MyPageProfileContent extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               Row(
                 children: [
                   if (authProvider == AuthProvider.naver) ...[

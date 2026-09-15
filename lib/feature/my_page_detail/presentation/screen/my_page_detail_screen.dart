@@ -57,7 +57,7 @@ class MyPageDetailScreen extends StatelessWidget {
             slivers: [
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 12),
+                  padding: EdgeInsets.symmetric(vertical: 8),
                   child: MyPageDetailProfileHeader(
                     user: state.user,
                     onAction: onAction,
