@@ -36,7 +36,6 @@ class MyPageDetailScreen extends StatelessWidget {
         title: '내 피드',
         toolbarHeight: 44,
         showBackButton: true,
-        showMoreButton: true,
         onBackPressed: () {
           onAction(const MyPageDetailAction.tapBack());
         },
