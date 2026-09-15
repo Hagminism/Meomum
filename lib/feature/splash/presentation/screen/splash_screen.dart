@@ -101,8 +101,8 @@ class SplashScreen extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontFamily: 'Pretendard',
-              fontSize: 28,
-              fontWeight: FontWeight.w600,
+              fontSize: 26,
+              fontWeight: FontWeight.w700,
               letterSpacing: -0.56,
               color: AppColors.black,
             ),
@@ -113,9 +113,10 @@ class SplashScreen extends StatelessWidget {
             textAlign: TextAlign.center,
             style: const TextStyle(
               fontFamily: 'Pretendard',
-              fontSize: 15,
+              fontSize: 16,
               fontWeight: FontWeight.w400,
               height: 1.5,
+              letterSpacing: -0.2,
               color: AppColors.textSecondary,
             ),
           ),

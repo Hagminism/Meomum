@@ -26,6 +26,14 @@ class MyPageScreen extends StatelessWidget {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
       child: Scaffold(
+        appBar: CustomAppBar(
+          toolbarHeight: 44,
+          onSettingsTap: () {
+            onAction(const MyPageAction.tapSettings());
+          },
+          title: '나의 여행',
+          showSettingsButton: true,
+        ),
         backgroundColor: AppColors.homeBackground,
         body: SafeArea(
           bottom: false,
@@ -33,15 +41,6 @@ class MyPageScreen extends StatelessWidget {
             children: [
               CustomScrollView(
                 slivers: [
-                  SliverToBoxAdapter(
-                    child: CustomAppBar(
-                      onSettingsTap: () {
-                        onAction(const MyPageAction.tapSettings());
-                      },
-                      title: '나의 여행',
-                      showSettingsButton: true,
-                    ),
-                  ),
                   SliverToBoxAdapter(
                     child: MyPageProfileHeader(
                       user: state.user,

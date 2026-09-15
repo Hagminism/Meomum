@@ -23,6 +23,4 @@ abstract interface class ProfileRepository {
     required String accountId,
     required File file,
   });
-
-  Future<Result<bool>> deleteProfileImage({required String storagePath});
 }

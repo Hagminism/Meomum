@@ -36,7 +36,6 @@ class MyPageDetailScreen extends StatelessWidget {
         title: '내 피드',
         toolbarHeight: 44,
         showBackButton: true,
-        showMoreButton: true,
         onBackPressed: () {
           onAction(const MyPageDetailAction.tapBack());
         },
@@ -58,7 +57,7 @@ class MyPageDetailScreen extends StatelessWidget {
             slivers: [
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 12),
+                  padding: EdgeInsets.symmetric(vertical: 8),
                   child: MyPageDetailProfileHeader(
                     user: state.user,
                     onAction: onAction,

@@ -17,7 +17,7 @@ class MyPageProfileHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 28, 16, 8),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: Material(
         color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(12),
@@ -27,7 +27,7 @@ class MyPageProfileHeader extends StatelessWidget {
           },
           borderRadius: BorderRadius.circular(12),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             child: Row(
               children: [
                 Expanded(child: MyPageProfileContent(user: user)),
