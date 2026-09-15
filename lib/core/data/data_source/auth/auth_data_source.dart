@@ -8,4 +8,6 @@ abstract interface class AuthDataSource {
   Future<Result<AuthIdentity?>> restoreSession();
 
   Future<Result<bool>> signOut();
+
+  Future<Result<bool>> deleteAccount();
 }

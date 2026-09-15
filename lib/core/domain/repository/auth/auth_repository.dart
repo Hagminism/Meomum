@@ -10,6 +10,8 @@ abstract interface class AuthRepository {
 
   Future<Result<bool>> signOut();
 
+  Future<Result<bool>> deleteAccount();
+
   Stream<AuthSessionStatus> watchAuthState();
 
   Future<void> retrySessionRestore();

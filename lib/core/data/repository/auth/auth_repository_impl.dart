@@ -60,6 +60,21 @@ class AuthRepositoryImpl implements AuthRepository {
     return result;
   }
 
+  /// 계정 삭제가 완료된 경우 앱 내부 사용자와 인증 상태를 signed-out으로 초기화합니다.
+  @override
+  Future<Result<bool>> deleteAccount() async {
+    final result = await _dataSource.deleteAccount();
+
+    if (result case Success()) {
+      _currentUser = null;
+      _sessionErrorMessage = null;
+      _authStateController.add(AuthSessionStatus.signedOut);
+    }
+
+    return result;
+  }
+
+  /// 세션 복원 결과를 먼저 전달한 뒤 이후 인증 상태 변경을 스트림으로 제공합니다.
   @override
   Stream<AuthSessionStatus> watchAuthState() {
     return _watchAuthState();

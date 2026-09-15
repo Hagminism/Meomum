@@ -15,6 +15,9 @@ import 'package:supabase_flutter/supabase_flutter.dart' hide User;
 /// 로그인 토큰의 보관과 갱신은 Auth0 CredentialsManager에 맡기고,
 /// Supabase는 인증된 토큰으로 앱 데이터와 accounts를 관리한다.
 class AuthDataSourceImpl implements AuthDataSource {
+  static const _deletedAuth0AccountMessage =
+      'This Auth0 account has been deleted';
+
   final SupabaseClient _client;
   final Auth0 _auth0;
 
@@ -40,12 +43,17 @@ class AuthDataSourceImpl implements AuthDataSource {
     } on WebAuthenticationException catch (error) {
       return Result.failure(error.message);
     } on PostgrestException catch (error) {
+      if (error.message.contains(_deletedAuth0AccountMessage)) {
+        await _clearStoredCredentials();
+        return const Result.failure('탈퇴한 계정의 기존 인증 세션이 남아있습니다. 다시 로그인해주세요.');
+      }
       return Result.failure('계정을 준비하지 못했습니다: ${error.message}');
     } catch (error) {
       return Result.failure(error.toString());
     }
   }
 
+  /// 저장된 Auth0 자격 증명을 복원하고 Supabase 계정과 연결된 인증 식별자를 반환합니다.
   @override
   Future<Result<AuthIdentity?>> restoreSession() async {
     try {
@@ -62,6 +70,12 @@ class AuthDataSourceImpl implements AuthDataSource {
     } on CredentialsManagerException {
       // 만료되었거나 복원할 수 없는 인증 자격 증명은 재로그인으로 처리한다.
       return const Result.success(null);
+    } on PostgrestException catch (error) {
+      if (error.message.contains(_deletedAuth0AccountMessage)) {
+        await _clearStoredCredentials();
+        return const Result.success(null);
+      }
+      return Result.failure('인증 상태를 복원하지 못했습니다: ${error.message}');
     } catch (_) {
       return const Result.failure('인증 상태를 복원하지 못했습니다. 다시 시도해주세요.');
     }
@@ -78,6 +92,53 @@ class AuthDataSourceImpl implements AuthDataSource {
       return Result.failure(error.message);
     } catch (error) {
       return Result.failure(error.toString());
+    }
+  }
+
+  /// Supabase에 계정 삭제를 요청한 뒤 Auth0 브라우저 세션과 로컬 자격 증명을 정리합니다.
+  @override
+  Future<Result<bool>> deleteAccount() async {
+    final accessToken = await Auth0Session.idToken();
+    if (accessToken == null) {
+      return const Result.failure('회원 탈퇴를 진행할 로그인 정보를 확인하지 못했습니다.');
+    }
+
+    try {
+      await _client.functions.invoke(
+        'delete-account',
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+    } on FunctionException {
+      return const Result.failure('회원 탈퇴 요청에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    } catch (error) {
+      return Result.failure('회원 탈퇴 요청 중 오류가 발생했습니다: $error');
+    }
+
+    // 계정 데이터와 Auth0 삭제 요청이 처리된 뒤 Auth0 브라우저 세션을 종료합니다.
+    try {
+      await _auth0.webAuthentication().logout(useHTTPS: !Platform.isIOS);
+    } on WebAuthenticationException {
+      // 브라우저 로그아웃이 실패해도 로컬 자격 증명은 반드시 제거합니다.
+    } catch (_) {
+      // 브라우저 로그아웃이 실패해도 로컬 자격 증명은 반드시 제거합니다.
+    }
+
+    try {
+      await _auth0.credentialsManager.clearCredentials();
+      return const Result.success(true);
+    } on CredentialsManagerException catch (error) {
+      return Result.failure('회원 탈퇴 후 로그인 정보를 정리하지 못했습니다: $error');
+    } catch (error) {
+      return Result.failure('회원 탈퇴 후 로그인 정보 정리 중 오류가 발생했습니다: $error');
+    }
+  }
+
+  /// 삭제된 계정의 기존 자격 증명을 제거해 다음 인증 시도가 새 세션으로 진행되게 합니다.
+  Future<void> _clearStoredCredentials() async {
+    try {
+      await _auth0.credentialsManager.clearCredentials();
+    } catch (_) {
+      // 오래된 자격 증명이 남아 있어도 다음 로그인 시도는 진행할 수 있습니다.
     }
   }
 
