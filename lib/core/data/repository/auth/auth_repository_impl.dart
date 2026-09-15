@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meomum/core/data/data_source/auth/auth_data_source.dart';
 import 'package:meomum/core/data/data_source/auth/auth_data_source_impl.dart';
 import 'package:meomum/core/data/repository/profile/profile_repository_impl.dart';
+import 'package:meomum/core/data/storage/storage_bucket.dart';
 import 'package:meomum/core/domain/enum/auth_provider.dart';
 import 'package:meomum/core/domain/enum/auth_session_status.dart';
 import 'package:meomum/core/domain/model/user/auth_identity.dart';
@@ -12,11 +13,14 @@ import 'package:meomum/core/domain/model/user/profile.dart';
 import 'package:meomum/core/domain/model/user/user.dart';
 import 'package:meomum/core/domain/repository/auth/auth_repository.dart';
 import 'package:meomum/core/domain/repository/profile/profile_repository.dart';
+import 'package:meomum/core/domain/repository/storage_cleanup/storage_cleanup_repository.dart';
+import 'package:meomum/core/data/repository/storage_cleanup/storage_cleanup_repository_impl.dart';
 import 'package:meomum/core/utils/result.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthDataSource _dataSource;
   final ProfileRepository _profileRepository;
+  final StorageCleanupRepository _storageCleanupRepository;
 
   late final Future<void> _restoreFuture;
   final StreamController<AuthSessionStatus> _authStateController =
@@ -28,7 +32,8 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl({
     required this._dataSource,
     required this._profileRepository,
-  }) {
+    required StorageCleanupRepository storageCleanupRepository,
+  }) : _storageCleanupRepository = storageCleanupRepository {
     _restoreFuture = _restoreSession();
   }
 
@@ -115,8 +120,9 @@ class AuthRepositoryImpl implements AuthRepository {
         if (uploadedStoragePath != null) {
           final oldStoragePath = _profileStoragePath(currentUser.avatarUrl);
           if (oldStoragePath != null && oldStoragePath != uploadedStoragePath) {
-            await _profileRepository.deleteProfileImage(
-              storagePath: oldStoragePath,
+            await _storageCleanupRepository.enqueue(
+              bucketName: StorageBucket.profileImages,
+              storagePaths: [oldStoragePath],
             );
           }
         }
@@ -129,8 +135,9 @@ class AuthRepositoryImpl implements AuthRepository {
         return Result.success(updatedUser);
       case Failure(message: final message):
         if (uploadedStoragePath != null) {
-          await _profileRepository.deleteProfileImage(
-            storagePath: uploadedStoragePath,
+          await _storageCleanupRepository.enqueue(
+            bucketName: StorageBucket.profileImages,
+            storagePaths: [uploadedStoragePath],
           );
         }
         return Result.failure(message);
@@ -285,6 +292,7 @@ final authRepositoryProvider = Provider<AuthRepository>((Ref ref) {
   final repository = AuthRepositoryImpl(
     dataSource: ref.watch(authDataSourceProvider),
     profileRepository: ref.watch(profileRepositoryProvider),
+    storageCleanupRepository: ref.watch(storageCleanupRepositoryProvider),
   );
   ref.onDispose(repository.dispose);
   return repository;

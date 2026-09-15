@@ -127,21 +127,6 @@ class ProfileDataSourceImpl implements ProfileDataSource {
     }
   }
 
-  /// Storage에 저장된 프로필 이미지를 지정한 경로에서 삭제합니다.
-  @override
-  Future<Result<bool>> deleteProfileImage({
-    required String storagePath,
-  }) async {
-    try {
-      await _client.storage.from(_bucketName).remove([storagePath]);
-      return const Result.success(true);
-    } on StorageException catch (error) {
-      return Result.failure('기존 프로필 사진 정리에 실패했습니다: ${error.message}');
-    } catch (error) {
-      return Result.failure('기존 프로필 사진을 정리하는 중 오류가 발생했습니다: $error');
-    }
-  }
-
   /// 파일 경로에서 지원하는 이미지 확장자를 확인하고 반환합니다.
   String _extensionOf(String path) {
     final extension = path.split('.').last.toLowerCase();

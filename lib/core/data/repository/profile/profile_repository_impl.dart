@@ -75,12 +75,6 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }) {
     return _dataSource.uploadProfileImage(accountId: accountId, file: file);
   }
-
-  /// 데이터 소스를 통해 Storage의 프로필 이미지를 삭제합니다.
-  @override
-  Future<Result<bool>> deleteProfileImage({required String storagePath}) {
-    return _dataSource.deleteProfileImage(storagePath: storagePath);
-  }
 }
 
 final profileRepositoryProvider = Provider<ProfileRepository>((Ref ref) {
