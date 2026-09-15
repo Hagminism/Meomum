@@ -57,6 +57,4 @@ abstract interface class CommunityPostRepository {
   Future<Result<bool>> toggleLike({
     required String postId,
   });
-
-  Future<Result<bool>> retryPendingImageCleanup();
 }

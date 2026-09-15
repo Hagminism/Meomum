@@ -1,11 +1,19 @@
+// The public constructor parameter intentionally initializes a private dependency.
+// ignore_for_file: prefer_initializing_formals
+
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meomum/core/data/repository/auth/auth_repository_impl.dart';
 import 'package:meomum/core/data/data_source/community/community_post_data_source.dart';
 import 'package:meomum/core/data/data_source/community/community_post_data_source_impl.dart';
 import 'package:meomum/core/data/dto/community/community_post_dto.dart';
 import 'package:meomum/core/data/mapper/community/community_post_mapper.dart';
+import 'package:meomum/core/data/storage/storage_bucket.dart';
+import 'package:meomum/core/domain/repository/auth/auth_repository.dart';
 import 'package:meomum/core/domain/repository/community/community_post_repository.dart';
+import 'package:meomum/core/domain/repository/storage_cleanup/storage_cleanup_repository.dart';
+import 'package:meomum/core/data/repository/storage_cleanup/storage_cleanup_repository_impl.dart';
 import 'package:meomum/core/utils/result.dart';
 import 'package:meomum/feature/community/domain/model/community_place.dart';
 import 'package:meomum/feature/community/domain/model/community_post.dart';
@@ -14,11 +22,17 @@ import 'package:meomum/feature/community/domain/model/enum/community_category.da
 
 class CommunityPostRepositoryImpl implements CommunityPostRepository {
   final CommunityPostDataSource dataSource;
+  final AuthRepository _authRepository;
+  final StorageCleanupRepository _storageCleanupRepository;
 
   CommunityPostRepositoryImpl({
     required this.dataSource,
-  });
+    required AuthRepository authRepository,
+    required StorageCleanupRepository storageCleanupRepository,
+  }) : _authRepository = authRepository,
+       _storageCleanupRepository = storageCleanupRepository;
 
+  /// 게시글 DTO 목록을 도메인 모델로 변환해 지역·커서 조건에 맞는 목록을 반환합니다.
   @override
   Future<Result<List<CommunityPost>>> getPosts({
     required String upperRegion,
@@ -38,7 +52,7 @@ class CommunityPostRepositoryImpl implements CommunityPostRepository {
         dtoList
             .map(
               (CommunityPostDto dto) => dto.toModel(
-                currentUserId: dataSource.currentUserId,
+                currentUserId: _currentAccountId,
               ),
             )
             .toList(),
@@ -47,12 +61,19 @@ class CommunityPostRepositoryImpl implements CommunityPostRepository {
     };
   }
 
+  /// 현재 사용자의 게시글 DTO 목록을 도메인 모델로 변환해 반환합니다.
   @override
   Future<Result<List<CommunityPost>>> getMyPosts({
     int limit = 20,
     DateTime? cursor,
   }) async {
+    final accountId = _currentAccountId;
+    if (accountId == null) {
+      return const Result.failure('로그인이 필요합니다.');
+    }
+
     final result = await dataSource.getMyPosts(
+      accountId: accountId,
       limit: limit,
       cursor: cursor,
     );
@@ -62,7 +83,7 @@ class CommunityPostRepositoryImpl implements CommunityPostRepository {
         dtoList
             .map(
               (CommunityPostDto dto) => dto.toModel(
-                currentUserId: dataSource.currentUserId,
+                currentUserId: _currentAccountId,
               ),
             )
             .toList(),
@@ -71,6 +92,7 @@ class CommunityPostRepositoryImpl implements CommunityPostRepository {
     };
   }
 
+  /// 이미지가 있는 최신 게시글 DTO 목록을 도메인 모델로 변환해 반환합니다.
   @override
   Future<Result<List<CommunityPost>>> getLatestPostsWithImages({
     int limit = 20,
@@ -86,7 +108,7 @@ class CommunityPostRepositoryImpl implements CommunityPostRepository {
         dtoList
             .map(
               (CommunityPostDto dto) => dto.toModel(
-                currentUserId: dataSource.currentUserId,
+                currentUserId: _currentAccountId,
               ),
             )
             .toList(),
@@ -95,6 +117,7 @@ class CommunityPostRepositoryImpl implements CommunityPostRepository {
     };
   }
 
+  /// 게시글 상세 DTO를 도메인 모델로 변환해 반환합니다.
   @override
   Future<Result<CommunityPost>> getPostById({
     required String postId,
@@ -103,12 +126,13 @@ class CommunityPostRepositoryImpl implements CommunityPostRepository {
 
     return switch (result) {
       Success(data: final dto) => Result.success(
-        dto.toModel(currentUserId: dataSource.currentUserId),
+        dto.toModel(currentUserId: _currentAccountId),
       ),
       Failure(message: final msg) => Result.failure(msg),
     };
   }
 
+  /// 이미지를 먼저 업로드한 뒤 게시글을 저장하고, 저장 실패 시 업로드 이미지를 정리 큐에 등록합니다.
   @override
   Future<Result<CommunityPost>> createPost({
     required String upperRegion,
@@ -119,11 +143,19 @@ class CommunityPostRepositoryImpl implements CommunityPostRepository {
     List<File> imageFiles = const [],
     CommunityPlace? place,
   }) async {
+    final accountId = _currentAccountId;
+    if (accountId == null) {
+      return const Result.failure('로그인이 필요합니다.');
+    }
+
     // Storage 업로드가 DB 저장보다 먼저 진행되므로, 이후 실패에 대비해 업로드 목록을 보관합니다.
     List<CommunityUploadedImage> uploadedImages = [];
 
     if (imageFiles.isNotEmpty) {
-      final uploadResult = await dataSource.uploadImages(files: imageFiles);
+      final uploadResult = await _uploadImages(
+        accountId: accountId,
+        files: imageFiles,
+      );
       switch (uploadResult) {
         case Success(data: final images):
           uploadedImages = images;
@@ -151,6 +183,7 @@ class CommunityPostRepositoryImpl implements CommunityPostRepository {
     };
   }
 
+  /// 기존 이미지와 새 이미지를 합쳐 게시글을 수정하고, 실패한 새 업로드는 정리 큐에 등록합니다.
   @override
   Future<Result<bool>> updatePost({
     required String postId,
@@ -163,11 +196,19 @@ class CommunityPostRepositoryImpl implements CommunityPostRepository {
     List<File> newImageFiles = const [],
     CommunityPlace? place,
   }) async {
+    final accountId = _currentAccountId;
+    if (accountId == null) {
+      return const Result.failure('로그인이 필요합니다.');
+    }
+
     // 기존 이미지와 새 업로드 이미지를 합쳐 하나의 수정 RPC에 전달합니다.
     List<CommunityUploadedImage> uploadedImages = [];
 
     if (newImageFiles.isNotEmpty) {
-      final uploadResult = await dataSource.uploadImages(files: newImageFiles);
+      final uploadResult = await _uploadImages(
+        accountId: accountId,
+        files: newImageFiles,
+      );
       switch (uploadResult) {
         case Success(data: final images):
           uploadedImages = images;
@@ -198,9 +239,8 @@ class CommunityPostRepositoryImpl implements CommunityPostRepository {
     );
 
     switch (updateResult) {
-      case Success(data: final update):
-        // DB 반영이 끝난 뒤에만 삭제된 기존 Storage 파일을 정리합니다.
-        await _cleanupRemovedImages(update.removedStoragePaths);
+      case Success():
+        // 삭제된 Storage 파일은 DB RPC가 공통 정리 큐에 등록합니다.
         return const Result.success(true);
       case Failure(message: final msg):
         return _cleanupAndReturnFailure<bool>(
@@ -210,22 +250,54 @@ class CommunityPostRepositoryImpl implements CommunityPostRepository {
     }
   }
 
+  /// 게시글 삭제 RPC를 호출하고 Storage 정리는 서버 큐에 맡깁니다.
   @override
   Future<Result<bool>> deletePost({
     required String postId,
   }) async {
+    if (_currentAccountId == null) {
+      return const Result.failure('로그인이 필요합니다.');
+    }
+
     final result = await dataSource.deletePost(postId: postId);
 
     switch (result) {
       case Failure(message: final message):
         return Result.failure(message);
-      case Success(data: final storagePaths):
-        // 게시글 삭제는 DB에서 완료되었으므로 Storage 정리는 보상 작업으로 처리합니다.
-        await _cleanupRemovedImages(storagePaths);
+      case Success():
+        // 게시글 삭제 RPC가 공통 정리 큐에 삭제 대상 경로를 등록합니다.
         return const Result.success(true);
     }
   }
 
+  /// 이미지 업로드를 순차적으로 진행하고, 중간 실패 시 먼저 업로드된 파일을 정리 큐에 등록합니다.
+  Future<Result<List<CommunityUploadedImage>>> _uploadImages({
+    required String accountId,
+    required List<File> files,
+  }) async {
+    final uploadedImages = <CommunityUploadedImage>[];
+
+    for (final file in files) {
+      final uploadResult = await dataSource.uploadImage(
+        accountId: accountId,
+        file: file,
+      );
+
+      switch (uploadResult) {
+        case Success(data: final image):
+          uploadedImages.add(image);
+        case Failure(message: final message):
+          return _cleanupAndReturnFailure<List<CommunityUploadedImage>>(
+            uploadedImages: uploadedImages,
+            message: message,
+          );
+      }
+    }
+
+    return Result.success(uploadedImages);
+  }
+
+  /// 저장된 게시글을 다시 조회해 생성 요청의 최종 도메인 모델을 반환합니다.
   Future<Result<CommunityPost>> _getCreatedPost(String postId) async {
     final result = await getPostById(postId: postId);
 
@@ -237,115 +309,46 @@ class CommunityPostRepositoryImpl implements CommunityPostRepository {
     };
   }
 
-  Future<void> _cleanupRemovedImages(List<String> storagePaths) async {
-    if (storagePaths.isEmpty) return;
-
-    // Storage 정리는 DB 트랜잭션과 분리된 보상 작업이며, 실패하면 재시도 큐 상태를 갱신합니다.
-    final cleanupResult = await dataSource.deleteImages(
-      storagePaths: storagePaths,
-    );
-    switch (cleanupResult) {
-      case Success():
-        await dataSource.completeImageCleanup(storagePaths: storagePaths);
-      case Failure(message: final message):
-        await dataSource.recordImageCleanupFailure(
-          storagePaths: storagePaths,
-          message: message,
-        );
-    }
-  }
-
+  /// 게시글 저장 실패를 반환하면서 새로 업로드된 이미지의 서버 정리 등록을 시도합니다.
   Future<Result<T>> _cleanupAndReturnFailure<T>({
     required List<CommunityUploadedImage> uploadedImages,
     required String message,
   }) async {
     if (uploadedImages.isNotEmpty) {
-      // 게시글 저장에 실패한 새 업로드 파일은 참조가 없으므로 즉시 삭제합니다.
-      final cleanupResult = await dataSource.deleteImages(
+      // 게시글 저장에 실패한 새 업로드 이미지는 공통 큐에서 정리합니다.
+      final enqueueResult = await _storageCleanupRepository.enqueue(
+        bucketName: StorageBucket.communityImages,
         storagePaths: uploadedImages
             .map((CommunityUploadedImage image) => image.storagePath)
             .toList(growable: false),
       );
 
-      if (cleanupResult case Failure(message: final cleanupMessage)) {
-        // 즉시 삭제까지 실패하면 다음 앱 실행·재개 시 정리하도록 큐에 등록합니다.
-        final storagePaths = uploadedImages
-            .map((CommunityUploadedImage image) => image.storagePath)
-            .toList(growable: false);
-        final enqueueResult = await dataSource.enqueueImageCleanup(
-          storagePaths: storagePaths,
+      if (enqueueResult case Failure(message: final enqueueMessage)) {
+        return Result.failure(
+          '$message 업로드한 이미지 정리와 재시도 등록에 실패했습니다: $enqueueMessage',
         );
-        return switch (enqueueResult) {
-          Success() => Result.failure(
-            '$message 업로드한 이미지 정리에도 실패했습니다: $cleanupMessage',
-          ),
-          Failure(message: final enqueueMessage) => Result.failure(
-            '$message 업로드한 이미지 정리와 재시도 등록에 실패했습니다: '
-            '$cleanupMessage ($enqueueMessage)',
-          ),
-        };
       }
     }
 
     return Result.failure(message);
   }
 
+  /// 현재 사용자의 게시글 좋아요 상태 변경을 데이터 소스에 위임합니다.
   @override
   Future<Result<bool>> toggleLike({
     required String postId,
   }) {
+    if (_currentAccountId == null) {
+      return Future.value(const Result.failure('로그인이 필요합니다.'));
+    }
+
     return dataSource.toggleLike(
       postId: postId,
     );
   }
 
-  @override
-  Future<Result<bool>> retryPendingImageCleanup() async {
-    // 앱 생명주기 이벤트에서 호출되어 만료된 큐 항목의 Storage 정리를 재개합니다.
-    final pendingResult = await dataSource.getPendingImageCleanup();
-
-    return switch (pendingResult) {
-      Failure(message: final message) => Result.failure(message),
-      Success(data: final items) when items.isEmpty => const Result.success(
-        true,
-      ),
-      Success(data: final items) => _retryImageCleanup(
-        items.map((item) => item.storagePath).toList(growable: false),
-      ),
-    };
-  }
-
-  Future<Result<bool>> _retryImageCleanup(List<String> storagePaths) async {
-    // 삭제 성공 시 큐에서 제거하고, 실패 시 다음 재시도 시각과 오류를 기록합니다.
-    final cleanupResult = await dataSource.deleteImages(
-      storagePaths: storagePaths,
-    );
-
-    return switch (cleanupResult) {
-      Success() => dataSource.completeImageCleanup(storagePaths: storagePaths),
-      Failure(message: final message) => _recordCleanupFailure(
-        storagePaths: storagePaths,
-        message: message,
-      ),
-    };
-  }
-
-  Future<Result<bool>> _recordCleanupFailure({
-    required List<String> storagePaths,
-    required String message,
-  }) async {
-    final result = await dataSource.recordImageCleanupFailure(
-      storagePaths: storagePaths,
-      message: message,
-    );
-
-    return switch (result) {
-      Success() => Result.failure(message),
-      Failure(message: final recordMessage) => Result.failure(
-        '$message 재시도 기록에도 실패했습니다: $recordMessage',
-      ),
-    };
-  }
+  /// 현재 인증된 Auth0 계정에 연결된 Supabase `accounts.id`를 반환합니다.
+  String? get _currentAccountId => _authRepository.currentUser?.id;
 }
 
 final communityPostRepositoryProvider = Provider<CommunityPostRepository>((
@@ -353,5 +356,7 @@ final communityPostRepositoryProvider = Provider<CommunityPostRepository>((
 ) {
   return CommunityPostRepositoryImpl(
     dataSource: ref.watch(communityPostDataSourceProvider),
+    authRepository: ref.watch(authRepositoryProvider),
+    storageCleanupRepository: ref.watch(storageCleanupRepositoryProvider),
   );
 });
