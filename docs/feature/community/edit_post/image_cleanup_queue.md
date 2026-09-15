@@ -1,8 +1,8 @@
-# 게시글 수정 이미지 정리 큐
+# Storage 정리 큐
 
 ## 1. 한 줄 요약
 
-게시글 수정 과정에서 DB 변경은 성공했지만 Storage 이미지 삭제가 실패할 수 있습니다. 이때 삭제하지 못한 이미지 경로를 `community_image_cleanup_queue`에 남겨 두고, 다음 앱 실행·커뮤니티 화면 진입·앱 재개 시 다시 삭제하는 구조입니다.
+게시글 수정·삭제, 프로필 변경, 회원 탈퇴 과정에서 DB 변경은 성공했지만 Storage 이미지 삭제가 실패할 수 있습니다. 이때 삭제하지 못한 이미지 경로를 `storage_cleanup_queue`에 남겨 두고, Supabase Cron이 호출하는 Edge Function이 서버에서 다시 삭제하는 구조입니다.
 
 이 큐는 삭제 작업이 끝날 때까지 사용하는 작업 큐입니다. 영구적으로 모든 시도를 보존하는 감사 로그 테이블은 아닙니다.
 
@@ -37,7 +37,9 @@ update_post_with_images RPC 호출
         ↓
 DB 수정 성공
         ↓
-삭제 대상 기존 이미지의 Storage 파일 삭제
+공통 Storage 정리 큐에 삭제 대상 경로 등록
+        ↓
+5분 주기 Edge Function이 Storage 파일 삭제
         ↓
 성공하면 큐 항목 삭제 / 실패하면 재시도 정보 기록
 ```
@@ -46,7 +48,7 @@ DB 수정 성공
 
 수정 화면에서 새 이미지를 추가하면 먼저 Storage에 업로드합니다. 업로드가 끝난 이미지의 `storage_path`와 `public_url`을 저장해 두었다가 게시글 수정 RPC에 전달합니다.
 
-이 단계에서 일부 파일만 업로드된 뒤 다음 파일 업로드가 실패할 수 있습니다. 이미 업로드된 파일은 게시글에서 참조되지 않으므로 먼저 삭제를 시도하고, 삭제까지 실패한 경로만 큐에 등록합니다.
+이 단계에서 일부 파일만 업로드된 뒤 다음 파일 업로드가 실패할 수 있습니다. 이미 업로드된 파일은 게시글에서 참조되지 않으므로 공통 큐에 등록하고, 서버 작업자가 정리합니다.
 
 ### 3.2 DB 수정 RPC
 
@@ -62,12 +64,12 @@ DB 수정 성공
 
 ### 3.3 DB 수정 이후 Storage 정리
 
-DB 수정이 성공한 뒤에야 삭제 대상 기존 이미지의 실제 Storage 파일을 삭제합니다.
+DB 수정 RPC는 삭제 대상 경로를 큐에 등록하고, Flutter는 Storage를 직접 삭제하지 않습니다. Edge Function은 service role로 큐를 선점한 뒤 버킷별로 파일을 삭제합니다.
 
 - Storage 삭제 성공: 큐 항목을 삭제합니다.
 - Storage 삭제 실패: 큐 항목을 유지하고 실패 횟수·오류·다음 재시도 시각을 기록합니다.
 
-Storage 정리가 실패해도 게시글 DB 수정 자체는 성공한 상태이므로 사용자는 수정 완료 결과를 받습니다. 남은 파일 정리는 큐를 통해 나중에 재시도합니다.
+Storage 정리가 실패해도 게시글 DB 수정 자체는 성공한 상태이므로 사용자는 수정 완료 결과를 받습니다. 남은 파일 정리는 서버에서 계속 재시도합니다.
 
 ## 4. 큐 테이블의 의미
 
@@ -83,14 +85,16 @@ Storage 정리가 실패해도 게시글 DB 수정 자체는 성공한 상태이
 
 | 컬럼 | 설명 |
 | --- | --- |
-| `account_id` | 큐 항목을 만든 사용자 계정 |
+| `account_id` | 큐 항목을 만든 사용자 계정. 회원 탈퇴 후에는 `NULL`이 될 수 있음 |
+| `bucket_id` | 삭제 대상 Storage 버킷 |
 | `storage_path` | 삭제해야 하는 Storage 파일 경로 |
 | `attempt_count` | 삭제 실패 누적 횟수 |
 | `last_error` | 가장 최근 삭제 실패 메시지 |
 | `next_retry_at` | 다음 삭제를 시도할 수 있는 시각 |
+| `lease_until` | Edge Function이 작업을 선점한 만료 시각 |
 | `created_at` | 큐 항목이 처음 생성된 시각 |
 
-`(account_id, storage_path)`에 unique 제약이 있어 같은 사용자의 같은 경로가 중복 등록되지 않습니다.
+`(account_id, bucket_id, storage_path)`에 unique 제약이 있어 같은 계정·버킷·경로가 중복 등록되지 않습니다.
 
 ## 5. 대표적인 두 가지 실패 흐름
 
@@ -107,7 +111,7 @@ Storage 정리가 실패해도 게시글 DB 수정 자체는 성공한 상태이
 1. C를 Storage에 업로드합니다.
 2. RPC가 `post_images`를 B, C로 갱신합니다.
 3. RPC가 A의 Storage 경로를 큐에 기록합니다.
-4. 앱이 A의 Storage 삭제를 시도합니다.
+4. Edge Function이 A의 Storage 삭제를 시도합니다.
 5. 삭제 성공 시 A의 큐 행을 삭제합니다.
 6. 삭제 실패 시 A의 큐 행에 실패 정보와 다음 재시도 시각을 기록합니다.
 
@@ -118,9 +122,9 @@ DB 수정은 이미 성공했기 때문에 화면에는 B, C가 정상적으로 
 새 이미지 C를 Storage에 업로드했지만 게시글 수정 RPC가 실패한 경우입니다.
 
 1. C는 아직 게시글에서 참조되지 않습니다.
-2. 앱이 C의 Storage 삭제를 즉시 시도합니다.
-3. 삭제 성공 시 별도 큐가 필요하지 않습니다.
-4. 삭제 실패 시 C의 경로를 큐에 등록합니다.
+2. C의 경로를 공통 큐에 등록합니다.
+3. Edge Function이 C의 Storage 삭제를 시도합니다.
+4. 삭제 성공 시 C의 큐 행을 삭제하고, 실패 시 다음 재시도를 예약합니다.
 
 이 경우에는 게시글 수정이 실패하므로 사용자에게 오류를 전달합니다. 동시에 C를 나중에 정리할 수 있도록 큐에 남깁니다.
 
@@ -139,20 +143,7 @@ DB 수정은 이미 성공했기 때문에 화면에는 B, C가 정상적으로 
 
 ## 7. 재시도가 실행되는 시점
 
-앱에 별도 백그라운드 타이머를 계속 실행하지 않습니다. 다음 이벤트가 발생할 때 만료된 큐 항목을 확인합니다.
-
-- 앱이 처음 실행될 때
-- 커뮤니티 화면에 진입할 때
-- 앱이 백그라운드에서 다시 활성화될 때
-
-한 번 조회할 때 최대 20개만 가져오며 `next_retry_at`이 빠른 항목부터 처리합니다. 또한 다음 보호 장치가 있습니다.
-
-- 이미 실행 중이면 동시에 다시 실행하지 않음
-- 일반 재시도는 마지막 실행 후 30초 이내면 생략
-- Storage 삭제 성공 후에만 큐 행을 삭제
-- 삭제 실패 시 큐 행을 유지하고 다음 시각을 갱신
-
-따라서 큐 항목이 많아져도 앱 실행마다 전체 큐를 한 번에 처리하지 않습니다.
+Supabase Cron이 5분마다 `storage-cleanup` Edge Function을 호출합니다. 함수는 한 번에 최대 50개 작업을 선점하고, `lease_until`로 중복 실행을 방지합니다. 회원 탈퇴 후 `account_id`가 `NULL`이 된 큐 항목도 서버 권한으로 처리할 수 있습니다.
 
 ## 8. 보안 처리
 
@@ -161,8 +152,9 @@ DB 수정은 이미 성공했기 때문에 화면에는 B, C가 정상적으로 
 - Storage 경로는 `accounts/{현재 계정 ID}/...` 형식이어야 합니다.
 - 큐 등록 RPC가 현재 계정의 경로인지 검증합니다.
 - 수정 RPC도 전달된 모든 이미지 경로의 계정 소유 여부를 검증합니다.
-- 큐 조회와 삭제는 현재 계정의 행만 대상으로 합니다.
-- 테이블 직접 입력 대신 보안 정의 RPC를 통해 큐를 등록합니다.
+- 큐 등록은 현재 계정의 소유 경로인지 검증하는 보안 정의 RPC를 통해서만 수행합니다.
+- 큐 선점·완료·실패 기록은 service role을 사용하는 Edge Function만 수행합니다.
+- service role key는 Edge Function Secret으로만 관리하고 Flutter 앱에 포함하지 않습니다.
 
 이를 통해 다른 사용자의 이미지 경로를 큐에 등록하거나 삭제 대상으로 삼는 것을 방지합니다.
 
@@ -181,7 +173,7 @@ DB 수정은 이미 성공했기 때문에 화면에는 B, C가 정상적으로 
 
 ## 10. 관련 구현 위치
 
-- DB 테이블 및 RPC: `supabase/migrations/20260910065540_add_community_post_editing.sql`
-- DB 접근 구현: `lib/core/data/data_source/community/community_post_data_source_impl.dart`
-- 보상 처리 및 재시도 조정: `lib/core/data/repository/community/community_post_repository_impl.dart`
-- 앱 시작·화면 진입·앱 재개 감지: `lib/core/presentation/service/community_image_cleanup_lifecycle.dart`
+- DB 테이블 및 RPC: `supabase/migrations/20260914040601_storage_cleanup_and_account_deletion.sql`
+- 공통 큐 등록 계약: `lib/core/domain/repository/storage_cleanup/storage_cleanup_repository.dart`
+- Edge Function: `supabase/functions/storage-cleanup/index.ts`
+- Cron 설정 안내: `docs/supabase/storage_cleanup.md`
