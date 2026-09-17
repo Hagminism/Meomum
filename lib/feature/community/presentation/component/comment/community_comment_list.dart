@@ -135,19 +135,23 @@ class _CommunityCommentListState extends State<CommunityCommentList> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Expanded(
-                      child: Wrap(
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        spacing: 4,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Text(
-                            comment.nickname,
-                            style: const TextStyle(
-                              fontFamily: 'Pretendard',
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
+                          Flexible(
+                            child: Text(
+                              comment.nickname,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontFamily: 'Pretendard',
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
-                          if (isPostAuthor)
+                          if (isPostAuthor) ...[
+                            const SizedBox(width: 4),
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 4,
@@ -165,8 +169,12 @@ class _CommunityCommentListState extends State<CommunityCommentList> {
                                 ),
                               ),
                             ),
+                          ],
+                          const SizedBox(width: 4),
                           Text(
-                            '${comment.neighborhood} · ${comment.timeLabel}',
+                            '· ${comment.timeLabel}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                               fontFamily: 'Pretendard',
                               fontSize: 12,
@@ -216,7 +224,16 @@ class _CommunityCommentListState extends State<CommunityCommentList> {
                       ),
                   ],
                 ),
-                const SizedBox(height: 2),
+                if (comment.neighborhood.isNotEmpty) const SizedBox(height: 2),
+                if (comment.neighborhood.isNotEmpty)
+                  Text(
+                    comment.neighborhood,
+                    style: const TextStyle(
+                      fontFamily: 'Pretendard',
+                      fontSize: 12,
+                      color: AppColors.communityMetaText,
+                    ),
+                  ),
                 if (comment.isDeleted)
                   const Text(
                     '삭제된 댓글입니다.',
