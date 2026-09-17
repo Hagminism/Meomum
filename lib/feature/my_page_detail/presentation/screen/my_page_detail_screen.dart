@@ -5,6 +5,7 @@ import 'package:meomum/feature/community/presentation/component/post/community_p
 import 'package:meomum/feature/community/presentation/screen/community_action.dart'
     as community;
 import 'package:meomum/feature/my_page_detail/presentation/component/my_page_detail_empty_view.dart';
+import 'package:meomum/feature/my_page_detail/presentation/component/my_page_detail_comment_list.dart';
 import 'package:meomum/feature/my_page_detail/presentation/component/my_page_detail_profile_header.dart';
 import 'package:meomum/feature/my_page_detail/presentation/component/my_page_detail_tab_switch.dart';
 import 'package:meomum/feature/my_page_detail/domain/model/enum/my_page_feed_tab.dart';
@@ -82,18 +83,49 @@ class MyPageDetailScreen extends StatelessWidget {
               else if (state.isPlaceholderTab)
                 const SliverFillRemaining(
                   hasScrollBody: false,
+                  child: MyPageDetailEmptyView(message: '준비 중인 기능입니다.'),
+                )
+              else if (state.selectedTab == MyPageFeedTab.myComments &&
+                  state.comments.isEmpty)
+                const SliverFillRemaining(
+                  hasScrollBody: false,
                   child: MyPageDetailEmptyView(
-                    message: '준비 중인 기능입니다.',
+                    message: '아직 작성한 댓글이 없어요.',
                   ),
                 )
-              else if (state.posts.isEmpty)
+              else if (state.selectedTab == MyPageFeedTab.myPosts &&
+                  state.posts.isEmpty)
                 const SliverFillRemaining(
                   hasScrollBody: false,
                   child: MyPageDetailEmptyView(
                     message: '아직 작성한 글이 없어요.',
                   ),
                 )
-              else ...[
+              else if (state.selectedTab == MyPageFeedTab.myComments) ...[
+                MyPageDetailCommentList(
+                  comments: state.comments,
+                  onTap: (comment) {
+                    onAction(
+                      MyPageDetailAction.tapCommentTarget(
+                        comment.postId,
+                        comment.id,
+                      ),
+                    );
+                  },
+                ),
+                if (state.isLoadingMore)
+                  const SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  ),
+                SliverToBoxAdapter(child: SizedBox(height: bottomPadding)),
+              ] else ...[
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (BuildContext context, int index) {

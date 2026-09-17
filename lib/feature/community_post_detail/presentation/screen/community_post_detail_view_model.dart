@@ -1,11 +1,14 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meomum/core/data/repository/auth/auth_repository_impl.dart';
+import 'package:meomum/core/data/repository/community/community_comment_repository_impl.dart';
 import 'package:meomum/core/data/repository/community/community_post_repository_impl.dart';
 import 'package:meomum/core/domain/repository/auth/auth_repository.dart';
 import 'package:meomum/core/domain/repository/community/community_post_repository.dart';
+import 'package:meomum/core/domain/repository/community/community_comment_repository.dart';
 import 'package:meomum/core/utils/result.dart';
 import 'package:meomum/feature/community_post_detail/presentation/screen/community_post_detail_action.dart';
 import 'package:meomum/feature/community_post_detail/presentation/screen/community_post_detail_event.dart';
@@ -15,6 +18,7 @@ class CommunityPostDetailViewModel extends Notifier<CommunityPostDetailState> {
   final String postId;
   final ImagePicker _imagePicker = ImagePicker();
   late final CommunityPostRepository _repository;
+  late final CommunityCommentRepository _commentRepository;
   late final AuthRepository _authRepository;
 
   CommunityPostDetailViewModel(this.postId);
@@ -53,13 +57,44 @@ class CommunityPostDetailViewModel extends Notifier<CommunityPostDetailState> {
     return result;
   }
 
+  Future<Result<bool>> deleteComment(String commentId) async {
+    final result = await _commentRepository.deleteComment(commentId: commentId);
+    if (!ref.mounted) return result;
+    switch (result) {
+      case Success():
+        final post = state.post;
+        state = state.copyWith(
+          post: post == null
+              ? null
+              : post.copyWith(
+                  commentCount: (post.commentCount - 1).clamp(0, 999999),
+                ),
+        );
+        await _fetchComments();
+      case Failure(message: final message):
+        _eventController.add(
+          CommunityPostDetailEvent.showMessage(message),
+        );
+    }
+    return result;
+  }
+
+  void setFocusCommentId(String? commentId) {
+    if (state.focusCommentId == commentId) return;
+    state = state.copyWith(focusCommentId: commentId);
+  }
+
   @override
   CommunityPostDetailState build() {
     _repository = ref.watch(communityPostRepositoryProvider);
+    _commentRepository = ref.watch(communityCommentRepositoryProvider);
     _authRepository = ref.watch(authRepositoryProvider);
     ref.onDispose(() => _eventController.close());
     Future.microtask(_fetchPost);
-    return const CommunityPostDetailState(isLoading: true);
+    return CommunityPostDetailState(
+      isLoading: true,
+      currentUserId: _authRepository.currentUser?.id,
+    );
   }
 
   void onAction(CommunityPostDetailAction action) {
@@ -76,6 +111,29 @@ class CommunityPostDetailViewModel extends Notifier<CommunityPostDetailState> {
         _pickImage();
       case SubmitComment():
         _submitComment();
+      case ReplyToComment(:final commentId):
+        final isCancelingReply = state.replyParentId == commentId;
+        state = state.copyWith(
+          replyParentId: isCancelingReply ? null : commentId,
+          commentContent: isCancelingReply ? '' : state.commentContent,
+          commentImage: isCancelingReply ? null : state.commentImage,
+        );
+      case ToggleCommentLike(:final commentId):
+        _toggleCommentLike(commentId);
+      case EditComment(:final commentId):
+        _startEditingComment(commentId);
+      case ChangeEditingComment(:final content):
+        state = state.copyWith(editingCommentContent: content);
+      case SubmitEditingComment():
+        _submitEditingComment();
+      case CancelEditingComment():
+        state = state.copyWith(
+          editingCommentId: null,
+          editingCommentContent: '',
+        );
+      case DeleteComment():
+      case ReportComment():
+        break;
       case TapMenu(:final item):
         _handleMenu(item);
     }
@@ -93,6 +151,7 @@ class CommunityPostDetailViewModel extends Notifier<CommunityPostDetailState> {
           isLoading: false,
           isOwner: post.authorId == _authRepository.currentUser?.id,
         );
+        await _fetchComments();
       case Failure(message: final message):
         state = state.copyWith(isLoading: false);
         _eventController.add(CommunityPostDetailEvent.showMessage(message));
@@ -145,12 +204,121 @@ class CommunityPostDetailViewModel extends Notifier<CommunityPostDetailState> {
     }
   }
 
-  void _submitComment() {
+  Future<void> _fetchComments() async {
+    final result = await _commentRepository.getComments(postId: postId);
+    if (!ref.mounted) return;
+    switch (result) {
+      case Success(data: final comments):
+        state = state.copyWith(
+          comments: comments,
+          isCommentsLoading: false,
+        );
+      case Failure(message: final message):
+        state = state.copyWith(isCommentsLoading: false);
+        _eventController.add(CommunityPostDetailEvent.showMessage(message));
+    }
+  }
+
+  Future<void> _submitComment() async {
     if (!state.isCommentButtonVisible) return;
 
-    _eventController.add(
-      const CommunityPostDetailEvent.showMessage('댓글 기능은 추후 연결 예정입니다.'),
+    state = state.copyWith(isCommentSubmitting: true);
+    final result = await _commentRepository.createComment(
+      postId: postId,
+      parentId: state.replyParentId,
+      content: state.commentContent,
+      imageFile: state.commentImage == null
+          ? null
+          : File(state.commentImage!.path),
     );
+    if (!ref.mounted) return;
+    switch (result) {
+      case Success():
+        final post = state.post;
+        state = state.copyWith(
+          post: post == null
+              ? null
+              : post.copyWith(
+                  commentCount: post.commentCount + 1,
+                ),
+          commentContent: '',
+          commentImage: null,
+          replyParentId: null,
+          isCommentSubmitting: false,
+        );
+        await _fetchComments();
+      case Failure(message: final message):
+        state = state.copyWith(isCommentSubmitting: false);
+        _eventController.add(CommunityPostDetailEvent.showMessage(message));
+    }
+  }
+
+  Future<void> _toggleCommentLike(String commentId) async {
+    final commentIndex = state.comments.indexWhere(
+      (comment) => comment.id == commentId,
+    );
+    if (commentIndex == -1) return;
+    final comment = state.comments[commentIndex];
+    final nextLiked = !comment.isLiked;
+    state = state.copyWith(
+      comments: [
+        for (final item in state.comments)
+          item.id == commentId
+              ? item.copyWith(
+                  isLiked: nextLiked,
+                  likeCount: nextLiked
+                      ? item.likeCount + 1
+                      : (item.likeCount - 1).clamp(0, 999999),
+                )
+              : item,
+      ],
+    );
+    final result = await _commentRepository.toggleLike(commentId: commentId);
+    if (!ref.mounted) return;
+    if (result case Failure(message: final message)) {
+      state = state.copyWith(
+        comments: [
+          for (final item in state.comments)
+            item.id == commentId ? comment : item,
+        ],
+      );
+      _eventController.add(CommunityPostDetailEvent.showMessage(message));
+    }
+  }
+
+  void _startEditingComment(String commentId) {
+    final comment = state.comments.firstWhere(
+      (item) => item.id == commentId,
+      orElse: () => throw StateError('댓글을 찾을 수 없습니다.'),
+    );
+    state = state.copyWith(
+      editingCommentId: comment.id,
+      editingCommentContent: comment.content,
+      replyParentId: null,
+    );
+  }
+
+  Future<void> _submitEditingComment() async {
+    final commentId = state.editingCommentId;
+    if (commentId == null || state.editingCommentContent.trim().isEmpty) return;
+    final comment = state.comments.firstWhere((item) => item.id == commentId);
+    final result = await _commentRepository.updateComment(
+      commentId: commentId,
+      content: state.editingCommentContent,
+      storagePath: comment.storagePath,
+      imageUrl: comment.imageUrl,
+    );
+    if (!ref.mounted) return;
+    switch (result) {
+      case Success():
+        state = state.copyWith(
+          editingCommentId: null,
+          editingCommentContent: '',
+        );
+        await _fetchComments();
+      case Failure(message: final message):
+        _eventController.add(CommunityPostDetailEvent.showMessage(message));
+    }
   }
 
   void _handleMenu(CommunityPostDetailMenuItem item) {

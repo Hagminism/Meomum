@@ -10,6 +10,7 @@ abstract class ReportState with _$ReportState {
 
   const factory ReportState({
     CommunityPost? post,
+    String? commentId,
     @Default(false) bool isFetching,
     String? loadError,
     @Default('') String title,

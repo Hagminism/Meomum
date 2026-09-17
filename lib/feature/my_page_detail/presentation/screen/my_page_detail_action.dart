@@ -13,6 +13,10 @@ sealed class MyPageDetailAction with _$MyPageDetailAction {
   ) = ChangeImagePage;
   const factory MyPageDetailAction.toggleLike(String postId) = ToggleLike;
   const factory MyPageDetailAction.tapComment(String postId) = TapComment;
+  const factory MyPageDetailAction.tapCommentTarget(
+    String postId,
+    String commentId,
+  ) = TapCommentTarget;
   const factory MyPageDetailAction.tapPost(String postId) = TapPost;
   const factory MyPageDetailAction.tapEditProfile() = TapEditProfile;
   const factory MyPageDetailAction.loadMore() = LoadMore;

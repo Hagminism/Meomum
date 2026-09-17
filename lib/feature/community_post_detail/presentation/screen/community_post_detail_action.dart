@@ -12,6 +12,22 @@ sealed class CommunityPostDetailAction with _$CommunityPostDetailAction {
       ChangeComment;
   const factory CommunityPostDetailAction.pickImage() = PickImage;
   const factory CommunityPostDetailAction.submitComment() = SubmitComment;
+  const factory CommunityPostDetailAction.replyToComment(String commentId) =
+      ReplyToComment;
+  const factory CommunityPostDetailAction.toggleCommentLike(String commentId) =
+      ToggleCommentLike;
+  const factory CommunityPostDetailAction.editComment(String commentId) =
+      EditComment;
+  const factory CommunityPostDetailAction.changeEditingComment(String content) =
+      ChangeEditingComment;
+  const factory CommunityPostDetailAction.submitEditingComment() =
+      SubmitEditingComment;
+  const factory CommunityPostDetailAction.cancelEditingComment() =
+      CancelEditingComment;
+  const factory CommunityPostDetailAction.deleteComment(String commentId) =
+      DeleteComment;
+  const factory CommunityPostDetailAction.reportComment(String commentId) =
+      ReportComment;
   const factory CommunityPostDetailAction.tapMenu(
     CommunityPostDetailMenuItem item,
   ) = TapMenu;

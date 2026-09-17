@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:meomum/core/presentation/component/custom_app_bar.dart';
 import 'package:meomum/feature/home_post_detail/presentation/component/home_post_detail_comment_input.dart';
-import 'package:meomum/feature/home_post_detail/presentation/component/home_post_detail_comments.dart';
 import 'package:meomum/feature/home_post_detail/presentation/component/home_post_detail_footer.dart';
 import 'package:meomum/feature/home_post_detail/presentation/component/home_post_detail_images.dart';
 import 'package:meomum/feature/community/presentation/component/post/community_post_header.dart';
+import 'package:meomum/feature/community/presentation/component/comment/community_comment_list.dart';
 import 'package:meomum/feature/home_post_detail/presentation/screen/home_post_detail_action.dart';
 import 'package:meomum/feature/home_post_detail/presentation/screen/home_post_detail_state.dart';
 import 'package:meomum/ui/app_colors.dart';
@@ -129,8 +129,78 @@ class HomePostDetailScreen extends StatelessWidget {
                                 child: SizedBox(height: 2),
                               ),
                             ),
-                            const SliverToBoxAdapter(
-                              child: HomePostDetailComments(),
+                            SliverToBoxAdapter(
+                              child: state.isCommentsLoading
+                                  ? const Padding(
+                                      padding: EdgeInsets.all(24),
+                                      child: Center(
+                                        child: CircularProgressIndicator(
+                                          color: AppColors.primary,
+                                        ),
+                                      ),
+                                    )
+                                  : CommunityCommentList(
+                                      comments: state.comments,
+                                      postAuthorId: post.authorId,
+                                      currentUserId: state.currentUserId,
+                                      focusCommentId: state.focusCommentId,
+                                      replyParentId: state.replyParentId,
+                                      editingCommentId: state.editingCommentId,
+                                      editingContent:
+                                          state.editingCommentContent,
+                                      onReply: (String commentId) {
+                                        onAction(
+                                          HomePostDetailAction.replyToComment(
+                                            commentId,
+                                          ),
+                                        );
+                                      },
+                                      onLike: (String commentId) {
+                                        onAction(
+                                          HomePostDetailAction.toggleCommentLike(
+                                            commentId,
+                                          ),
+                                        );
+                                      },
+                                      onEdit: (String commentId) {
+                                        onAction(
+                                          HomePostDetailAction.editComment(
+                                            commentId,
+                                          ),
+                                        );
+                                      },
+                                      onDelete: (String commentId) {
+                                        onAction(
+                                          HomePostDetailAction.deleteComment(
+                                            commentId,
+                                          ),
+                                        );
+                                      },
+                                      onReport: (String commentId) {
+                                        onAction(
+                                          HomePostDetailAction.reportComment(
+                                            commentId,
+                                          ),
+                                        );
+                                      },
+                                      onEditChanged: (String content) {
+                                        onAction(
+                                          HomePostDetailAction.changeEditingComment(
+                                            content,
+                                          ),
+                                        );
+                                      },
+                                      onEditSubmit: () {
+                                        onAction(
+                                          const HomePostDetailAction.submitEditingComment(),
+                                        );
+                                      },
+                                      onEditCancel: () {
+                                        onAction(
+                                          const HomePostDetailAction.cancelEditingComment(),
+                                        );
+                                      },
+                                    ),
                             ),
                           ],
                         ),

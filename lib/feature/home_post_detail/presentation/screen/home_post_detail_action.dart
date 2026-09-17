@@ -12,6 +12,22 @@ sealed class HomePostDetailAction with _$HomePostDetailAction {
       ChangeComment;
   const factory HomePostDetailAction.pickImage() = PickImage;
   const factory HomePostDetailAction.submitComment() = SubmitComment;
+  const factory HomePostDetailAction.replyToComment(String commentId) =
+      ReplyToComment;
+  const factory HomePostDetailAction.toggleCommentLike(String commentId) =
+      ToggleCommentLike;
+  const factory HomePostDetailAction.editComment(String commentId) =
+      EditComment;
+  const factory HomePostDetailAction.changeEditingComment(String content) =
+      ChangeEditingComment;
+  const factory HomePostDetailAction.submitEditingComment() =
+      SubmitEditingComment;
+  const factory HomePostDetailAction.cancelEditingComment() =
+      CancelEditingComment;
+  const factory HomePostDetailAction.deleteComment(String commentId) =
+      DeleteComment;
+  const factory HomePostDetailAction.reportComment(String commentId) =
+      ReportComment;
   const factory HomePostDetailAction.tapMenu(HomePostDetailMenuItem item) =
       TapMenu;
 }

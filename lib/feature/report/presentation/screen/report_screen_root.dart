@@ -32,7 +32,7 @@ class _ReportScreenRootState extends ConsumerState<ReportScreenRoot> {
       if (!mounted) return;
 
       final viewModel = ref.read(
-        reportViewModelProvider(widget.postId).notifier,
+        reportViewModelProvider(_target).notifier,
       );
       _eventSubscription = viewModel.eventStream.listen((event) {
         if (!mounted) return;
@@ -49,8 +49,8 @@ class _ReportScreenRootState extends ConsumerState<ReportScreenRoot> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(reportViewModelProvider(widget.postId));
-    final viewModel = ref.read(reportViewModelProvider(widget.postId).notifier);
+    final state = ref.watch(reportViewModelProvider(_target));
+    final viewModel = ref.read(reportViewModelProvider(_target).notifier);
 
     return ReportScreen(
       state: state,
@@ -69,6 +69,13 @@ class _ReportScreenRootState extends ConsumerState<ReportScreenRoot> {
             break;
         }
       },
+    );
+  }
+
+  (String, String?) get _target {
+    return (
+      widget.postId,
+      GoRouterState.of(context).uri.queryParameters['commentId'],
     );
   }
 
