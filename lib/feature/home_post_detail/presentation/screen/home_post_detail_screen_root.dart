@@ -40,6 +40,9 @@ class _HomePostDetailScreenRootState
       final viewModel = ref.read(
         homePostDetailViewModelProvider(widget.postId).notifier,
       );
+      viewModel.setFocusCommentId(
+        GoRouterState.of(context).uri.queryParameters['commentId'],
+      );
       _eventSubscription = viewModel.eventStream.listen((event) {
         if (!mounted) return;
 
@@ -84,6 +87,20 @@ class _HomePostDetailScreenRootState
           case SubmitComment():
             viewModel.onAction(action);
             break;
+          case DeleteComment(:final commentId):
+            unawaited(_confirmDeleteComment(viewModel, commentId));
+            break;
+          case ReportComment(:final commentId):
+            _openReport(commentId: commentId);
+            break;
+          case ReplyToComment():
+          case ToggleCommentLike():
+          case EditComment():
+          case ChangeEditingComment():
+          case SubmitEditingComment():
+          case CancelEditingComment():
+            viewModel.onAction(action);
+            break;
           case TapMenu(:final item):
             if (item == HomePostDetailMenuItem.report) {
               _openReport();
@@ -100,14 +117,37 @@ class _HomePostDetailScreenRootState
     );
   }
 
-  Future<void> _openReport() async {
+  Future<void> _openReport({String? commentId}) async {
     final currentPath = GoRouterState.of(context).uri.path;
+    final query = commentId == null ? '' : '?commentId=$commentId';
     final didSubmit = await context.push<bool>(
-      '$currentPath/${Routes.report}',
+      '$currentPath/${Routes.report}$query',
     );
     if (!mounted || didSubmit != true) return;
 
     AppSnackBar.showSuccess(context, '신고가 접수되었습니다.');
+  }
+
+  Future<void> _confirmDeleteComment(
+    HomePostDetailViewModel viewModel,
+    String commentId,
+  ) async {
+    final shouldDelete = await TwoButtonDialog.show(
+      context,
+      title: '댓글을 삭제하시겠습니까?',
+      message: '삭제한 댓글은 복구할 수 없습니다.',
+      cancelLabel: '취소',
+      confirmLabel: '삭제',
+    );
+    if (!mounted || !shouldDelete) return;
+    final result = await viewModel.deleteComment(commentId);
+    if (!mounted) return;
+    switch (result) {
+      case Success():
+        AppSnackBar.showSuccess(context, '댓글이 삭제되었습니다.');
+      case Failure(message: final message):
+        AppSnackBar.showError(context, message);
+    }
   }
 
   Future<void> _openEdit(HomePostDetailViewModel viewModel) async {

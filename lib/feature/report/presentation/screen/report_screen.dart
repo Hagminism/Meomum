@@ -104,6 +104,17 @@ class ReportScreen extends StatelessWidget {
               _buildSectionLabel('신고 대상 게시글'),
               const SizedBox(height: 8),
               ReportPostSummary(post: post),
+              if (state.commentId != null) ...[
+                const SizedBox(height: 8),
+                const Text(
+                  '신고 대상: 게시글의 댓글',
+                  style: TextStyle(
+                    fontFamily: 'Pretendard',
+                    fontSize: 13,
+                    color: AppColors.communityMetaText,
+                  ),
+                ),
+              ],
               const SizedBox(height: 20),
               _buildSectionLabel('제목', isRequired: true),
               const SizedBox(height: 8),
@@ -200,6 +211,7 @@ class ReportScreen extends StatelessWidget {
       ),
       child: TextFormField(
         initialValue: initialValue,
+        cursorColor: AppColors.primary,
         maxLines: maxLines,
         maxLength: maxLength,
         onChanged: onChanged,

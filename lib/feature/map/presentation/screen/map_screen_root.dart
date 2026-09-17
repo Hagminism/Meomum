@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:meomum/core/data/repository/location/location_repository_impl.dart';
 import 'package:meomum/core/domain/model/location/geo_location.dart';
 import 'package:meomum/core/presentation/component/app_snackbar.dart';
+import 'package:meomum/core/routing/routes.dart';
 import 'package:meomum/core/utils/result.dart';
 import 'package:meomum/feature/map/presentation/screen/map_action.dart';
 import 'package:meomum/feature/map/presentation/screen/map_event.dart';
@@ -169,7 +171,9 @@ class _MapScreenRootState extends ConsumerState<MapScreenRoot> {
       onAction: (action) {
         switch (action) {
           case MapReady():
+            break;
           case SearchBarPressed():
+            context.push('${Routes.map}/${Routes.mapSearch}');
             break;
           case ResearchButtonPressed():
             _handleResearchButtonPressed();

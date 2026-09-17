@@ -68,6 +68,52 @@ class CommercialStoreDataSourceImpl implements CommercialStoreDataSource {
       }
     }
   }
+
+  @override
+  Future<Result<List<CommercialStore>>> searchStores({
+    required String query,
+  }) async {
+    final normalizedQuery = query.trim();
+    if (normalizedQuery.isEmpty) {
+      return const Result.success(<CommercialStore>[]);
+    }
+
+    int attempts = 0;
+
+    while (true) {
+      try {
+        final response = await _client.rpc(
+          'search_commercial_stores',
+          params: {'p_query': normalizedQuery},
+        );
+
+        final list = response as List<dynamic>;
+        final stores = list
+            .map(
+              (item) => CommercialStore.fromJson(item as Map<String, dynamic>),
+            )
+            .toList();
+
+        return Result.success(stores);
+      } on SocketException catch (error) {
+        attempts++;
+        if (attempts > _maxRetries) {
+          return Result.failure('네트워크 연결을 확인해 주세요. ($error)');
+        }
+        await Future.delayed(_baseRetryDelay * attempts);
+      } on TimeoutException catch (error) {
+        attempts++;
+        if (attempts > _maxRetries) {
+          return Result.failure('요청 시간이 초과되었습니다. ($error)');
+        }
+        await Future.delayed(_baseRetryDelay * attempts);
+      } on PostgrestException catch (error) {
+        return Result.failure('데이터베이스 조회에 실패했습니다: ${error.message}');
+      } catch (error) {
+        return Result.failure('매장 검색에 실패했습니다. ($error)');
+      }
+    }
+  }
 }
 
 final commercialStoreDataSourceProvider = Provider<CommercialStoreDataSource>((

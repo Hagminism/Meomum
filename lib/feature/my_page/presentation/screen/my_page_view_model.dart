@@ -28,8 +28,31 @@ class MyPageViewModel extends Notifier<MyPageState> {
 
   final StreamController<MyPageEvent> _eventController =
       StreamController<MyPageEvent>.broadcast();
+  bool _isRefreshing = false;
 
   Stream<MyPageEvent> get eventStream => _eventController.stream;
+
+  /// 서버에서 최신 프로필을 조회해 마이페이지 상태에 반영합니다.
+  Future<void> refresh() async {
+    if (_isRefreshing) return;
+
+    _isRefreshing = true;
+    try {
+      final authRepository = ref.read(authRepositoryProvider);
+      final result = await authRepository.refreshCurrentUser();
+
+      if (!ref.mounted) return;
+
+      switch (result) {
+        case Success(data: final user):
+          state = state.copyWith(user: user);
+        case Failure(message: final message):
+          _eventController.add(MyPageEvent.showError(message));
+      }
+    } finally {
+      _isRefreshing = false;
+    }
+  }
 
   void onAction(MyPageAction action) {
     switch (action) {

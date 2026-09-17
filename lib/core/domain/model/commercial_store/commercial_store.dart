@@ -14,6 +14,7 @@ abstract class CommercialStore with _$CommercialStore {
     String? industryLargeCode,
     String? industryLargeName,
     String? address,
+    @JsonKey(name: 'dist_m') double? distanceMeters,
   }) = _CommercialStore;
 
   factory CommercialStore.fromJson(Map<String, dynamic> json) =>

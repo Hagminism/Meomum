@@ -10,9 +10,9 @@ import 'package:meomum/feature/report/presentation/screen/report_event.dart';
 import 'package:meomum/feature/report/presentation/screen/report_state.dart';
 
 class ReportViewModel extends Notifier<ReportState> {
-  final String postId;
+  final (String, String?) target;
 
-  ReportViewModel(this.postId);
+  ReportViewModel(this.target);
 
   final ImagePicker _imagePicker = ImagePicker();
   late final CommunityPostRepository _repository;
@@ -27,7 +27,7 @@ class ReportViewModel extends Notifier<ReportState> {
     _repository = ref.watch(communityPostRepositoryProvider);
     ref.onDispose(() => _eventController.close());
     Future.microtask(_fetchPost);
-    return const ReportState();
+    return ReportState(commentId: target.$2);
   }
 
   void onAction(ReportAction action) {
@@ -55,7 +55,7 @@ class ReportViewModel extends Notifier<ReportState> {
 
     state = state.copyWith(isFetching: true, loadError: null);
 
-    final result = await _repository.getPostById(postId: postId);
+    final result = await _repository.getPostById(postId: target.$1);
 
     if (!ref.mounted) return;
 
@@ -116,7 +116,8 @@ class ReportViewModel extends Notifier<ReportState> {
     if (!state.isSubmitEnabled) return;
 
     final reportPayload = {
-      'postId': postId,
+      'postId': target.$1,
+      'commentId': target.$2,
       'title': state.title.trim(),
       'content': state.content.trim(),
       'photos': List<XFile>.unmodifiable(state.mediaFiles),
@@ -132,10 +133,12 @@ class ReportViewModel extends Notifier<ReportState> {
   }
 
   /// 실제 전송 연동 전까지 제출 지연을 시뮬레이션합니다.
-  Future<void> _simulateSubmission(Map<String, Object> reportPayload) async {
+  Future<void> _simulateSubmission(Map<String, Object?> reportPayload) async {
     await Future<void>.delayed(const Duration(milliseconds: 1200));
   }
 }
 
 final reportViewModelProvider = NotifierProvider.autoDispose
-    .family<ReportViewModel, ReportState, String>(ReportViewModel.new);
+    .family<ReportViewModel, ReportState, (String, String?)>(
+      ReportViewModel.new,
+    );

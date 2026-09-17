@@ -189,6 +189,24 @@ class AuthRepositoryImpl implements AuthRepository {
     };
   }
 
+  /// 서버에서 최신 프로필을 조회한 뒤 현재 사용자 정보에 반영합니다.
+  @override
+  Future<Result<User>> refreshCurrentUser() async {
+    final currentUser = _currentUser;
+    if (currentUser == null) {
+      return const Result.failure('로그인 후 프로필을 새로고침할 수 있습니다.');
+    }
+
+    final result = await _profileRepository.getProfile(
+      accountId: currentUser.id,
+    );
+
+    return switch (result) {
+      Success(data: final profile) => _updateCurrentUser(profile),
+      Failure(message: final message) => Result.failure(message),
+    };
+  }
+
   @override
   User? get currentUser => _currentUser;
 

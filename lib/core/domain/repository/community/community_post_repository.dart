@@ -19,6 +19,11 @@ abstract interface class CommunityPostRepository {
     DateTime? cursor,
   });
 
+  Future<Result<List<CommunityPost>>> getLikedPosts({
+    int limit = 20,
+    DateTime? cursor,
+  });
+
   Future<Result<List<CommunityPost>>> getLatestPostsWithImages({
     int limit = 20,
     DateTime? cursor,

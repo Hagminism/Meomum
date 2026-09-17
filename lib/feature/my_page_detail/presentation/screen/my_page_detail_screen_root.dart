@@ -71,6 +71,9 @@ class _MyPageDetailScreenRootState
           case TapEditProfile():
             _openEditProfile();
             break;
+          case TapCommentTarget(:final postId, :final commentId):
+            unawaited(_openPost(postId, viewModel, commentId: commentId));
+            break;
           case SelectTab():
           case ChangeImagePage():
           case ToggleLike():
@@ -86,10 +89,12 @@ class _MyPageDetailScreenRootState
 
   Future<void> _openPost(
     String postId,
-    MyPageDetailViewModel viewModel,
-  ) async {
+    MyPageDetailViewModel viewModel, {
+    String? commentId,
+  }) async {
+    final query = commentId == null ? '' : '?commentId=$commentId';
     final didDelete = await context.push<bool>(
-      '${Routes.myPage}/${Routes.myPageFeed}/post-detail/$postId',
+      '${Routes.myPage}/${Routes.myPageFeed}/post-detail/$postId$query',
     );
     if (!mounted || didDelete != true) return;
 

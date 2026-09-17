@@ -28,6 +28,8 @@ abstract interface class AuthRepository {
     required String lowerRegion,
   });
 
+  Future<Result<User>> refreshCurrentUser();
+
   User? get currentUser;
 
   bool get isSignedIn;

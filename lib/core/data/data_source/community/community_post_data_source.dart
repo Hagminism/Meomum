@@ -29,6 +29,12 @@ abstract interface class CommunityPostDataSource {
     DateTime? cursor,
   });
 
+  Future<Result<List<CommunityPostDto>>> getLikedPosts({
+    required String accountId,
+    int limit = 20,
+    DateTime? cursor,
+  });
+
   Future<Result<List<CommunityPostDto>>> getLatestPostsWithImages({
     int limit = 20,
     DateTime? cursor,

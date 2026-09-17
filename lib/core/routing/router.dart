@@ -15,6 +15,7 @@ import 'package:meomum/feature/community_post_detail/presentation/screen/communi
 import 'package:meomum/feature/community_edit_post/presentation/screen/community_edit_post_screen_root.dart';
 import 'package:meomum/feature/location_search/presentation/screen/location_search_screen_root.dart';
 import 'package:meomum/feature/map/presentation/screen/map_screen_root.dart';
+import 'package:meomum/feature/map_search/presentation/screen/map_search_screen_root.dart';
 import 'package:meomum/feature/edit_profile/presentation/screen/edit_profile_screen_root.dart';
 import 'package:meomum/feature/my_page/presentation/screen/my_page_screen_root.dart';
 import 'package:meomum/feature/my_page_detail/presentation/screen/my_page_detail_screen_root.dart';
@@ -140,6 +141,13 @@ final routerProvider = Provider<GoRouter>((Ref ref) {
               GoRoute(
                 path: Routes.map,
                 builder: (_, _) => const MapScreenRoot(),
+                routes: [
+                  GoRoute(
+                    parentNavigatorKey: rootNavigatorKey,
+                    path: Routes.mapSearch,
+                    builder: (_, _) => const MapSearchScreenRoot(),
+                  ),
+                ],
               ),
             ],
           ),

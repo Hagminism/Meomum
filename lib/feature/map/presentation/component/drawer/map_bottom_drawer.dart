@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:meomum/core/domain/model/commercial_store/commercial_store.dart';
 import 'package:meomum/feature/map/presentation/component/drawer/map_bottom_drawer_controls.dart';
 import 'package:meomum/feature/map/presentation/component/drawer/map_bottom_drawer_sheet.dart';
 import 'package:meomum/feature/map/presentation/model/map_category.dart';
 
 /// 지도 화면 하단에서 드로어와 플로팅 컨트롤의 배치를 조정합니다.
 class MapBottomDrawer extends StatefulWidget {
+  final List<CommercialStore> stores;
   final MapCategory? selectedCategory;
   final bool isResearchEnabled;
   final bool isResearchLoading;
@@ -14,6 +16,7 @@ class MapBottomDrawer extends StatefulWidget {
 
   const MapBottomDrawer({
     super.key,
+    required this.stores,
     required this.selectedCategory,
     required this.isResearchEnabled,
     required this.isResearchLoading,
@@ -93,6 +96,8 @@ class _MapBottomDrawerState extends State<MapBottomDrawer> {
                     minChildSize: minChildSize,
                     maxChildSize: maxChildSize,
                     bottomPadding: _bottomNavigationHeight,
+                    isLoading: widget.isResearchLoading,
+                    stores: widget.stores,
                     selectedCategory: widget.selectedCategory,
                     onCategoryPressed: widget.onCategoryPressed,
                   ),

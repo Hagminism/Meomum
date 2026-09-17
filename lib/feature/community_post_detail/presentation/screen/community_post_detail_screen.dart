@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:meomum/core/presentation/component/custom_app_bar.dart';
 import 'package:meomum/feature/community_post_detail/presentation/component/community_post_detail_comment_input.dart';
-import 'package:meomum/feature/community_post_detail/presentation/component/community_post_detail_comments.dart';
 import 'package:meomum/feature/community_post_detail/presentation/component/community_post_detail_footer.dart';
 import 'package:meomum/feature/community_post_detail/presentation/component/community_post_detail_images.dart';
 import 'package:meomum/feature/community/presentation/component/post/community_post_header.dart';
+import 'package:meomum/feature/community/presentation/component/comment/community_comment_list.dart';
 import 'package:meomum/feature/community_post_detail/presentation/screen/community_post_detail_action.dart';
 import 'package:meomum/feature/community_post_detail/presentation/screen/community_post_detail_state.dart';
 import 'package:meomum/ui/app_colors.dart';
@@ -26,7 +26,12 @@ class CommunityPostDetailScreen extends StatelessWidget {
     final post = state.post;
 
     return PopScope(
-      canPop: state.isDeleting ? false : true,
+      canPop:
+          (state.isDeleting ||
+              state.isCommentSubmitting ||
+              state.isEditingCommentSubmitting)
+          ? false
+          : true,
       child: Stack(
         children: [
           Scaffold(
@@ -125,8 +130,80 @@ class CommunityPostDetailScreen extends StatelessWidget {
                                 child: SizedBox(height: 2),
                               ),
                             ),
-                            const SliverToBoxAdapter(
-                              child: CommunityPostDetailComments(),
+                            SliverToBoxAdapter(
+                              child: state.isCommentsLoading
+                                  ? const Padding(
+                                      padding: EdgeInsets.all(24),
+                                      child: Center(
+                                        child: CircularProgressIndicator(
+                                          color: AppColors.primary,
+                                        ),
+                                      ),
+                                    )
+                                  : CommunityCommentList(
+                                      comments: state.comments,
+                                      postAuthorId: post.authorId,
+                                      currentUserId: state.currentUserId,
+                                      focusCommentId: state.focusCommentId,
+                                      replyParentId: state.replyParentId,
+                                      editingCommentId: state.editingCommentId,
+                                      editingContent:
+                                          state.editingCommentContent,
+                                      isEditingSubmitting:
+                                          state.isEditingCommentSubmitting,
+                                      onReply: (String commentId) {
+                                        onAction(
+                                          CommunityPostDetailAction.replyToComment(
+                                            commentId,
+                                          ),
+                                        );
+                                      },
+                                      onLike: (String commentId) {
+                                        onAction(
+                                          CommunityPostDetailAction.toggleCommentLike(
+                                            commentId,
+                                          ),
+                                        );
+                                      },
+                                      onEdit: (String commentId) {
+                                        onAction(
+                                          CommunityPostDetailAction.editComment(
+                                            commentId,
+                                          ),
+                                        );
+                                      },
+                                      onDelete: (String commentId) {
+                                        onAction(
+                                          CommunityPostDetailAction.deleteComment(
+                                            commentId,
+                                          ),
+                                        );
+                                      },
+                                      onReport: (String commentId) {
+                                        onAction(
+                                          CommunityPostDetailAction.reportComment(
+                                            commentId,
+                                          ),
+                                        );
+                                      },
+                                      onEditChanged: (String content) {
+                                        onAction(
+                                          CommunityPostDetailAction.changeEditingComment(
+                                            content,
+                                          ),
+                                        );
+                                      },
+                                      onEditSubmit: () {
+                                        onAction(
+                                          const CommunityPostDetailAction.submitEditingComment(),
+                                        );
+                                      },
+                                      onEditCancel: () {
+                                        onAction(
+                                          const CommunityPostDetailAction.cancelEditingComment(),
+                                        );
+                                      },
+                                    ),
                             ),
                           ],
                         ),

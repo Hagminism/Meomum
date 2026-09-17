@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:meomum/core/domain/model/user/user.dart';
 import 'package:meomum/feature/community/domain/model/community_post.dart';
+import 'package:meomum/feature/community/domain/model/community_comment.dart';
 import 'package:meomum/feature/my_page_detail/domain/model/enum/my_page_feed_tab.dart';
 
 part 'my_page_detail_state.freezed.dart';
@@ -13,11 +14,15 @@ abstract class MyPageDetailState with _$MyPageDetailState {
     User? user,
     @Default(MyPageFeedTab.myPosts) MyPageFeedTab selectedTab,
     @Default([]) List<CommunityPost> posts,
+    @Default([]) List<CommunityPost> likedPosts,
+    @Default([]) List<CommunityComment> comments,
     @Default({}) Map<String, int> imagePageByPostId,
     @Default(false) bool isLoading,
     @Default(false) bool isLoadingMore,
     @Default(true) bool hasMore,
+    @Default(false) bool isLikedPostsLoading,
+    @Default(false) bool hasMoreLikedPosts,
+    @Default(false) bool isCommentsLoading,
+    @Default(false) bool hasMoreComments,
   }) = _MyPageDetailState;
-
-  bool get isPlaceholderTab => selectedTab != MyPageFeedTab.myPosts;
 }

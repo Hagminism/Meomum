@@ -7,4 +7,8 @@ abstract interface class CommercialStoreRepository {
     required GeoLocation location,
     required int radius,
   });
+
+  Future<Result<List<CommercialStore>>> searchStores({
+    required String query,
+  });
 }
