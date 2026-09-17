@@ -143,10 +143,12 @@ class _CommunityCommentListState extends State<CommunityCommentList> {
                               comment.nickname,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontFamily: 'Pretendard',
                                 fontSize: 16,
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.w500,
+                                height: 1.25,
+                                color: AppColors.communityText,
                               ),
                             ),
                           ),
@@ -171,14 +173,23 @@ class _CommunityCommentListState extends State<CommunityCommentList> {
                             ),
                           ],
                           const SizedBox(width: 4),
+                          Container(
+                            width: 2,
+                            height: 2,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFD9D9D9),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
                           Text(
-                            '· ${comment.timeLabel}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
+                            comment.timeLabel,
+                            style: TextStyle(
                               fontFamily: 'Pretendard',
                               fontSize: 12,
-                              color: AppColors.communityMetaText,
+                              fontWeight: FontWeight.w400,
+                              height: 1,
+                              color: AppColors.communityText,
                             ),
                           ),
                         ],
@@ -224,13 +235,15 @@ class _CommunityCommentListState extends State<CommunityCommentList> {
                       ),
                   ],
                 ),
-                if (comment.neighborhood.isNotEmpty) const SizedBox(height: 2),
+                if (comment.neighborhood.isNotEmpty) const SizedBox(height: 4),
                 if (comment.neighborhood.isNotEmpty)
                   Text(
                     comment.neighborhood,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Pretendard',
-                      fontSize: 12,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      height: 1,
                       color: AppColors.communityMetaText,
                     ),
                   ),
