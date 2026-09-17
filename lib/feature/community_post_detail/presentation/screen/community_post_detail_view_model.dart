@@ -205,6 +205,7 @@ class CommunityPostDetailViewModel extends Notifier<CommunityPostDetailState> {
   }
 
   Future<void> _fetchComments() async {
+    state = state.copyWith(isCommentsLoading: true);
     final result = await _commentRepository.getComments(postId: postId);
     if (!ref.mounted) return;
     switch (result) {
