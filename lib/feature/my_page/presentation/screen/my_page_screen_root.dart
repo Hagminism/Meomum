@@ -50,6 +50,7 @@ class _MyPageScreenRootState extends ConsumerState<MyPageScreenRoot> {
 
     return MyPageScreen(
       state: state,
+      onRefresh: viewModel.refresh,
       onAction: (MyPageAction action) {
         switch (action) {
           case TapMyFeed():

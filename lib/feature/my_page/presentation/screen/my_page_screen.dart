@@ -12,11 +12,13 @@ import 'package:meomum/ui/app_colors.dart';
 class MyPageScreen extends StatelessWidget {
   final MyPageState state;
   final void Function(MyPageAction) onAction;
+  final Future<void> Function() onRefresh;
 
   const MyPageScreen({
     super.key,
     required this.state,
     required this.onAction,
+    required this.onRefresh,
   });
 
   @override
@@ -39,57 +41,63 @@ class MyPageScreen extends StatelessWidget {
           bottom: false,
           child: Stack(
             children: [
-              CustomScrollView(
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: MyPageProfileHeader(
-                      user: state.user,
-                      onAction: onAction,
-                    ),
-                  ),
-                  if (state.currentStay != null)
+              RefreshIndicator(
+                color: AppColors.primary,
+                backgroundColor: AppColors.white,
+                onRefresh: onRefresh,
+                child: CustomScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
                     SliverToBoxAdapter(
-                      child: MyPageCurrentStayCard(
-                        currentStay: state.currentStay!,
+                      child: MyPageProfileHeader(
+                        user: state.user,
                         onAction: onAction,
                       ),
                     ),
-                  SliverToBoxAdapter(
-                    child: MyPageServiceSection(
-                      categories: state.categories,
-                      onAction: onAction,
+                    if (state.currentStay != null)
+                      SliverToBoxAdapter(
+                        child: MyPageCurrentStayCard(
+                          currentStay: state.currentStay!,
+                          onAction: onAction,
+                        ),
+                      ),
+                    SliverToBoxAdapter(
+                      child: MyPageServiceSection(
+                        categories: state.categories,
+                        onAction: onAction,
+                      ),
                     ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 24, 16, 4),
-                      child: Text(
-                        '머문 기록',
-                        style: TextStyle(
-                          fontFamily: 'Pretendard',
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          height: 1,
-                          color: AppColors.feedContentText,
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 24, 16, 4),
+                        child: Text(
+                          '머문 기록',
+                          style: TextStyle(
+                            fontFamily: 'Pretendard',
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            height: 1,
+                            color: AppColors.feedContentText,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  SliverPadding(
-                    padding: EdgeInsets.only(bottom: bottomPadding),
-                    sliver: SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (BuildContext context, int index) {
-                          return MyPageStayHistoryItem(
-                            item: state.stayHistories[index],
-                            onAction: onAction,
-                          );
-                        },
-                        childCount: state.stayHistories.length,
+                    SliverPadding(
+                      padding: EdgeInsets.only(bottom: bottomPadding),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (BuildContext context, int index) {
+                            return MyPageStayHistoryItem(
+                              item: state.stayHistories[index],
+                              onAction: onAction,
+                            );
+                          },
+                          childCount: state.stayHistories.length,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               if (state.isLoading)
                 ColoredBox(
