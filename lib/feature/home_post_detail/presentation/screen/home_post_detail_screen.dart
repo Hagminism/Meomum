@@ -26,7 +26,12 @@ class HomePostDetailScreen extends StatelessWidget {
     final post = state.post;
 
     return PopScope(
-      canPop: state.isDeleting ? false : true,
+      canPop:
+      (state.isDeleting ||
+          state.isCommentSubmitting ||
+          state.isEditingCommentSubmitting)
+          ? false
+          : true,
       child: Stack(
         children: [
           Scaffold(
