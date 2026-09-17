@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:meomum/core/domain/model/commercial_store/commercial_store.dart';
 import 'package:meomum/feature/map/presentation/component/drawer/map_category_filter_bar.dart';
+import 'package:meomum/feature/map/presentation/component/drawer/map_store_list_item.dart';
 import 'package:meomum/feature/map/presentation/model/map_category.dart';
 import 'package:meomum/ui/app_colors.dart';
 
@@ -10,6 +12,8 @@ class MapBottomDrawerSheet extends StatelessWidget {
   final double minChildSize;
   final double maxChildSize;
   final double bottomPadding;
+  final bool isLoading;
+  final List<CommercialStore> stores;
   final MapCategory? selectedCategory;
   final void Function(MapCategory category) onCategoryPressed;
 
@@ -20,6 +24,8 @@ class MapBottomDrawerSheet extends StatelessWidget {
     required this.minChildSize,
     required this.maxChildSize,
     required this.bottomPadding,
+    required this.isLoading,
+    required this.stores,
     required this.selectedCategory,
     required this.onCategoryPressed,
   });
@@ -70,6 +76,46 @@ class MapBottomDrawerSheet extends StatelessWidget {
                 selectedCategory: selectedCategory,
                 onCategoryPressed: onCategoryPressed,
               ),
+              const Padding(
+                padding: EdgeInsets.fromLTRB(16, 4, 16, 8),
+                child: Text(
+                  '가까운 매장이 먼저 표시됩니다.',
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontFamily: 'Pretendard',
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+              if (isLoading)
+                Padding(
+                  padding: EdgeInsets.fromLTRB(16, 20, 16, 24),
+                  child: Semantics(
+                    label: '주변 매장을 불러오는 중입니다',
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                )
+              else if (stores.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(16, 20, 16, 24),
+                  child: Text(
+                    '현재 위치 주변에 매장이 없습니다.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: AppColors.feedContentText,
+                      fontFamily: 'Pretendard',
+                      fontSize: 15,
+                    ),
+                  ),
+                )
+              else
+                ...stores.map(
+                  (store) => MapStoreListItem(store: store),
+                ),
             ],
           ),
         );

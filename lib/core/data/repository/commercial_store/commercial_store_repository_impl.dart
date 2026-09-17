@@ -20,6 +20,13 @@ class CommercialStoreRepositoryImpl implements CommercialStoreRepository {
   }) {
     return _dataSource.getNearbyStores(location: location, radius: radius);
   }
+
+  @override
+  Future<Result<List<CommercialStore>>> searchStores({
+    required String query,
+  }) {
+    return _dataSource.searchStores(query: query);
+  }
 }
 
 final commercialStoreRepositoryProvider = Provider<CommercialStoreRepository>((

@@ -38,6 +38,7 @@ class MapScreen extends StatelessWidget {
             ),
           ),
           MapBottomDrawer(
+            stores: state.visibleStores,
             selectedCategory: state.selectedCategory,
             isResearchEnabled: state.isResearchButtonEnabled,
             isResearchLoading: state.isLoadingNearbyStores,
