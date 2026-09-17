@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:meomum/feature/community/presentation/component/comment/community_comment_reply_indicator.dart';
 import 'package:meomum/feature/home_post_detail/presentation/screen/home_post_detail_action.dart';
 import 'package:meomum/feature/home_post_detail/presentation/screen/home_post_detail_state.dart';
 import 'package:meomum/ui/app_colors.dart';
@@ -70,32 +71,16 @@ class _HomePostDetailCommentInputState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (state.replyParentId != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8, left: 8),
-                child: Row(
-                  children: [
-                    const Expanded(
-                      child: Text(
-                        '답글을 작성하고 있어요.',
-                        style: TextStyle(
-                          fontFamily: 'Pretendard',
-                          color: AppColors.primary,
-                        ),
-                      ),
+              CommunityCommentReplyIndicator(
+                enabled: !state.isCommentSubmitting,
+                onCancel: () {
+                  onAction(HomePostDetailAction.changeComment(''));
+                  onAction(
+                    HomePostDetailAction.replyToComment(
+                      state.replyParentId!,
                     ),
-                    TextButton(
-                      onPressed: () {
-                        onAction(HomePostDetailAction.changeComment(''));
-                        onAction(
-                          HomePostDetailAction.replyToComment(
-                            state.replyParentId!,
-                          ),
-                        );
-                      },
-                      child: const Text('취소'),
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
