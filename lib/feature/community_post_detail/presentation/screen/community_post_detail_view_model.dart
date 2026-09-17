@@ -62,14 +62,6 @@ class CommunityPostDetailViewModel extends Notifier<CommunityPostDetailState> {
     if (!ref.mounted) return result;
     switch (result) {
       case Success():
-        final post = state.post;
-        state = state.copyWith(
-          post: post == null
-              ? null
-              : post.copyWith(
-                  commentCount: (post.commentCount - 1).clamp(0, 999999),
-                ),
-        );
         await _fetchComments();
       case Failure(message: final message):
         _eventController.add(
