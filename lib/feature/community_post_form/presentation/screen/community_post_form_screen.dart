@@ -265,6 +265,7 @@ class CommunityPostFormScreen extends StatelessWidget {
       ),
       child: TextFormField(
         initialValue: initialValue,
+        cursorColor: AppColors.primary,
         enabled: !isLoading,
         maxLines: maxLines,
         maxLength: maxLength,

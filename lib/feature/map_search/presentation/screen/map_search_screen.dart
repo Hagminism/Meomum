@@ -43,6 +43,7 @@ class MapSearchScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
               child: TextField(
                 autofocus: true,
+                cursorColor: AppColors.primary,
                 textInputAction: TextInputAction.search,
                 onChanged: (query) {
                   onAction(MapSearchAction.queryChanged(query));

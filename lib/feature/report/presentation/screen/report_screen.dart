@@ -211,6 +211,7 @@ class ReportScreen extends StatelessWidget {
       ),
       child: TextFormField(
         initialValue: initialValue,
+        cursorColor: AppColors.primary,
         maxLines: maxLines,
         maxLength: maxLength,
         onChanged: onChanged,

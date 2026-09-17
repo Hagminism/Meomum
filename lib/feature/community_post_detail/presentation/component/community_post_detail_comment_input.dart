@@ -114,6 +114,7 @@ class _CommunityPostDetailCommentInputState
                     height: 44,
                     child: TextField(
                       controller: _controller,
+                      cursorColor: AppColors.primary,
                       enabled: !state.isCommentSubmitting,
                       maxLength: 1000,
                       buildCounter:

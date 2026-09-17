@@ -112,6 +112,7 @@ class ProfileEditor extends StatelessWidget {
           const SizedBox(height: 20),
           TextFormField(
             initialValue: nickname,
+            cursorColor: AppColors.primary,
             maxLength: 20,
             textInputAction: TextInputAction.done,
             onChanged: onNicknameChanged,
