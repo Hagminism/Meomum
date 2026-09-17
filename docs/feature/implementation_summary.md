@@ -176,7 +176,30 @@ Supabase advisor와 lint에서는 이번 변경과 무관한 기존 PostGIS 함�
 - 따라서 현재 매장 목록 항목의 `onTap`에는 별도 화면 이동 동작을 넣지 않음
 - 매장 상세 정보 조회 방식과 데이터 계약이 정해지면 지도 Drawer와 장소 검색 결과에 동일한 상세 이동을 연결
 
-## 6. 주요 커밋
+## 6. 마이페이지 좋아요한 글
+
+2026-09-18 추가 구현 내용이다.
+
+- `좋아요한 글` 탭의 placeholder를 실제 게시글 목록으로 교체
+- 현재 로그인한 계정이 좋아요한 게시글만 조회
+- 내가 쓴 글과 좋아요한 글의 목록·페이지네이션 상태를 분리
+- 게시글 작성일 최신순으로 정렬하고 기존 커서 페이지네이션을 재사용
+- 좋아요 취소 시 목록에서 게시글을 즉시 제거
+- 좋아요 처리 실패 시 기존 목록으로 롤백
+- 기존 게시글 카드와 상세 화면 이동 흐름 재사용
+- 좋아요한 글이 없을 때 `아직 좋아요한 글이 없어요.` 빈 상태 표시
+
+데이터 조회는 `post_likes!inner(account_id)` 관계를 사용하며, 클라이언트 계정 ID 필터에만 의존하지 않도록 `post_likes` SELECT RLS 정책도 현재 계정 소유 행으로 제한했다.
+
+관련 코드:
+
+- [`my_page_detail_view_model.dart`](../../lib/feature/my_page_detail/presentation/screen/my_page_detail_view_model.dart)
+- [`my_page_detail_screen.dart`](../../lib/feature/my_page_detail/presentation/screen/my_page_detail_screen.dart)
+- [`community_post_data_source_impl.dart`](../../lib/core/data/data_source/community/community_post_data_source_impl.dart)
+- [`20260917150533_restrict_post_like_reads.sql`](../../supabase/migrations/20260917150533_restrict_post_like_reads.sql)
+- [`my_page_detail_screen_test.dart`](../../test/feature/my_page_detail/my_page_detail_screen_test.dart)
+
+## 7. 주요 커밋
 
 | 커밋 | 내용 |
 | --- | --- |
@@ -190,3 +213,4 @@ Supabase advisor와 lint에서는 이번 변경과 무관한 기존 PostGIS 함�
 | `02f8dde` | 삭제 댓글을 게시글 댓글 수에 포함 |
 | `2d12e7d` | 답글 작성 상태 입력 UI 개선 |
 | `a322241` | 답글 작성 인디케이터 UI 수정 |
+| `eecb80e` | 댓글 및 지도 검색 구현 내용 정리 |

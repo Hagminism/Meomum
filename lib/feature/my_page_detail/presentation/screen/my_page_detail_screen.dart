@@ -30,6 +30,14 @@ class MyPageDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.paddingOf(context).bottom + 16;
+    final visiblePosts = state.selectedTab == MyPageFeedTab.likedPosts
+        ? state.likedPosts
+        : state.posts;
+    final isSelectedTabLoading = switch (state.selectedTab) {
+      MyPageFeedTab.myPosts => state.isLoading,
+      MyPageFeedTab.myComments => state.isLoading || state.isCommentsLoading,
+      MyPageFeedTab.likedPosts => state.isLoading || state.isLikedPostsLoading,
+    };
 
     return Scaffold(
       backgroundColor: AppColors.homeBackground,
@@ -73,17 +81,12 @@ class MyPageDetailScreen extends StatelessWidget {
                   },
                 ),
               ),
-              if (state.isLoading)
+              if (isSelectedTabLoading)
                 const SliverFillRemaining(
                   hasScrollBody: false,
                   child: Center(
                     child: CircularProgressIndicator(color: AppColors.primary),
                   ),
-                )
-              else if (state.isPlaceholderTab)
-                const SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: MyPageDetailEmptyView(message: '준비 중인 기능입니다.'),
                 )
               else if (state.selectedTab == MyPageFeedTab.myComments &&
                   state.comments.isEmpty)
@@ -99,6 +102,14 @@ class MyPageDetailScreen extends StatelessWidget {
                   hasScrollBody: false,
                   child: MyPageDetailEmptyView(
                     message: '아직 작성한 글이 없어요.',
+                  ),
+                )
+              else if (state.selectedTab == MyPageFeedTab.likedPosts &&
+                  state.likedPosts.isEmpty)
+                const SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: MyPageDetailEmptyView(
+                    message: '아직 좋아요한 글이 없어요.',
                   ),
                 )
               else if (state.selectedTab == MyPageFeedTab.myComments) ...[
@@ -129,7 +140,7 @@ class MyPageDetailScreen extends StatelessWidget {
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (BuildContext context, int index) {
-                      final post = state.posts[index];
+                      final post = visiblePosts[index];
                       return CommunityPostCard(
                         post: post,
                         currentImageIndex:
@@ -138,7 +149,7 @@ class MyPageDetailScreen extends StatelessWidget {
                         onShare: onShare,
                       );
                     },
-                    childCount: state.posts.length,
+                    childCount: visiblePosts.length,
                   ),
                 ),
                 if (state.isLoadingMore)

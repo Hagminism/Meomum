@@ -29,6 +29,19 @@ void main() {
       expect(dataSource.requestedAccountId, 'account-id');
     });
 
+    test('현재 계정 ID를 getLikedPosts 데이터 소스에 전달한다', () async {
+      final dataSource = _FakeCommunityPostDataSource();
+      final repository = _createRepository(
+        dataSource: dataSource,
+        currentUserId: 'account-id',
+      );
+
+      final result = await repository.getLikedPosts();
+
+      expect(result, isA<Success<List<CommunityPost>>>());
+      expect(dataSource.requestedLikedPostsAccountId, 'account-id');
+    });
+
     test('현재 계정 ID를 게시글 변환에 사용한다', () async {
       final dataSource = _FakeCommunityPostDataSource(
         posts: [
@@ -165,6 +178,7 @@ class _FakeCommunityPostDataSource implements CommunityPostDataSource {
   final List<CommunityPostDto> posts;
   final List<Result<CommunityUploadedImage>> _uploadResults;
   String? requestedAccountId;
+  String? requestedLikedPostsAccountId;
   int uploadCallCount = 0;
   bool createPostCalled = false;
 
@@ -185,6 +199,16 @@ class _FakeCommunityPostDataSource implements CommunityPostDataSource {
     DateTime? cursor,
   }) async {
     requestedAccountId = accountId;
+    return Result.success(posts);
+  }
+
+  @override
+  Future<Result<List<CommunityPostDto>>> getLikedPosts({
+    required String accountId,
+    int limit = 20,
+    DateTime? cursor,
+  }) async {
+    requestedLikedPostsAccountId = accountId;
     return Result.success(posts);
   }
 

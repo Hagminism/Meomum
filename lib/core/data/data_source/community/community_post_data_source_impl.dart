@@ -29,6 +29,13 @@ class CommunityPostDataSourceImpl implements CommunityPostDataSource {
       'post_images!inner(storage_path, public_url, sort_order), '
       'post_likes(account_id)';
 
+  /// 현재 계정이 좋아요한 게시글만 조회하기 위한 관계 선택문을 정의합니다.
+  static const String _postSelectLiked =
+      '*, profiles!posts_author_id_fkey('
+      'nickname, profile_image_url, upper_region, lower_region), '
+      'post_images(storage_path, public_url, sort_order), '
+      'post_likes!inner(account_id)';
+
   final SupabaseClient _client;
 
   CommunityPostDataSourceImpl({
@@ -109,6 +116,43 @@ class CommunityPostDataSourceImpl implements CommunityPostDataSource {
       return Result.success(posts);
     } on PostgrestException catch (error) {
       return Result.failure('게시글을 불러오지 못했습니다: ${error.message}');
+    } catch (error) {
+      return Result.failure('오류가 발생했습니다: $error');
+    }
+  }
+
+  @override
+  /// 현재 계정이 좋아요한 게시글을 조회합니다.
+  /// 커서가 있으면 마지막으로 조회한 게시글보다 오래된 게시글만 조회합니다.
+  Future<Result<List<CommunityPostDto>>> getLikedPosts({
+    required String accountId,
+    int limit = 20,
+    DateTime? cursor,
+  }) async {
+    try {
+      var query = _client
+          .from('posts')
+          .select(_postSelectLiked)
+          .eq('post_likes.account_id', accountId);
+
+      if (cursor != null) {
+        query = query.lt('created_at', cursor.toIso8601String());
+      }
+
+      final response = await query
+          .order('created_at', ascending: false)
+          .limit(limit);
+
+      final list = response as List<dynamic>;
+      final posts = list
+          .map(
+            (item) => CommunityPostDto.fromJson(item as Map<String, dynamic>),
+          )
+          .toList();
+
+      return Result.success(posts);
+    } on PostgrestException catch (error) {
+      return Result.failure('좋아요한 글을 불러오지 못했습니다: ${error.message}');
     } catch (error) {
       return Result.failure('오류가 발생했습니다: $error');
     }

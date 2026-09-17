@@ -92,6 +92,37 @@ class CommunityPostRepositoryImpl implements CommunityPostRepository {
     };
   }
 
+  /// 현재 사용자가 좋아요한 게시글 DTO 목록을 도메인 모델로 변환해 반환합니다.
+  @override
+  Future<Result<List<CommunityPost>>> getLikedPosts({
+    int limit = 20,
+    DateTime? cursor,
+  }) async {
+    final accountId = _currentAccountId;
+    if (accountId == null) {
+      return const Result.failure('로그인이 필요합니다.');
+    }
+
+    final result = await dataSource.getLikedPosts(
+      accountId: accountId,
+      limit: limit,
+      cursor: cursor,
+    );
+
+    return switch (result) {
+      Success(data: final dtoList) => Result.success(
+        dtoList
+            .map(
+              (CommunityPostDto dto) => dto.toModel(
+                currentUserId: _currentAccountId,
+              ),
+            )
+            .toList(),
+      ),
+      Failure(message: final msg) => Result.failure(msg),
+    };
+  }
+
   /// 이미지가 있는 최신 게시글 DTO 목록을 도메인 모델로 변환해 반환합니다.
   @override
   Future<Result<List<CommunityPost>>> getLatestPostsWithImages({
