@@ -119,16 +119,24 @@ class HomePostDetailViewModel extends Notifier<HomePostDetailState> {
       case ToggleCommentLike(:final commentId):
         _toggleCommentLike(commentId);
       case EditComment(:final commentId):
-        _startEditingComment(commentId);
+        if (!state.isEditingCommentSubmitting) {
+          _startEditingComment(commentId);
+        }
       case ChangeEditingComment(:final content):
-        state = state.copyWith(editingCommentContent: content);
+        if (!state.isEditingCommentSubmitting) {
+          state = state.copyWith(editingCommentContent: content);
+        }
       case SubmitEditingComment():
-        _submitEditingComment();
+        if (!state.isEditingCommentSubmitting) {
+          _submitEditingComment();
+        }
       case CancelEditingComment():
-        state = state.copyWith(
-          editingCommentId: null,
-          editingCommentContent: '',
-        );
+        if (!state.isEditingCommentSubmitting) {
+          state = state.copyWith(
+            editingCommentId: null,
+            editingCommentContent: '',
+          );
+        }
       case DeleteComment():
       case ReportComment():
         break;
@@ -296,8 +304,13 @@ class HomePostDetailViewModel extends Notifier<HomePostDetailState> {
 
   Future<void> _submitEditingComment() async {
     final commentId = state.editingCommentId;
-    if (commentId == null || state.editingCommentContent.trim().isEmpty) return;
+    if (state.isEditingCommentSubmitting ||
+        commentId == null ||
+        state.editingCommentContent.trim().isEmpty) {
+      return;
+    }
     final comment = state.comments.firstWhere((item) => item.id == commentId);
+    state = state.copyWith(isEditingCommentSubmitting: true);
     final result = await _commentRepository.updateComment(
       commentId: commentId,
       content: state.editingCommentContent,
@@ -310,9 +323,11 @@ class HomePostDetailViewModel extends Notifier<HomePostDetailState> {
         state = state.copyWith(
           editingCommentId: null,
           editingCommentContent: '',
+          isEditingCommentSubmitting: false,
         );
         await _fetchComments();
       case Failure(message: final message):
+        state = state.copyWith(isEditingCommentSubmitting: false);
         _eventController.add(HomePostDetailEvent.showMessage(message));
     }
   }

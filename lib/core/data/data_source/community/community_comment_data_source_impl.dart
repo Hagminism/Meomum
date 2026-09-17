@@ -37,7 +37,7 @@ class CommunityCommentDataSourceImpl implements CommunityCommentDataSource {
           .from('comments')
           .select(_commentSelect)
           .eq('post_id', postId)
-          .order('created_at');
+          .order('created_at', ascending: true);
       final list = response as List<dynamic>;
       return Result.success(
         list

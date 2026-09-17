@@ -31,6 +31,7 @@ class HomePostDetailComments extends StatelessWidget {
       replyParentId: state.replyParentId,
       editingCommentId: state.editingCommentId,
       editingContent: state.editingCommentContent,
+      isEditingSubmitting: state.isEditingCommentSubmitting,
       onReply: (String commentId) => onAction(
         HomePostDetailAction.replyToComment(commentId),
       ),

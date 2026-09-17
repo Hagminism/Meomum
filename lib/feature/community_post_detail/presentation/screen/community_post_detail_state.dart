@@ -21,6 +21,7 @@ abstract class CommunityPostDetailState with _$CommunityPostDetailState {
     String? replyParentId,
     String? editingCommentId,
     @Default('') String editingCommentContent,
+    @Default(false) bool isEditingCommentSubmitting,
     String? focusCommentId,
     @Default('') String commentContent,
     XFile? commentImage,

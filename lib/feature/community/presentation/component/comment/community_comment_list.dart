@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:meomum/feature/community/domain/model/community_comment.dart';
+import 'package:meomum/feature/community/presentation/component/comment/community_comment_edit_form.dart';
 import 'package:meomum/feature/community/presentation/component/post/community_profile_avatar.dart';
 import 'package:meomum/ui/app_colors.dart';
 
@@ -11,6 +12,7 @@ class CommunityCommentList extends StatefulWidget {
   final String? replyParentId;
   final String? editingCommentId;
   final String editingContent;
+  final bool isEditingSubmitting;
   final void Function(String commentId) onReply;
   final void Function(String commentId) onLike;
   final void Function(String commentId) onEdit;
@@ -29,6 +31,7 @@ class CommunityCommentList extends StatefulWidget {
     required this.replyParentId,
     required this.editingCommentId,
     required this.editingContent,
+    required this.isEditingSubmitting,
     required this.onReply,
     required this.onLike,
     required this.onEdit,
@@ -129,7 +132,7 @@ class _CommunityCommentListState extends State<CommunityCommentList> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Expanded(
                       child: Wrap(
@@ -176,7 +179,12 @@ class _CommunityCommentListState extends State<CommunityCommentList> {
                     if (!comment.isDeleted)
                       PopupMenuButton<String>(
                         padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(
+                          minWidth: 44,
+                          minHeight: 44,
+                        ),
                         iconSize: 20,
+                        color: AppColors.white,
                         onSelected: (String value) {
                           switch (value) {
                             case 'edit':
@@ -208,7 +216,7 @@ class _CommunityCommentListState extends State<CommunityCommentList> {
                       ),
                   ],
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 2),
                 if (comment.isDeleted)
                   const Text(
                     '삭제된 댓글입니다.',
@@ -284,35 +292,12 @@ class _CommunityCommentListState extends State<CommunityCommentList> {
   }
 
   Widget _buildEditField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        TextField(
-          autofocus: true,
-          maxLength: 1000,
-          minLines: 1,
-          maxLines: 5,
-          controller: _editingController,
-          onChanged: widget.onEditChanged,
-          decoration: const InputDecoration(
-            isDense: true,
-            border: OutlineInputBorder(),
-          ),
-        ),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextButton(
-              onPressed: widget.onEditCancel,
-              child: const Text('취소'),
-            ),
-            FilledButton(
-              onPressed: widget.onEditSubmit,
-              child: const Text('저장'),
-            ),
-          ],
-        ),
-      ],
+    return CommunityCommentEditForm(
+      controller: _editingController,
+      isSubmitting: widget.isEditingSubmitting,
+      onChanged: widget.onEditChanged,
+      onCancel: widget.onEditCancel,
+      onSubmit: widget.onEditSubmit,
     );
   }
 

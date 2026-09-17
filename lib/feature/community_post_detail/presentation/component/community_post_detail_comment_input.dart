@@ -54,7 +54,7 @@ class _CommunityPostDetailCommentInputState
     return SafeArea(
       top: false,
       child: Container(
-        padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+        padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
         decoration: BoxDecoration(
           color: AppColors.white,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
