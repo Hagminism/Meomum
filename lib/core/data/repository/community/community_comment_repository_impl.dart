@@ -57,7 +57,7 @@ class CommunityCommentRepositoryImpl implements CommunityCommentRepository {
       cursor: cursor,
     );
     return switch (result) {
-      Success(data: final dtos) => Result.success(_mapComments(dtos)),
+      Success(data: final dtos) => Result.success(_mapMyComments(dtos)),
       Failure(message: final message) => Result.failure(message),
     };
   }
@@ -146,21 +146,15 @@ class CommunityCommentRepositoryImpl implements CommunityCommentRepository {
   }
 
   List<CommunityComment> _mapComments(List<CommunityCommentDto> dtos) {
-    final baseComments = dtos
-        .map(
-          (CommunityCommentDto dto) => dto.toModel(
-            currentUserId: _authRepository.currentUser?.id,
-          ),
-        )
-        .toList(growable: false);
+    final comments = _mapDtos(dtos);
     final replyCounts = <String, int>{};
-    for (final comment in baseComments) {
+    for (final comment in comments) {
       final parentId = comment.parentId;
       if (parentId != null) {
         replyCounts[parentId] = (replyCounts[parentId] ?? 0) + 1;
       }
     }
-    final comments = baseComments
+    final commentsWithReplyCounts = comments
         .map(
           (CommunityComment comment) => comment.copyWith(
             replyCount: replyCounts[comment.id] ?? 0,
@@ -168,18 +162,20 @@ class CommunityCommentRepositoryImpl implements CommunityCommentRepository {
         )
         .toList(growable: false);
 
-    if (comments.isEmpty ||
-        comments.every((CommunityComment item) {
+    if (commentsWithReplyCounts.isEmpty ||
+        commentsWithReplyCounts.every((CommunityComment item) {
           return item.parentId == null;
         })) {
-      return comments;
+      return commentsWithReplyCounts;
     }
 
-    final roots = comments
+    final roots = commentsWithReplyCounts
         .where((CommunityComment comment) => comment.parentId == null)
         .toList(growable: false);
     final repliesByRoot = <String, List<CommunityComment>>{};
-    for (final reply in comments.where((CommunityComment comment) {
+    for (final reply in commentsWithReplyCounts.where((
+      CommunityComment comment,
+    ) {
       return comment.parentId != null;
     })) {
       repliesByRoot.putIfAbsent(reply.parentId!, () => []).add(reply);
@@ -190,6 +186,20 @@ class CommunityCommentRepositoryImpl implements CommunityCommentRepository {
         ...?repliesByRoot[root.id],
       ],
     ];
+  }
+
+  List<CommunityComment> _mapMyComments(List<CommunityCommentDto> dtos) {
+    return _mapDtos(dtos);
+  }
+
+  List<CommunityComment> _mapDtos(List<CommunityCommentDto> dtos) {
+    return dtos
+        .map(
+          (CommunityCommentDto dto) => dto.toModel(
+            currentUserId: _authRepository.currentUser?.id,
+          ),
+        )
+        .toList(growable: false);
   }
 
   Future<Result<bool>> _cleanupAndFail({
