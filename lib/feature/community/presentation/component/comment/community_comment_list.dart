@@ -135,63 +135,81 @@ class _CommunityCommentListState extends State<CommunityCommentList> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Expanded(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Flexible(
-                            child: Text(
-                              comment.nickname,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontFamily: 'Pretendard',
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                height: 1.25,
-                                color: AppColors.communityText,
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  comment.nickname,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontFamily: 'Pretendard',
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    height: 1.25,
+                                    color: AppColors.communityText,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                          if (isPostAuthor) ...[
-                            const SizedBox(width: 4),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 4,
-                                vertical: 3,
+                              if (isPostAuthor) ...[
+                                const SizedBox(width: 4),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 4,
+                                    vertical: 3,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.placeTagBadge,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: const Text(
+                                    '작성자',
+                                    style: TextStyle(
+                                      fontFamily: 'Pretendard',
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                              const SizedBox(width: 4),
+                              Container(
+                                width: 2,
+                                height: 2,
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFD9D9D9),
+                                  shape: BoxShape.circle,
+                                ),
                               ),
-                              decoration: BoxDecoration(
-                                color: AppColors.placeTagBadge,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: const Text(
-                                '작성자',
+                              const SizedBox(width: 4),
+                              Text(
+                                comment.timeLabel,
                                 style: TextStyle(
                                   fontFamily: 'Pretendard',
                                   fontSize: 12,
+                                  fontWeight: FontWeight.w400,
+                                  height: 1,
+                                  color: AppColors.communityText,
                                 ),
                               ),
-                            ),
-                          ],
-                          const SizedBox(width: 4),
-                          Container(
-                            width: 2,
-                            height: 2,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFD9D9D9),
-                              shape: BoxShape.circle,
-                            ),
+                            ],
                           ),
-                          const SizedBox(width: 4),
-                          Text(
-                            comment.timeLabel,
-                            style: TextStyle(
-                              fontFamily: 'Pretendard',
-                              fontSize: 12,
-                              fontWeight: FontWeight.w400,
-                              height: 1,
-                              color: AppColors.communityText,
+                          if (comment.neighborhood.isNotEmpty)
+                            const SizedBox(height: 4),
+                          if (comment.neighborhood.isNotEmpty)
+                            Text(
+                              comment.neighborhood,
+                              style: TextStyle(
+                                fontFamily: 'Pretendard',
+                                fontSize: 14,
+                                fontWeight: FontWeight.w400,
+                                height: 1,
+                                color: AppColors.communityMetaText,
+                              ),
                             ),
-                          ),
                         ],
                       ),
                     ),
@@ -235,18 +253,7 @@ class _CommunityCommentListState extends State<CommunityCommentList> {
                       ),
                   ],
                 ),
-                if (comment.neighborhood.isNotEmpty) const SizedBox(height: 4),
-                if (comment.neighborhood.isNotEmpty)
-                  Text(
-                    comment.neighborhood,
-                    style: TextStyle(
-                      fontFamily: 'Pretendard',
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      height: 1,
-                      color: AppColors.communityMetaText,
-                    ),
-                  ),
+                const SizedBox(height: 8),
                 if (comment.isDeleted)
                   const Text(
                     '삭제된 댓글입니다.',

@@ -59,6 +59,7 @@ class CommunityCommentEditForm extends StatelessWidget {
               counterText: '${controller.text.length}/1000',
               counterStyle: const TextStyle(
                 color: AppColors.communityMetaText,
+                height: 2.5,
                 fontFamily: 'Pretendard',
                 fontSize: 12,
               ),
