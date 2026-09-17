@@ -15,6 +15,7 @@ class Routes {
   static const String communityLocationSearch = 'location-search';
   static const String report = 'report';
   static const String map = '/map';
+  static const String mapSearch = 'map-search';
   static const String jobs = '/jobs';
   static const String myPage = '/my-page';
   static const String myPageSettings = 'settings';
