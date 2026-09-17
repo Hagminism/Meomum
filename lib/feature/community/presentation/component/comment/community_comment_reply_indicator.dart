@@ -16,18 +16,9 @@ class CommunityCommentReplyIndicator extends StatelessWidget {
     final foregroundColor = enabled ? AppColors.primary : AppColors.hintIcon;
 
     return Padding(
-      padding: const EdgeInsets.only(left: 8, right: 4, bottom: 10),
+      padding: const EdgeInsets.only(left: 4, right: 4, bottom: 10),
       child: Row(
         children: [
-          Container(
-            width: 4,
-            height: 18,
-            decoration: BoxDecoration(
-              color: foregroundColor,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(width: 8),
           Expanded(
             child: Text(
               '답글을 작성하고 있어요.',
