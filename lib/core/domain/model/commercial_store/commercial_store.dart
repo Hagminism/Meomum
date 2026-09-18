@@ -20,3 +20,7 @@ abstract class CommercialStore with _$CommercialStore {
   factory CommercialStore.fromJson(Map<String, dynamic> json) =>
       _$CommercialStoreFromJson(json);
 }
+
+extension CommercialStoreDisplayName on CommercialStore {
+  String get displayName => '$name${branchName ?? ''}';
+}

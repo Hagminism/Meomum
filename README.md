@@ -40,7 +40,7 @@
 - GoRouter
 - Supabase Database, Storage, RPC, RLS
 - Auth0
-- Naver Map 및 Search API
+- Naver Map 및 NAVER API
 - Freezed / JSON Serializable / Build Runner
 
 MVVM 기반 Clean Architecture를 바탕으로 구성하고, 사용자 액션은 MVI 방식으로 처리합니다.

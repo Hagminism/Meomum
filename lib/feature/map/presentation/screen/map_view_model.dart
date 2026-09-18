@@ -11,7 +11,7 @@ import 'package:meomum/feature/map/presentation/screen/map_state.dart';
 
 class MapViewModel extends Notifier<MapState> {
   /// 검색 반경
-  static const int _nearbySearchRadiusMeter = 1000;
+  static const int _nearbySearchRadiusMeter = 500;
 
   /// 재검색 버튼 디바운스 설정 시간
   static const Duration _researchCooldownDuration = Duration(seconds: 3);

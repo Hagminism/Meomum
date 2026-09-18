@@ -13,6 +13,7 @@ class MapBottomDrawer extends StatefulWidget {
   final void Function(MapCategory category) onCategoryPressed;
   final void Function() onCurrentLocationPressed;
   final void Function() onResearchPressed;
+  final void Function(CommercialStore store) onStoreSelected;
 
   const MapBottomDrawer({
     super.key,
@@ -23,6 +24,7 @@ class MapBottomDrawer extends StatefulWidget {
     required this.onCategoryPressed,
     required this.onCurrentLocationPressed,
     required this.onResearchPressed,
+    required this.onStoreSelected,
   });
 
   @override
@@ -70,40 +72,48 @@ class _MapBottomDrawerState extends State<MapBottomDrawer> {
           maxChildSize,
         );
 
-        // 드래그 중 변경되는 컨트롤러의 크기에 맞춰
-        // 드로어와 플로팅 컨트롤의 위치를 갱신합니다.
-        return AnimatedBuilder(
-          animation: _drawerController,
-          builder: (context, child) {
-            final currentChildSize = _drawerController.isAttached
-                ? _drawerController.size.clamp(minChildSize, maxChildSize)
-                : minChildSize;
-            final currentDrawerHeight = availableHeight * currentChildSize;
-            final currentDrawerTop = availableHeight - currentDrawerHeight;
+        // 드로어와 플로팅 컨트롤을 분리해
+        // controller 알림이 드로어 자체를 빌드 중 갱신하지 않도록 합니다.
+        return Stack(
+          children: [
+            Positioned.fill(
+              child: MapBottomDrawerSheet(
+                controller: _drawerController,
+                initialChildSize: minChildSize,
+                minChildSize: minChildSize,
+                maxChildSize: maxChildSize,
+                bottomPadding: _bottomNavigationHeight,
+                isLoading: widget.isResearchLoading,
+                stores: widget.stores,
+                selectedCategory: widget.selectedCategory,
+                onCategoryPressed: widget.onCategoryPressed,
+                onStoreSelected: widget.onStoreSelected,
+              ),
+            ),
+            Positioned.fill(
+              child: AnimatedBuilder(
+                animation: _drawerController,
+                builder: (context, child) {
+                  final currentChildSize = _drawerController.isAttached
+                      ? _drawerController.size.clamp(
+                          minChildSize,
+                          maxChildSize,
+                        )
+                      : minChildSize;
+                  final currentDrawerHeight =
+                      availableHeight * currentChildSize;
+                  final currentDrawerTop =
+                      availableHeight - currentDrawerHeight;
 
-            // 드로어가 플로팅 컨트롤 영역까지 확장되면
-            // 겹침을 방지하기 위해 컨트롤을 숨깁니다.
-            final controlsVisible =
-                currentDrawerTop >
-                expandedTop + _floatingButtonHeight + _floatingButtonSpacing;
+                  // 드로어가 플로팅 컨트롤 영역까지 확장되면
+                  // 겹침을 방지하기 위해 컨트롤을 숨깁니다.
+                  final controlsVisible =
+                      currentDrawerTop >
+                      expandedTop +
+                          _floatingButtonHeight +
+                          _floatingButtonSpacing;
 
-            return Stack(
-              children: [
-                Positioned.fill(
-                  child: MapBottomDrawerSheet(
-                    controller: _drawerController,
-                    initialChildSize: minChildSize,
-                    minChildSize: minChildSize,
-                    maxChildSize: maxChildSize,
-                    bottomPadding: _bottomNavigationHeight,
-                    isLoading: widget.isResearchLoading,
-                    stores: widget.stores,
-                    selectedCategory: widget.selectedCategory,
-                    onCategoryPressed: widget.onCategoryPressed,
-                  ),
-                ),
-                Positioned.fill(
-                  child: MapBottomDrawerControls(
+                  return MapBottomDrawerControls(
                     isVisible: controlsVisible,
                     isResearchEnabled: widget.isResearchEnabled,
                     isResearchLoading: widget.isResearchLoading,
@@ -116,11 +126,11 @@ class _MapBottomDrawerState extends State<MapBottomDrawer> {
                     controlHeight: _floatingButtonHeight,
                     onCurrentLocationPressed: widget.onCurrentLocationPressed,
                     onResearchPressed: widget.onResearchPressed,
-                  ),
-                ),
-              ],
-            );
-          },
+                  );
+                },
+              ),
+            ),
+          ],
         );
       },
     );
