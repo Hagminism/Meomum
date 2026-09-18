@@ -19,7 +19,10 @@ class CustomBottomAppBar extends StatelessWidget {
       extendBody: true,
       body: navigationShell,
       bottomNavigationBar: ClipRRect(
-        borderRadius: BorderRadius.circular(30.0),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(30.0),
+          topRight: Radius.circular(30.0),
+        ),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: Container(
