@@ -16,9 +16,11 @@ void main() {
     address: '서울특별시 중구 세종대로 1',
   );
 
-  testWidgets('검색 결과 매장은 터치 피드백만 제공한다', (
+  testWidgets('검색 결과 매장을 선택하면 상세 선택 콜백을 호출한다', (
     WidgetTester tester,
   ) async {
+    CommercialStore? selectedStore;
+
     await tester.pumpWidget(
       MaterialApp(
         home: MapSearchScreen(
@@ -28,17 +30,19 @@ void main() {
             hasSearched: true,
           ),
           onAction: (MapSearchAction action) {},
+          onStoreSelected: (CommercialStore value) {
+            selectedStore = value;
+          },
         ),
       ),
     );
 
-    expect(find.text('머뭄 카페'), findsOneWidget);
-    expect(find.text('시청점'), findsOneWidget);
+    expect(find.text('머뭄 카페시청점'), findsOneWidget);
     expect(find.text('서울특별시 중구 세종대로 1'), findsOneWidget);
 
-    await tester.tap(find.text('머뭄 카페'));
+    await tester.tap(find.text('머뭄 카페시청점'));
     await tester.pump();
 
-    expect(find.text('머뭄 카페'), findsOneWidget);
+    expect(selectedStore, store);
   });
 }

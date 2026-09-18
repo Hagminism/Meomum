@@ -4,91 +4,97 @@ import 'package:meomum/ui/app_colors.dart';
 
 class MapStoreListItem extends StatelessWidget {
   final CommercialStore store;
+  final void Function()? onTap;
 
   const MapStoreListItem({
     super.key,
     required this.store,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final distance = store.distanceMeters;
+    final address = store.address?.trim();
+    final semanticLabel = [
+      store.displayName,
+      if (address?.isNotEmpty ?? false) address!,
+      if (distance != null) '${_formatDistance(distance)} 거리',
+    ].join(', ');
 
-    return Material(
-      color: AppColors.white,
-      child: InkWell(
-        onTap: () {},
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(
-                Icons.storefront_outlined,
-                color: AppColors.primary,
-                size: 22,
-                semanticLabel: '매장',
+    return Semantics(
+      button: onTap != null,
+      enabled: onTap != null,
+      label: semanticLabel,
+      child: Material(
+        color: AppColors.homeBackground,
+        child: InkWell(
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(16, 16, 12, 16),
+            decoration: const BoxDecoration(
+              border: Border(
+                bottom: BorderSide(color: AppColors.divider),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      store.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: AppColors.black,
-                        fontFamily: 'Pretendard',
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    if (store.branchName?.isNotEmpty ?? false)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 2),
-                        child: Text(
-                          store.branchName!,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: AppColors.feedContentText,
-                            fontFamily: 'Pretendard',
-                            fontSize: 14,
-                          ),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        store.displayName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: AppColors.black,
+                          fontFamily: 'Pretendard',
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          height: 1.2,
                         ),
                       ),
-                    if (store.address?.isNotEmpty ?? false)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: Text(
-                          store.address!,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: AppColors.textSecondary,
-                            fontFamily: 'Pretendard',
-                            fontSize: 13,
+                      if (address?.isNotEmpty ?? false)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 6),
+                          child: Text(
+                            address!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: AppColors.textSecondary,
+                              fontFamily: 'Pretendard',
+                              fontSize: 13,
+                              height: 1.2,
+                            ),
                           ),
                         ),
-                      ),
-                  ],
-                ),
-              ),
-              if (distance != null)
-                Padding(
-                  padding: const EdgeInsets.only(left: 8),
-                  child: Text(
-                    _formatDistance(distance),
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
-                      fontFamily: 'Pretendard',
-                      fontSize: 12,
-                    ),
+                    ],
                   ),
                 ),
-            ],
+                const SizedBox(width: 12),
+                if (distance != null)
+                  Text(
+                    _formatDistance(distance),
+                    style: const TextStyle(
+                      color: AppColors.primary,
+                      fontFamily: 'Pretendard',
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      height: 1.2,
+                    ),
+                  ),
+                const SizedBox(width: 6),
+                const Icon(
+                  Icons.arrow_forward_rounded,
+                  color: AppColors.textSecondary,
+                  size: 18,
+                ),
+              ],
+            ),
           ),
         ),
       ),

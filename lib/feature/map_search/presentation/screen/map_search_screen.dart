@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:meomum/core/domain/model/commercial_store/commercial_store.dart';
 import 'package:meomum/feature/map_search/presentation/component/map_search_result_item.dart';
 import 'package:meomum/feature/map_search/presentation/screen/map_search_action.dart';
 import 'package:meomum/feature/map_search/presentation/screen/map_search_state.dart';
@@ -7,11 +8,13 @@ import 'package:meomum/ui/app_colors.dart';
 class MapSearchScreen extends StatelessWidget {
   final MapSearchState state;
   final void Function(MapSearchAction action) onAction;
+  final void Function(CommercialStore store)? onStoreSelected;
 
   const MapSearchScreen({
     super.key,
     required this.state,
     required this.onAction,
+    this.onStoreSelected,
   });
 
   @override
@@ -194,6 +197,7 @@ class MapSearchScreen extends StatelessWidget {
         return MapSearchResultItem(
           key: ValueKey(store.id),
           store: store,
+          onTap: onStoreSelected == null ? null : () => onStoreSelected!(store),
         );
       },
     );

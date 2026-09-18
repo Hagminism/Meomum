@@ -66,7 +66,7 @@ class StoreMarkerManager {
           (store) => NClusterableMarker(
             id: store.id,
             position: NLatLng(store.latitude, store.longitude),
-            caption: NOverlayCaption(text: store.name),
+            caption: NOverlayCaption(text: store.displayName),
             iconTintColor: AppColors.primary,
             size: Size(30, 40),
           ),

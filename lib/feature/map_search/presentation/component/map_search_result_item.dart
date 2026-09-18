@@ -4,10 +4,12 @@ import 'package:meomum/ui/app_colors.dart';
 
 class MapSearchResultItem extends StatelessWidget {
   final CommercialStore store;
+  final void Function()? onTap;
 
   const MapSearchResultItem({
     super.key,
     required this.store,
+    this.onTap,
   });
 
   @override
@@ -15,7 +17,7 @@ class MapSearchResultItem extends StatelessWidget {
     return Material(
       color: AppColors.white,
       child: InkWell(
-        onTap: () {},
+        onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Row(
@@ -33,7 +35,7 @@ class MapSearchResultItem extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      store.name,
+                      store.displayName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -43,20 +45,6 @@ class MapSearchResultItem extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    if (store.branchName?.isNotEmpty ?? false)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 3),
-                        child: Text(
-                          store.branchName!,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: AppColors.feedContentText,
-                            fontFamily: 'Pretendard',
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
                     if (store.address?.isNotEmpty ?? false)
                       Padding(
                         padding: const EdgeInsets.only(top: 5),
@@ -86,6 +74,15 @@ class MapSearchResultItem extends StatelessWidget {
                     ),
                   ),
                 ),
+              const Padding(
+                padding: EdgeInsets.only(left: 8),
+                child: Icon(
+                  Icons.chevron_right_rounded,
+                  color: AppColors.textSecondary,
+                  size: 22,
+                  semanticLabel: '상세 보기',
+                ),
+              ),
             ],
           ),
         ),

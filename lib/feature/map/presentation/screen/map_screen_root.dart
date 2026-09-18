@@ -5,6 +5,7 @@ import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meomum/core/data/repository/location/location_repository_impl.dart';
+import 'package:meomum/core/domain/model/commercial_store/commercial_store.dart';
 import 'package:meomum/core/domain/model/location/geo_location.dart';
 import 'package:meomum/core/presentation/component/app_snackbar.dart';
 import 'package:meomum/core/routing/routes.dart';
@@ -45,6 +46,8 @@ class _MapScreenRootState extends ConsumerState<MapScreenRoot> {
 
     _mapView = _createMapView();
 
+    ref.listenManual<MapState>(mapViewModelProvider, _handleMapStateChanged);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final viewModel = ref.read(mapViewModelProvider.notifier);
 
@@ -59,6 +62,30 @@ class _MapScreenRootState extends ConsumerState<MapScreenRoot> {
         }
       });
     });
+  }
+
+  /// 실제로 표시되는 마커 ID가 변경된 경우에만 지도 오버레이를 동기화합니다.
+  void _handleMapStateChanged(MapState? previous, MapState next) {
+    final previousStores = previous?.visibleStores;
+    final nextStores = next.visibleStores;
+
+    if (previousStores != null &&
+        !_hasDifferentMarkerIds(previousStores, nextStores)) {
+      return;
+    }
+
+    unawaited(_markerManager.updateStores(nextStores));
+  }
+
+  bool _hasDifferentMarkerIds(
+    List<CommercialStore> previous,
+    List<CommercialStore> next,
+  ) {
+    final previousIds = previous.map((store) => store.id).toSet();
+    final nextIds = next.map((store) => store.id).toSet();
+
+    return previousIds.length != nextIds.length ||
+        !previousIds.containsAll(nextIds);
   }
 
   /// mapView를 생성합니다.
@@ -153,21 +180,10 @@ class _MapScreenRootState extends ConsumerState<MapScreenRoot> {
     final state = ref.watch(mapViewModelProvider);
     final viewModel = ref.read(mapViewModelProvider.notifier);
 
-    // 상가 목록에 변경이 있거나 카테고리가 변경되면,
-    // 화면에 표시되는 마커들을 전부 제거하고, 새로 확정된 내용을 기반으로 마커를 재표시합니다.
-    ref.listen<MapState>(mapViewModelProvider, (previous, next) {
-      final storesChanged = previous?.nearbyStores != next.nearbyStores;
-      final categoryChanged =
-          previous?.selectedCategory != next.selectedCategory;
-
-      if (storesChanged || categoryChanged) {
-        _markerManager.updateStores(next.visibleStores);
-      }
-    });
-
     return MapScreen(
       mapView: _mapView ?? _createMapView(),
       state: state,
+      onStoreSelected: _openStoreDetail,
       onAction: (action) {
         switch (action) {
           case MapReady():
@@ -187,6 +203,10 @@ class _MapScreenRootState extends ConsumerState<MapScreenRoot> {
         }
       },
     );
+  }
+
+  void _openStoreDetail(CommercialStore store) {
+    context.push(Routes.storeDetailLocation(store));
   }
 
   /// 현위치 기준 상가 재검색을 실시합니다.

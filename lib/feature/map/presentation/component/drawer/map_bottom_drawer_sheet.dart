@@ -16,6 +16,7 @@ class MapBottomDrawerSheet extends StatelessWidget {
   final List<CommercialStore> stores;
   final MapCategory? selectedCategory;
   final void Function(MapCategory category) onCategoryPressed;
+  final void Function(CommercialStore store) onStoreSelected;
 
   const MapBottomDrawerSheet({
     super.key,
@@ -28,6 +29,7 @@ class MapBottomDrawerSheet extends StatelessWidget {
     required this.stores,
     required this.selectedCategory,
     required this.onCategoryPressed,
+    required this.onStoreSelected,
   });
 
   @override
@@ -44,7 +46,7 @@ class MapBottomDrawerSheet extends StatelessWidget {
       builder: (context, scrollController) {
         return DecoratedBox(
           decoration: BoxDecoration(
-            color: AppColors.white,
+            color: AppColors.homeBackground,
             border: const Border(
               top: BorderSide(color: AppColors.divider),
             ),
@@ -66,7 +68,7 @@ class MapBottomDrawerSheet extends StatelessWidget {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFA1A1A2),
+                      color: AppColors.homeBackground,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -78,13 +80,24 @@ class MapBottomDrawerSheet extends StatelessWidget {
               ),
               const Padding(
                 padding: EdgeInsets.fromLTRB(16, 4, 16, 8),
-                child: Text(
-                  '가까운 매장이 먼저 표시됩니다.',
-                  style: TextStyle(
-                    color: AppColors.textSecondary,
-                    fontFamily: 'Pretendard',
-                    fontSize: 13,
-                  ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      size: 13,
+                      color: AppColors.textSecondary,
+                    ),
+                    SizedBox(width: 4),
+                    Text(
+                      '가까운 매장이 먼저 표시됩니다.',
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontFamily: 'Pretendard',
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               if (isLoading)
@@ -114,7 +127,10 @@ class MapBottomDrawerSheet extends StatelessWidget {
                 )
               else
                 ...stores.map(
-                  (store) => MapStoreListItem(store: store),
+                  (store) => MapStoreListItem(
+                    store: store,
+                    onTap: () => onStoreSelected(store),
+                  ),
                 ),
             ],
           ),
