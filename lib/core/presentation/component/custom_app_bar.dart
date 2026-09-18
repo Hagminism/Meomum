@@ -9,6 +9,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool? showBackButton;
   final bool? showMoreButton;
   final double? toolbarHeight;
+  final Widget? trailing;
+  final String? backButtonTooltip;
   final void Function()? onSettingsTap;
   final void Function()? onClosePressed;
   final void Function()? onBackPressed;
@@ -26,6 +28,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.showBackButton,
     this.showMoreButton,
     this.toolbarHeight,
+    this.trailing,
+    this.backButtonTooltip,
     this.onBackPressed,
     this.moreItemBuilder,
     this.onMoreSelected,
@@ -56,6 +60,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                       minWidth: 44,
                       minHeight: 44,
                     ),
+                    tooltip: backButtonTooltip,
                     icon: const Icon(Icons.chevron_left_rounded, size: 32),
                     color: AppColors.communityMetaText,
                   ),
@@ -109,6 +114,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               itemBuilder:
                   moreItemBuilder ?? (_) => const <PopupMenuEntry<Object>>[],
             ),
+          ?trailing,
         ],
       ),
     );

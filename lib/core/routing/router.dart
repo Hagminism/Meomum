@@ -27,6 +27,8 @@ import 'package:meomum/feature/settings_notice/presentation/screen/settings_noti
 import 'package:meomum/feature/settings/presentation/screen/settings_screen_root.dart';
 import 'package:meomum/feature/sign_in/presentation/screen/sign_in_screen_root.dart';
 import 'package:meomum/feature/splash/presentation/screen/splash_screen_root.dart';
+import 'package:meomum/feature/store_detail/presentation/screen/store_detail_screen_root.dart';
+import 'package:meomum/ui/app_colors.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -146,6 +148,31 @@ final routerProvider = Provider<GoRouter>((Ref ref) {
                     parentNavigatorKey: rootNavigatorKey,
                     path: Routes.mapSearch,
                     builder: (_, _) => const MapSearchScreenRoot(),
+                  ),
+                  GoRoute(
+                    parentNavigatorKey: rootNavigatorKey,
+                    path: Routes.storeDetail,
+                    builder: (_, GoRouterState state) {
+                      final store = Routes.storeFromDetailQuery(
+                        state.uri.queryParameters[Routes.storeDetailQuery],
+                      );
+                      if (store == null) {
+                        return const Scaffold(
+                          backgroundColor: AppColors.homeBackground,
+                          body: Center(
+                            child: Text(
+                              '매장 정보를 불러오지 못했습니다.',
+                              style: TextStyle(
+                                fontFamily: 'Pretendard',
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+
+                      return StoreDetailScreenRoot(store: store);
+                    },
                   ),
                 ],
               ),
