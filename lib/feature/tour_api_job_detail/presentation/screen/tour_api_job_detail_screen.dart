@@ -77,7 +77,7 @@ class TourApiJobDetailScreen extends StatelessWidget {
   Widget _buildHeader(TourApiJobPosting posting) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: const Color(0xFFF4F8F1),
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFFD9E7D2)),
       ),
@@ -86,28 +86,7 @@ class TourApiJobDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                const Icon(
-                  Icons.verified_rounded,
-                  size: 17,
-                  color: AppColors.uploadButton,
-                ),
-                const SizedBox(width: 5),
-                const Text(
-                  '한국관광공사 · 관광인 제공',
-                  style: TextStyle(
-                    fontFamily: 'Pretendard',
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.uploadButton,
-                  ),
-                ),
-                const Spacer(),
-                if (posting.isClosed) _buildClosedBadge(),
-              ],
-            ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 4),
             Text(
               posting.title,
               style: const TextStyle(
@@ -337,27 +316,6 @@ class TourApiJobDetailScreen extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildClosedBadge() {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: const Color(0xFFE9E9E9),
-        borderRadius: BorderRadius.circular(7),
-      ),
-      child: const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-        child: Text(
-          '마감',
-          style: TextStyle(
-            fontFamily: 'Pretendard',
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            color: AppColors.communityMetaText,
-          ),
-        ),
       ),
     );
   }
