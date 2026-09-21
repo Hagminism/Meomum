@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meomum/ui/app_colors.dart';
 
-class MediaPreviewList extends StatelessWidget {
+class ReportMediaPreviewList extends StatelessWidget {
   final List<XFile> mediaFiles;
   final void Function(int) onRemove;
 
-  const MediaPreviewList({
+  const ReportMediaPreviewList({
     super.key,
     required this.mediaFiles,
     required this.onRemove,
