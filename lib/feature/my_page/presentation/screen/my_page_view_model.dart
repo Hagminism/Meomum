@@ -6,6 +6,7 @@ import 'package:meomum/core/domain/model/category/category.dart';
 import 'package:meomum/core/utils/result.dart';
 import 'package:meomum/feature/community/domain/model/enum/community_category.dart';
 import 'package:meomum/feature/my_page/domain/model/current_stay.dart';
+import 'package:meomum/feature/my_page/domain/model/my_page_promotion.dart';
 import 'package:meomum/feature/my_page/domain/model/stay_history_item.dart';
 import 'package:meomum/feature/my_page/presentation/screen/my_page_action.dart';
 import 'package:meomum/feature/my_page/presentation/screen/my_page_event.dart';
@@ -21,6 +22,7 @@ class MyPageViewModel extends Notifier<MyPageState> {
     return MyPageState(
       user: authRepository.currentUser,
       currentStay: _mockCurrentStay,
+      promotions: _promotions,
       categories: _categories,
       stayHistories: _mockStayHistories,
     );
@@ -68,6 +70,8 @@ class MyPageViewModel extends Notifier<MyPageState> {
         _eventController.add(
           const MyPageEvent.showMessage('현재 머무는 중 메뉴는 추후 연결 예정입니다.'),
         );
+      case ChangePromotionIndex(:final index):
+        state = state.copyWith(currentPromotionIndex: index);
       case TapCategory(:final id):
         _eventController.add(
           MyPageEvent.showMessage('카테고리($id)는 추후 연결 예정입니다.'),
@@ -123,6 +127,30 @@ class MyPageViewModel extends Notifier<MyPageState> {
         imageAssetPath: category.assetPath,
       ),
   ]);
+
+  static const List<MyPagePromotion> _promotions = [
+    MyPagePromotion(
+      id: 'community',
+      eyebrow: '지역 커뮤니티',
+      title: '낯선 동네에서도\n함께 시작해요',
+      subtitle: '동네 이야기와 유용한 정보를 만나보세요.',
+      imageAssetPath: 'assets/images/my_page_carousel/community.png',
+    ),
+    MyPagePromotion(
+      id: 'stay-and-work',
+      eyebrow: '머무는 생활',
+      title: '머물 곳과 일할 곳을\n한 번에 찾아보세요',
+      subtitle: '숙소와 일자리 정보를 한곳에서 확인해요.',
+      imageAssetPath: 'assets/images/my_page_carousel/stay-and-work.png',
+    ),
+    MyPagePromotion(
+      id: 'local-discovery',
+      eyebrow: '지역 발견',
+      title: '오늘의 동네를\n더 깊이 알아가요',
+      subtitle: '맛집, 관광, 생활 정보를 모아봤어요.',
+      imageAssetPath: 'assets/images/my_page_carousel/local-discovery.png',
+    ),
+  ];
 
   static const List<StayHistoryItem> _mockStayHistories = [
     StayHistoryItem(
