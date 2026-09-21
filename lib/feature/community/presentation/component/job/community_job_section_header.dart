@@ -3,13 +3,11 @@ import 'package:meomum/ui/app_colors.dart';
 
 class CommunityJobSectionHeader extends StatelessWidget {
   final String title;
-  final String? subtitle;
   final bool showSourceNotice;
 
   const CommunityJobSectionHeader({
     super.key,
     required this.title,
-    this.subtitle,
     this.showSourceNotice = false,
   });
 
@@ -33,17 +31,6 @@ class CommunityJobSectionHeader extends StatelessWidget {
                     color: AppColors.communityText,
                   ),
                 ),
-                if (subtitle != null) ...[
-                  const SizedBox(height: 3),
-                  Text(
-                    subtitle!,
-                    style: const TextStyle(
-                      fontFamily: 'Pretendard',
-                      fontSize: 12,
-                      color: AppColors.communityMetaText,
-                    ),
-                  ),
-                ],
               ],
             ),
           ),

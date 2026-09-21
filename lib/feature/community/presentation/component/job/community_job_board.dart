@@ -54,10 +54,7 @@ class CommunityJobBoard extends StatelessWidget {
               padding: EdgeInsets.fromLTRB(16, 14, 16, bottomPadding),
               children: [
                 if (showUserPosts) ...[
-                  const CommunityJobSectionHeader(
-                    title: '우리동네 구인글',
-                    subtitle: '이웃이 직접 올린 일자리예요.',
-                  ),
+                  const CommunityJobSectionHeader(title: '우리동네 구인글'),
                   if (hasUserPosts)
                     ...userPosts.map(
                       (CommunityPost post) => Padding(
@@ -66,12 +63,10 @@ class CommunityJobBoard extends StatelessWidget {
                           post: post,
                           onTap: () =>
                               onAction(CommunityAction.tapPost(post.id)),
-                          onLike: () => onAction(
-                            CommunityAction.toggleLike(post.id),
-                          ),
-                          onComment: () => onAction(
-                            CommunityAction.tapComment(post.id),
-                          ),
+                          onLike: () =>
+                              onAction(CommunityAction.toggleLike(post.id)),
+                          onComment: () =>
+                              onAction(CommunityAction.tapComment(post.id)),
                           onShare: () => onShare(post, context),
                         ),
                       ),
@@ -79,7 +74,6 @@ class CommunityJobBoard extends StatelessWidget {
                 ] else ...[
                   const CommunityJobSectionHeader(
                     title: '관광인 채용',
-                    subtitle: '한국관광공사 관광인에서 제공하는 채용정보예요.',
                     showSourceNotice: true,
                   ),
                   if (isApiLoading)
@@ -140,7 +134,6 @@ class CommunityJobBoard extends StatelessWidget {
           sliver: SliverToBoxAdapter(
             child: CommunityJobSectionHeader(
               title: showUserPosts ? '우리동네 구인글' : '관광인 채용',
-              subtitle: showUserPosts ? null : '한국관광공사 관광인에서 제공하는 채용정보예요.',
               showSourceNotice: !showUserPosts,
             ),
           ),

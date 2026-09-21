@@ -20,16 +20,16 @@ class TourApiJobDetailScreen extends StatelessWidget {
     final posting = state.posting;
     if (state.isLoading && posting == null) {
       return const Scaffold(
+        backgroundColor: AppColors.homeBackground,
         body: Center(
-          child: CircularProgressIndicator(color: Color(0xFF63C77E)),
+          child: CircularProgressIndicator(color: AppColors.primary),
         ),
       );
     }
     if (posting == null) {
       return Scaffold(
-        body: Center(
-          child: Text(state.errorMessage ?? '채용정보를 불러오지 못했습니다.'),
-        ),
+        backgroundColor: AppColors.homeBackground,
+        body: Center(child: Text(state.errorMessage ?? '채용정보를 불러오지 못했습니다.')),
       );
     }
 
