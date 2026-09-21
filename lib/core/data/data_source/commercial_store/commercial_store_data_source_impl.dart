@@ -12,6 +12,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CommercialStoreDataSourceImpl implements CommercialStoreDataSource {
   static const int _maxRetries = 2;
+  static const int _searchResultLimit = 50;
   static const Duration _baseRetryDelay = Duration(seconds: 1);
 
   final SupabaseClient _client;
@@ -84,7 +85,10 @@ class CommercialStoreDataSourceImpl implements CommercialStoreDataSource {
       try {
         final response = await _client.rpc(
           'search_commercial_stores',
-          params: {'p_query': normalizedQuery},
+          params: {
+            'p_query': normalizedQuery,
+            'p_limit': _searchResultLimit,
+          },
         );
 
         final list = response as List<dynamic>;

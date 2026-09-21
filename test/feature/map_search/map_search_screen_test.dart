@@ -45,4 +45,25 @@ void main() {
 
     expect(selectedStore, store);
   });
+
+  testWidgets('검색어를 입력하면 queryChanged 액션을 전달한다', (
+    WidgetTester tester,
+  ) async {
+    final actions = <MapSearchAction>[];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MapSearchScreen(
+          state: const MapSearchState(),
+          onAction: (MapSearchAction action) {
+            actions.add(action);
+          },
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byType(EditableText), '영등포');
+
+    expect(actions, [const MapSearchAction.queryChanged('영등포')]);
+  });
 }

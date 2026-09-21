@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:meomum/core/domain/model/commercial_store/commercial_store.dart';
-import 'package:meomum/feature/map_search/presentation/component/map_search_result_item.dart';
+import 'package:meomum/feature/map/presentation/component/drawer/map_store_list_item.dart';
+import 'package:meomum/feature/map_search/presentation/component/map_search_field.dart';
 import 'package:meomum/feature/map_search/presentation/screen/map_search_action.dart';
 import 'package:meomum/feature/map_search/presentation/screen/map_search_state.dart';
 import 'package:meomum/ui/app_colors.dart';
@@ -44,37 +45,15 @@ class MapSearchScreen extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-              child: TextField(
+              child: MapSearchField(
+                query: state.query,
                 autofocus: true,
-                cursorColor: AppColors.primary,
-                textInputAction: TextInputAction.search,
                 onChanged: (query) {
                   onAction(MapSearchAction.queryChanged(query));
                 },
-                onSubmitted: (_) {
+                onSubmitted: () {
                   onAction(const MapSearchAction.searchSubmitted());
                 },
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: AppColors.inputBackground,
-                  hintText: '상호명, 지점명, 주소로 검색',
-                  labelText: '매장 검색',
-                  hintStyle: const TextStyle(
-                    color: AppColors.placeholderText,
-                    fontFamily: 'Pretendard',
-                    fontSize: 16,
-                  ),
-                  prefixIcon: const Icon(
-                    Icons.search,
-                    color: AppColors.hintIcon,
-                    semanticLabel: '검색',
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
-                ),
               ),
             ),
             Expanded(child: _buildContent()),
@@ -187,14 +166,12 @@ class MapSearchScreen extends StatelessWidget {
       );
     }
 
-    return ListView.separated(
+    return ListView.builder(
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       itemCount: state.results.length,
-      separatorBuilder: (context, index) =>
-          const Divider(height: 1, color: AppColors.divider),
       itemBuilder: (context, index) {
         final store = state.results[index];
-        return MapSearchResultItem(
+        return MapStoreListItem(
           key: ValueKey(store.id),
           store: store,
           onTap: onStoreSelected == null ? null : () => onStoreSelected!(store),
