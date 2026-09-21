@@ -108,6 +108,11 @@ class _CommunityScreenRootState extends ConsumerState<CommunityScreenRoot> {
           case TapPost(:final postId):
             unawaited(_openPost(postId, viewModel));
             break;
+          case TapTourApiJob(:final empmnInfoNo):
+            context.push(
+              '${Routes.community}/${Routes.tourApiJobDetailSegment}/$empmnInfoNo',
+            );
+            break;
           case LoadMore():
           case Refresh():
             viewModel.onAction(action);

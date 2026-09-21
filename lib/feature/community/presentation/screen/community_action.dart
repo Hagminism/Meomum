@@ -16,6 +16,8 @@ sealed class CommunityAction with _$CommunityAction {
   const factory CommunityAction.toggleLike(String postId) = ToggleLike;
   const factory CommunityAction.tapComment(String postId) = TapComment;
   const factory CommunityAction.tapPost(String postId) = TapPost;
+  const factory CommunityAction.tapTourApiJob(String empmnInfoNo) =
+      TapTourApiJob;
   const factory CommunityAction.tapWrite() = TapWrite;
   const factory CommunityAction.loadMore() = LoadMore;
   const factory CommunityAction.refresh() = Refresh;
