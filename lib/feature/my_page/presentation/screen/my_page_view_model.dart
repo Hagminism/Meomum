@@ -133,14 +133,14 @@ class MyPageViewModel extends Notifier<MyPageState> {
       id: 'community',
       eyebrow: '지역 커뮤니티',
       title: '낯선 동네에서도\n함께 시작해요',
-      subtitle: '동네 이야기와 유용한 정보를 만나보세요.',
+      subtitle: '동네 이야기와 유용한 정보를\n만나보세요.',
       imageAssetPath: 'assets/images/my_page_carousel/community.png',
     ),
     MyPagePromotion(
       id: 'stay-and-work',
       eyebrow: '머무는 생활',
       title: '머물 곳과 일할 곳을\n한 번에 찾아보세요',
-      subtitle: '숙소와 일자리 정보를 한곳에서 확인해요.',
+      subtitle: '숙소와 일자리 정보를\n한곳에서 확인해요.',
       imageAssetPath: 'assets/images/my_page_carousel/stay-and-work.png',
     ),
     MyPagePromotion(

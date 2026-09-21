@@ -24,7 +24,7 @@ class MyPagePromotionCarousel extends StatelessWidget {
     final normalizedIndex = currentIndex.clamp(0, promotions.length - 1);
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      padding: const EdgeInsets.fromLTRB(16, 32, 16, 0),
       child: Column(
         children: [
           AspectRatio(
@@ -102,7 +102,7 @@ class MyPagePromotionCarousel extends StatelessWidget {
                 Color(0xCFFFFFFF),
                 Color(0x00FFFFFF),
               ],
-              stops: [0.0, 0.68],
+              stops: [0.0, 1],
             ),
           ),
         ),
@@ -146,12 +146,12 @@ class MyPagePromotionCarousel extends StatelessWidget {
                     promotion.subtitle,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Pretendard',
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
                       height: 1.35,
-                      color: AppColors.feedContentText,
+                      color: AppColors.black.withValues(alpha: 0.7),
                     ),
                   ),
                 ],
