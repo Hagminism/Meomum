@@ -79,7 +79,7 @@ class CommunityJobFormFields extends StatelessWidget {
           onChanged: onWorkingTimeChanged,
         ),
         const SizedBox(height: 20),
-        _buildLabel('모집 마감'),
+        _buildLabel('모집 마감', isRequired: true),
         const SizedBox(height: 8),
         _buildDeadlineField(),
         const SizedBox(height: 20),
@@ -87,9 +87,18 @@ class CommunityJobFormFields extends StatelessWidget {
     );
   }
 
-  Widget _buildLabel(String label) {
-    return Text(
-      label,
+  Widget _buildLabel(String label, {bool isRequired = false}) {
+    return Text.rich(
+      TextSpan(
+        text: label,
+        children: [
+          if (isRequired)
+            const TextSpan(
+              text: ' *',
+              style: TextStyle(color: AppColors.snackBarError),
+            ),
+        ],
+      ),
       style: const TextStyle(
         fontFamily: 'Pretendard',
         fontSize: 14,
@@ -134,9 +143,7 @@ class CommunityJobFormFields extends StatelessWidget {
               height: 50,
               padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
-                color: isAlwaysRecruiting
-                    ? AppColors.categoryHighlight
-                    : AppColors.inputBackground,
+                color: AppColors.inputBackground,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: isAlwaysRecruiting
@@ -149,11 +156,11 @@ class CommunityJobFormFields extends StatelessWidget {
                 children: [
                   Icon(
                     isAlwaysRecruiting
-                        ? Icons.check_circle_rounded
+                        ? Icons.check_rounded
                         : Icons.circle_outlined,
                     size: 18,
                     color: isAlwaysRecruiting
-                        ? AppColors.uploadButton
+                        ? AppColors.primary
                         : AppColors.textSecondary,
                   ),
                   const SizedBox(width: 6),
@@ -191,7 +198,7 @@ class CommunityJobFormFields extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14),
           decoration: BoxDecoration(
             color: muted
-                ? AppColors.categoryHighlight
+                ? AppColors.textSecondary.withValues(alpha: 0.3)
                 : AppColors.inputBackground,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: AppColors.inputBorder),
@@ -206,15 +213,17 @@ class CommunityJobFormFields extends StatelessWidget {
                     fontFamily: 'Pretendard',
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
-                    color: muted || label != '급여 형태 선택'
+                    color: muted
+                        ? AppColors.white
+                        : label != '급여 형태 선택'
                         ? AppColors.black
                         : AppColors.placeholderText,
                   ),
                 ),
               ),
-              const Icon(
+              Icon(
                 Icons.keyboard_arrow_down_rounded,
-                color: AppColors.hintIcon,
+                color: muted ? AppColors.white : AppColors.hintIcon,
               ),
             ],
           ),
@@ -245,6 +254,7 @@ class CommunityJobFormFields extends StatelessWidget {
         inputFormatters: inputFormatters,
         onChanged: onChanged,
         onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+        cursorColor: AppColors.primary,
         style: const TextStyle(
           fontFamily: 'Pretendard',
           fontSize: 15,
