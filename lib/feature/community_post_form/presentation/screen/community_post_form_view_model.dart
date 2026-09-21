@@ -13,27 +13,32 @@ import 'package:meomum/feature/community/domain/model/community_regions.dart';
 import 'package:meomum/feature/community/domain/model/enum/community_category.dart';
 import 'package:meomum/feature/community_post_form/presentation/model/community_post_form_media.dart';
 import 'package:meomum/feature/community_post_form/presentation/screen/community_post_form_action.dart';
-import 'package:meomum/feature/community_edit_post/presentation/screen/community_edit_post_event.dart';
-import 'package:meomum/feature/community_edit_post/presentation/screen/community_edit_post_state.dart';
+import 'package:meomum/feature/community_post_form/presentation/screen/community_post_form_event.dart';
+import 'package:meomum/feature/community_post_form/presentation/screen/community_post_form_state.dart';
 
-class CommunityEditPostViewModel extends Notifier<CommunityEditPostState> {
-  final String postId;
+class CommunityPostFormViewModel extends Notifier<CommunityPostFormState> {
+  final String? postId;
   final ImagePicker _imagePicker = ImagePicker();
   late final CommunityPostRepository _repository;
 
-  CommunityEditPostViewModel(this.postId);
+  CommunityPostFormViewModel(this.postId);
 
-  final StreamController<CommunityEditPostEvent> _eventController =
-      StreamController<CommunityEditPostEvent>.broadcast();
+  final StreamController<CommunityPostFormEvent> _eventController =
+      StreamController<CommunityPostFormEvent>.broadcast();
 
-  Stream<CommunityEditPostEvent> get eventStream => _eventController.stream;
+  Stream<CommunityPostFormEvent> get eventStream => _eventController.stream;
 
   @override
-  CommunityEditPostState build() {
+  CommunityPostFormState build() {
     _repository = ref.watch(communityPostRepositoryProvider);
     ref.onDispose(() => _eventController.close());
 
     final currentUser = ref.read(authRepositoryProvider).currentUser;
+    if (postId == null &&
+        (currentUser == null || !currentUser.hasSelectedRegion)) {
+      throw StateError('거주 지역이 설정된 사용자만 글을 작성할 수 있습니다.');
+    }
+
     final initialRegion = currentUser?.hasSelectedRegion == true
         ? CommunityRegion(
             upperRegion: currentUser!.upperRegion!,
@@ -41,21 +46,27 @@ class CommunityEditPostViewModel extends Notifier<CommunityEditPostState> {
           )
         : CommunityRegions.pohang;
 
-    Future.microtask(_fetchPost);
+    if (postId != null) {
+      Future.microtask(_fetchPost);
+    }
 
-    return CommunityEditPostState(
+    return CommunityPostFormState(
       postId: postId,
       selectedRegion: initialRegion,
+      initialRegion: initialRegion,
+      isInitializing: postId != null,
     );
   }
 
   void onAction(CommunityPostFormAction action) {
-    if (state.isLoading) return;
+    if (state.isLoading || state.isInitializing) return;
 
     switch (action) {
       case TapRegionSelect():
-        break;
       case TapCategorySelect():
+      case TapLocationSearch():
+      case TapRecruitmentDeadline():
+      case TapBack():
         break;
       case SelectRegion(:final region):
         state = state.copyWith(selectedRegion: region);
@@ -75,11 +86,9 @@ class CommunityEditPostViewModel extends Notifier<CommunityEditPostState> {
               : false,
         );
       case PickMedia():
-        _pickMedia();
+        unawaited(_pickMedia());
       case RemoveMedia(:final index):
         _removeMedia(index);
-      case TapLocationSearch():
-        break;
       case SetLocation(:final place):
         state = state.copyWith(selectedPlace: place);
       case ChangeTitle(:final title):
@@ -95,8 +104,6 @@ class CommunityEditPostViewModel extends Notifier<CommunityEditPostState> {
         state = state.copyWith(wageAmount: amount);
       case ChangeWorkingTime(:final workingTime):
         state = state.copyWith(workingTime: workingTime);
-      case TapRecruitmentDeadline():
-        break;
       case SelectRecruitmentDeadline(:final deadline):
         state = state.copyWith(recruitmentDeadline: deadline);
       case ToggleAlwaysRecruiting():
@@ -107,14 +114,12 @@ class CommunityEditPostViewModel extends Notifier<CommunityEditPostState> {
               : null,
         );
       case TapUpload():
-        _updatePost();
-      case TapBack():
-        break;
+        unawaited(_submitPost());
     }
   }
 
   Future<void> _fetchPost() async {
-    final result = await _repository.getPostById(postId: postId);
+    final result = await _repository.getPostById(postId: postId!);
 
     if (!ref.mounted) return;
 
@@ -161,7 +166,7 @@ class CommunityEditPostViewModel extends Notifier<CommunityEditPostState> {
     final remainingCount = 10 - state.mediaItems.length;
     if (remainingCount <= 0) {
       _eventController.add(
-        const CommunityEditPostEvent.showMessage(
+        const CommunityPostFormEvent.showMessage(
           '사진과 동영상은 최대 10개까지 추가할 수 있습니다.',
         ),
       );
@@ -186,22 +191,73 @@ class CommunityEditPostViewModel extends Notifier<CommunityEditPostState> {
       );
     } catch (error) {
       _eventController.add(
-        CommunityEditPostEvent.showMessage('사진/동영상을 불러오지 못했습니다: $error'),
+        CommunityPostFormEvent.showMessage('사진/동영상을 불러오지 못했습니다: $error'),
       );
     }
   }
 
   void _removeMedia(int index) {
     if (index < 0 || index >= state.mediaItems.length) return;
+
     final updatedItems = List<CommunityPostFormMedia>.from(state.mediaItems)
       ..removeAt(index);
     state = state.copyWith(mediaItems: updatedItems);
   }
 
-  Future<void> _updatePost() async {
-    if (state.isLoading || !state.isUploadEnabled) return;
+  Future<void> _submitPost() async {
+    if (state.isLoading) return;
+
+    if (!state.isUploadEnabled) {
+      _eventController.add(
+        CommunityPostFormEvent.showMessage(state.uploadValidationMessage),
+      );
+      return;
+    }
 
     state = state.copyWith(isLoading: true);
+
+    if (postId == null) {
+      final imageFiles = state.mediaItems
+          .where((CommunityPostFormMedia media) => media.isLocal)
+          .map((CommunityPostFormMedia media) => File(media.localFile!.path))
+          .toList(growable: false);
+      final result = state.category == CommunityCategory.job
+          ? await _repository.createJobPost(
+              upperRegion: state.selectedRegion.upperRegion,
+              lowerRegion: state.selectedRegion.lowerRegion,
+              title: state.title.trim(),
+              content: state.content.trim(),
+              wageType: state.wageType,
+              wageAmount: double.tryParse(state.wageAmount),
+              workingTime: state.workingTime.trim().isEmpty
+                  ? null
+                  : state.workingTime.trim(),
+              recruitmentDeadline: state.recruitmentDeadline,
+              isAlwaysRecruiting: state.isAlwaysRecruiting,
+              imageFiles: imageFiles,
+              place: state.selectedPlace,
+            )
+          : await _repository.createPost(
+              upperRegion: state.selectedRegion.upperRegion,
+              lowerRegion: state.selectedRegion.lowerRegion,
+              category: state.category,
+              title: state.title.trim(),
+              content: state.content.trim(),
+              imageFiles: imageFiles,
+              place: state.selectedPlace,
+            );
+
+      if (!ref.mounted) return;
+
+      state = state.copyWith(isLoading: false);
+      switch (result) {
+        case Success(data: final post):
+          _eventController.add(CommunityPostFormEvent.postCreated(post));
+        case Failure(message: final message):
+          _eventController.add(CommunityPostFormEvent.showMessage(message));
+      }
+      return;
+    }
 
     final existingImages = state.mediaItems
         .where((CommunityPostFormMedia media) => !media.isLocal)
@@ -214,7 +270,7 @@ class CommunityEditPostViewModel extends Notifier<CommunityEditPostState> {
 
     final result = state.category == CommunityCategory.job
         ? await _repository.updateJobPost(
-            postId: postId,
+            postId: postId!,
             upperRegion: state.selectedRegion.upperRegion,
             lowerRegion: state.selectedRegion.lowerRegion,
             title: state.title.trim(),
@@ -231,7 +287,7 @@ class CommunityEditPostViewModel extends Notifier<CommunityEditPostState> {
             place: state.selectedPlace,
           )
         : await _repository.updatePost(
-            postId: postId,
+            postId: postId!,
             upperRegion: state.selectedRegion.upperRegion,
             lowerRegion: state.selectedRegion.lowerRegion,
             category: state.category,
@@ -245,19 +301,16 @@ class CommunityEditPostViewModel extends Notifier<CommunityEditPostState> {
     if (!ref.mounted) return;
 
     state = state.copyWith(isLoading: false);
-
     switch (result) {
       case Success():
-        _eventController.add(
-          const CommunityEditPostEvent.postUpdatedSuccess(),
-        );
+        _eventController.add(const CommunityPostFormEvent.postUpdated());
       case Failure(message: final message):
-        _eventController.add(CommunityEditPostEvent.showMessage(message));
+        _eventController.add(CommunityPostFormEvent.showMessage(message));
     }
   }
 }
 
-final communityEditPostViewModelProvider = NotifierProvider.autoDispose
-    .family<CommunityEditPostViewModel, CommunityEditPostState, String>(
-      CommunityEditPostViewModel.new,
+final communityPostFormViewModelProvider = NotifierProvider.autoDispose
+    .family<CommunityPostFormViewModel, CommunityPostFormState, String?>(
+      CommunityPostFormViewModel.new,
     );
