@@ -100,6 +100,7 @@ class _CommunityScreenRootState extends ConsumerState<CommunityScreenRoot> {
             break;
           case SelectRegion():
           case SelectCategory():
+          case SelectJobSource():
           case ChangeImagePage():
           case ToggleLike():
           case TapComment():

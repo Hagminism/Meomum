@@ -63,6 +63,8 @@ class CommunityViewModel extends Notifier<CommunityState> {
           selectedCategory: action.category,
           imagePageByPostId: const {},
         );
+      case SelectJobSource():
+        state = state.copyWith(selectedJobSource: action.source);
       case ChangeImagePage():
         state = state.copyWith(
           imagePageByPostId: {
@@ -73,9 +75,7 @@ class CommunityViewModel extends Notifier<CommunityState> {
       case ToggleLike():
         _toggleLike(action.postId);
       case TapComment():
-        _eventController.add(
-          const CommunityEvent.showMessage('댓글 기능은 추후 연결 예정입니다.'),
-        );
+        break;
       case TapPost():
         break;
       case TapTourApiJob():

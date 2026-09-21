@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:meomum/feature/community/domain/model/community_post.dart';
 import 'package:meomum/feature/community/domain/model/enum/community_category.dart';
+import 'package:meomum/feature/community/domain/model/enum/community_job_source.dart';
 import 'package:meomum/feature/community/presentation/component/category/community_category_filter_bar.dart';
+import 'package:meomum/feature/community/presentation/component/job/community_job_source_filter_bar.dart';
 import 'package:meomum/feature/community/presentation/component/post/community_post_card.dart';
 import 'package:meomum/feature/community/presentation/component/job/community_job_board.dart';
 import 'package:meomum/feature/community/presentation/component/region/community_region_header.dart';
@@ -50,6 +52,13 @@ class CommunityScreen extends StatelessWidget {
                       onAction(CommunityAction.selectCategory(category));
                     },
                   ),
+                  if (state.selectedCategory == CommunityCategory.job)
+                    CommunityJobSourceFilterBar(
+                      selectedSource: state.selectedJobSource,
+                      onSourcePressed: (CommunityJobSource source) {
+                        onAction(CommunityAction.selectJobSource(source));
+                      },
+                    ),
                   Expanded(
                     child: state.isLoading
                         ? const Center(
@@ -63,6 +72,7 @@ class CommunityScreen extends StatelessWidget {
                             apiPostings: state.tourApiJobPostings,
                             isApiLoading: state.isTourApiLoading,
                             apiErrorMessage: state.tourApiErrorMessage,
+                            selectedSource: state.selectedJobSource,
                             bottomPadding: bottomSafeArea + 164,
                             onAction: onAction,
                             onShare: onShare,

@@ -186,6 +186,7 @@ class MyPageDetailScreen extends StatelessWidget {
       case community.TapRegionFilter():
       case community.SelectRegion():
       case community.SelectCategory():
+      case community.SelectJobSource():
       case community.TapWrite():
       case community.LoadMore():
       case community.Refresh():
