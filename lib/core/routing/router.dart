@@ -17,6 +17,7 @@ import 'package:meomum/feature/location_search/presentation/screen/location_sear
 import 'package:meomum/feature/map/presentation/screen/map_screen_root.dart';
 import 'package:meomum/feature/map_search/presentation/screen/map_search_screen_root.dart';
 import 'package:meomum/feature/edit_profile/presentation/screen/edit_profile_screen_root.dart';
+import 'package:meomum/feature/edit_region/presentation/screen/edit_region_screen_root.dart';
 import 'package:meomum/feature/my_page/presentation/screen/my_page_screen_root.dart';
 import 'package:meomum/feature/my_page_detail/presentation/screen/my_page_detail_screen_root.dart';
 import 'package:meomum/feature/on_boarding/feature/create_profile/presentation/screen/create_profile_screen_root.dart';
@@ -205,6 +206,13 @@ final routerProvider = Provider<GoRouter>((Ref ref) {
                         parentNavigatorKey: rootNavigatorKey,
                         path: Routes.myPageFeedEditProfile,
                         builder: (_, _) => const EditProfileScreenRoot(),
+                        routes: [
+                          GoRoute(
+                            parentNavigatorKey: rootNavigatorKey,
+                            path: Routes.myPageFeedEditRegion,
+                            builder: (_, _) => const EditRegionScreenRoot(),
+                          ),
+                        ],
                       ),
                       GoRoute(
                         parentNavigatorKey: rootNavigatorKey,

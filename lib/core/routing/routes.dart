@@ -28,6 +28,7 @@ class Routes {
   static const String myPageSettingsNotices = 'notices';
   static const String myPageFeed = 'feed';
   static const String myPageFeedEditProfile = 'edit-profile';
+  static const String myPageFeedEditRegion = 'edit-region';
   static const String myPageFeedPostDetail = 'post-detail/:postId';
 
   static String storeDetailLocation(CommercialStore store) {
