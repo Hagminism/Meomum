@@ -56,17 +56,6 @@ class _MapSearchFieldState extends State<MapSearchField> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '매장 검색',
-            style: TextStyle(
-              color: AppColors.primary,
-              fontFamily: 'Pretendard',
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              height: 1.2,
-            ),
-          ),
-          const SizedBox(height: 4),
           DecoratedBox(
             decoration: BoxDecoration(
               color: AppColors.inputBackground,
