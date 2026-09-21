@@ -26,6 +26,13 @@ abstract class CommunityPostDto with _$CommunityPostDto {
     Map<String, dynamic>? profiles,
     @JsonKey(name: 'post_images') @Default([]) List<dynamic> postImages,
     @JsonKey(name: 'post_likes') @Default([]) List<dynamic> postLikes,
+    @JsonKey(name: 'job_wage_type') String? jobWageType,
+    @JsonKey(name: 'job_wage_amount') double? jobWageAmount,
+    @JsonKey(name: 'job_working_time') String? jobWorkingTime,
+    @JsonKey(name: 'job_recruitment_deadline') String? jobRecruitmentDeadline,
+    @JsonKey(name: 'job_is_always_recruiting')
+    @Default(false)
+    bool jobIsAlwaysRecruiting,
   }) = _CommunityPostDto;
 
   factory CommunityPostDto.fromJson(Map<String, dynamic> json) =>

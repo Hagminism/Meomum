@@ -8,6 +8,7 @@ import 'package:meomum/core/data/repository/community/community_post_repository_
 import 'package:meomum/core/domain/repository/community/community_post_repository.dart';
 import 'package:meomum/core/utils/result.dart';
 import 'package:meomum/feature/community/domain/model/community_region.dart';
+import 'package:meomum/feature/community/domain/model/enum/community_category.dart';
 import 'package:meomum/feature/community_post_form/presentation/screen/community_post_form_action.dart';
 import 'package:meomum/feature/community_write/presentation/screen/community_write_event.dart';
 import 'package:meomum/feature/community_write/presentation/screen/community_write_state.dart';
@@ -53,7 +54,20 @@ class CommunityWriteViewModel extends Notifier<CommunityWriteState> {
       case SelectRegion(:final region):
         state = state.copyWith(selectedRegion: region);
       case SelectCategory(:final category):
-        state = state.copyWith(category: category);
+        state = state.copyWith(
+          category: category,
+          wageType: category == CommunityCategory.job ? state.wageType : null,
+          wageAmount: category == CommunityCategory.job ? state.wageAmount : '',
+          workingTime: category == CommunityCategory.job
+              ? state.workingTime
+              : '',
+          recruitmentDeadline: category == CommunityCategory.job
+              ? state.recruitmentDeadline
+              : null,
+          isAlwaysRecruiting: category == CommunityCategory.job
+              ? state.isAlwaysRecruiting
+              : false,
+        );
       case PickMedia():
         _pickMedia();
       case RemoveMedia(:final index):
@@ -66,6 +80,26 @@ class CommunityWriteViewModel extends Notifier<CommunityWriteState> {
         state = state.copyWith(title: title);
       case ChangeContent(:final content):
         state = state.copyWith(content: content);
+      case ChangeWageType(:final wageType):
+        state = state.copyWith(
+          wageType: wageType,
+          wageAmount: wageType == '협의' ? '' : state.wageAmount,
+        );
+      case ChangeWageAmount(:final amount):
+        state = state.copyWith(wageAmount: amount);
+      case ChangeWorkingTime(:final workingTime):
+        state = state.copyWith(workingTime: workingTime);
+      case TapRecruitmentDeadline():
+        break;
+      case SelectRecruitmentDeadline(:final deadline):
+        state = state.copyWith(recruitmentDeadline: deadline);
+      case ToggleAlwaysRecruiting():
+        state = state.copyWith(
+          isAlwaysRecruiting: !state.isAlwaysRecruiting,
+          recruitmentDeadline: state.isAlwaysRecruiting
+              ? state.recruitmentDeadline
+              : null,
+        );
       case TapUpload():
         _uploadPost();
       case TapBack():
@@ -116,7 +150,7 @@ class CommunityWriteViewModel extends Notifier<CommunityWriteState> {
 
     if (!state.isUploadEnabled) {
       _eventController.add(
-        const CommunityWriteEvent.showMessage('제목과 내용을 모두 입력해주세요.'),
+        CommunityWriteEvent.showMessage(state.uploadValidationMessage),
       );
       return;
     }
@@ -125,15 +159,31 @@ class CommunityWriteViewModel extends Notifier<CommunityWriteState> {
 
     final imageFiles = state.mediaFiles.map((file) => File(file.path)).toList();
 
-    final result = await _repository.createPost(
-      upperRegion: state.selectedRegion.upperRegion,
-      lowerRegion: state.selectedRegion.lowerRegion,
-      category: state.category,
-      title: state.title.trim(),
-      content: state.content.trim(),
-      imageFiles: imageFiles,
-      place: state.selectedPlace,
-    );
+    final result = state.category == CommunityCategory.job
+        ? await _repository.createJobPost(
+            upperRegion: state.selectedRegion.upperRegion,
+            lowerRegion: state.selectedRegion.lowerRegion,
+            title: state.title.trim(),
+            content: state.content.trim(),
+            wageType: state.wageType,
+            wageAmount: double.tryParse(state.wageAmount),
+            workingTime: state.workingTime.trim().isEmpty
+                ? null
+                : state.workingTime.trim(),
+            recruitmentDeadline: state.recruitmentDeadline,
+            isAlwaysRecruiting: state.isAlwaysRecruiting,
+            imageFiles: imageFiles,
+            place: state.selectedPlace,
+          )
+        : await _repository.createPost(
+            upperRegion: state.selectedRegion.upperRegion,
+            lowerRegion: state.selectedRegion.lowerRegion,
+            category: state.category,
+            title: state.title.trim(),
+            content: state.content.trim(),
+            imageFiles: imageFiles,
+            place: state.selectedPlace,
+          );
 
     state = state.copyWith(isLoading: false);
 

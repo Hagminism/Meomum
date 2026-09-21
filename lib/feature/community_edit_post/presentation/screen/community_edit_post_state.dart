@@ -21,6 +21,11 @@ abstract class CommunityEditPostState with _$CommunityEditPostState {
     CommunityPlace? selectedPlace,
     @Default('') String title,
     @Default('') String content,
+    String? wageType,
+    @Default('') String wageAmount,
+    @Default('') String workingTime,
+    DateTime? recruitmentDeadline,
+    @Default(false) bool isAlwaysRecruiting,
     @Default(true) bool isInitializing,
     @Default(false) bool isLoading,
     String? errorMessage,
@@ -43,6 +48,11 @@ abstract class CommunityEditPostState with _$CommunityEditPostState {
         selectedPlace != post.place ||
         title.trim() != post.title.trim() ||
         content.trim() != post.content.trim() ||
+        wageType != post.jobWageType ||
+        double.tryParse(wageAmount) != post.jobWageAmount ||
+        workingTime.trim() != (post.jobWorkingTime ?? '').trim() ||
+        recruitmentDeadline != post.jobRecruitmentDeadline ||
+        isAlwaysRecruiting != post.jobIsAlwaysRecruiting ||
         !listEquals(currentImagePaths, originalImagePaths) ||
         mediaItems.any((CommunityPostFormMedia media) => media.isLocal);
   }
@@ -53,6 +63,38 @@ abstract class CommunityEditPostState with _$CommunityEditPostState {
       title.trim().length <= 50 &&
       content.trim().isNotEmpty &&
       content.trim().length <= 10000 &&
+      (!isJob || isJobFieldsValid) &&
       hasChanges &&
       !isLoading;
+
+  bool get isJob => category == CommunityCategory.job;
+
+  bool get isJobFieldsValid {
+    if (!isAlwaysRecruiting && recruitmentDeadline == null) return false;
+    if (wageAmount.trim().isNotEmpty && wageType == null) return false;
+    if (wageType == '협의' && wageAmount.trim().isNotEmpty) return false;
+    if (wageType != null && wageType != '협의' && wageAmount.trim().isEmpty) {
+      return false;
+    }
+    return wageAmount.trim().isEmpty || double.tryParse(wageAmount) != null;
+  }
+
+  String get uploadValidationMessage {
+    if (isJob && !isAlwaysRecruiting && recruitmentDeadline == null) {
+      return '모집 마감일 또는 상시 모집을 선택해주세요.';
+    }
+    if (isJob && wageAmount.trim().isNotEmpty && wageType == null) {
+      return '급여 형태를 먼저 선택해주세요.';
+    }
+    if (isJob && wageType == '협의' && wageAmount.trim().isNotEmpty) {
+      return '급여 협의는 금액을 입력하지 않습니다.';
+    }
+    if (isJob &&
+        wageType != null &&
+        wageType != '협의' &&
+        wageAmount.trim().isEmpty) {
+      return '급여 금액을 입력해주세요.';
+    }
+    return '입력 내용을 확인해주세요.';
+  }
 }

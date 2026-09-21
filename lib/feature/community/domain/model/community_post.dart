@@ -31,6 +31,11 @@ abstract class CommunityPost with _$CommunityPost {
     @Default([]) List<CommunityPostImage> images,
     String? profileImageUrl,
     CommunityPlace? place,
+    String? jobWageType,
+    double? jobWageAmount,
+    String? jobWorkingTime,
+    DateTime? jobRecruitmentDeadline,
+    @Default(false) bool jobIsAlwaysRecruiting,
   }) = _CommunityPost;
 
   String get timeLabel => createdAt.toTimeAgo();

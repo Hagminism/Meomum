@@ -4,6 +4,7 @@ import 'package:meomum/feature/community/domain/model/community_place.dart';
 import 'package:meomum/feature/community/domain/model/community_region.dart';
 import 'package:meomum/feature/community/domain/model/enum/community_category.dart';
 import 'package:meomum/feature/community_post_form/presentation/component/community_post_form_media_preview_list.dart';
+import 'package:meomum/feature/community_post_form/presentation/component/community_job_form_fields.dart';
 import 'package:meomum/feature/community_post_form/presentation/model/community_post_form_media.dart';
 import 'package:meomum/feature/community_post_form/presentation/screen/community_post_form_action.dart';
 import 'package:meomum/feature/community_write/presentation/component/category/community_category_selector_button.dart';
@@ -20,6 +21,11 @@ class CommunityPostFormScreen extends StatelessWidget {
   final CommunityPlace? selectedPlace;
   final String title;
   final String content;
+  final String? wageType;
+  final String wageAmount;
+  final String workingTime;
+  final DateTime? recruitmentDeadline;
+  final bool isAlwaysRecruiting;
   final bool isUploadEnabled;
   final bool isLoading;
   final void Function(CommunityPostFormAction) onAction;
@@ -34,6 +40,11 @@ class CommunityPostFormScreen extends StatelessWidget {
     required this.selectedPlace,
     required this.title,
     required this.content,
+    required this.wageType,
+    required this.wageAmount,
+    required this.workingTime,
+    required this.recruitmentDeadline,
+    required this.isAlwaysRecruiting,
     required this.isUploadEnabled,
     required this.isLoading,
     required this.onAction,
@@ -135,6 +146,37 @@ class CommunityPostFormScreen extends StatelessWidget {
                                       const CommunityPostFormAction.tapCategorySelect(),
                                     ),
                             ),
+                            if (category == CommunityCategory.job) ...[
+                              const SizedBox(height: 20),
+                              CommunityJobFormFields(
+                                wageType: wageType,
+                                wageAmount: wageAmount,
+                                workingTime: workingTime,
+                                recruitmentDeadline: recruitmentDeadline,
+                                isAlwaysRecruiting: isAlwaysRecruiting,
+                                enabled: !isLoading,
+                                onWageTypeChanged: (String? value) => onAction(
+                                  CommunityPostFormAction.changeWageType(value),
+                                ),
+                                onWageAmountChanged: (String value) => onAction(
+                                  CommunityPostFormAction.changeWageAmount(
+                                    value,
+                                  ),
+                                ),
+                                onWorkingTimeChanged: (String value) =>
+                                    onAction(
+                                      CommunityPostFormAction.changeWorkingTime(
+                                        value,
+                                      ),
+                                    ),
+                                onRecruitmentDeadlineTap: () => onAction(
+                                  const CommunityPostFormAction.tapRecruitmentDeadline(),
+                                ),
+                                onAlwaysRecruitingToggle: () => onAction(
+                                  const CommunityPostFormAction.toggleAlwaysRecruiting(),
+                                ),
+                              ),
+                            ],
                             const SizedBox(height: 20),
                             _buildSectionLabel('사진이나 동영상'),
                             const SizedBox(height: 8),

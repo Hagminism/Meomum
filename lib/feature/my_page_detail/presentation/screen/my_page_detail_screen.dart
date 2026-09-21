@@ -182,6 +182,7 @@ class MyPageDetailScreen extends StatelessWidget {
         onAction(MyPageDetailAction.toggleLike(postId));
       case community.TapComment(:final postId):
         onAction(MyPageDetailAction.tapComment(postId));
+      case community.TapTourApiJob():
       case community.TapRegionFilter():
       case community.SelectRegion():
       case community.SelectCategory():

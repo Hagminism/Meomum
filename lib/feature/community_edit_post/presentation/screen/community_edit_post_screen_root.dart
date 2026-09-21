@@ -97,8 +97,41 @@ class _CommunityEditPostScreenRootState
           case SetLocation():
           case ChangeTitle():
           case ChangeContent():
+          case ChangeWageType():
+          case ChangeWageAmount():
+          case ChangeWorkingTime():
+          case SelectRecruitmentDeadline():
+          case ToggleAlwaysRecruiting():
           case TapUpload():
             viewModel.onAction(action);
+            break;
+          case TapRecruitmentDeadline():
+            final today = DateTime.now();
+            final initialDeadline = state.recruitmentDeadline;
+            final selectedDate = await showDatePicker(
+              context: context,
+              firstDate: DateTime.now(),
+              lastDate: DateTime.now().add(const Duration(days: 3650)),
+              initialDate:
+                  initialDeadline != null && !initialDeadline.isBefore(today)
+                  ? initialDeadline
+                  : today,
+              builder: (BuildContext context, Widget? child) {
+                return Theme(
+                  data: Theme.of(context).copyWith(
+                    colorScheme: Theme.of(context).colorScheme.copyWith(
+                      primary: AppColors.primary,
+                    ),
+                  ),
+                  child: child!,
+                );
+              },
+            );
+            if (selectedDate != null && mounted) {
+              viewModel.onAction(
+                CommunityPostFormAction.selectRecruitmentDeadline(selectedDate),
+              );
+            }
             break;
         }
       },

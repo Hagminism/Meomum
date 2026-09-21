@@ -266,6 +266,67 @@ class CommunityPostDataSourceImpl implements CommunityPostDataSource {
   }
 
   @override
+  /// 일자리 게시글의 구조화 필드를 일자리 전용 RPC로 함께 저장합니다.
+  Future<Result<String>> createJobPost({
+    required String upperRegion,
+    required String lowerRegion,
+    required String title,
+    required String content,
+    String? wageType,
+    double? wageAmount,
+    String? workingTime,
+    DateTime? recruitmentDeadline,
+    required bool isAlwaysRecruiting,
+    List<CommunityUploadedImage> images = const [],
+    CommunityPlace? place,
+  }) async {
+    try {
+      final postId =
+          await _client.rpc(
+                'create_job_post_with_images',
+                params: {
+                  'p_upper_region': upperRegion,
+                  'p_lower_region': lowerRegion,
+                  'p_title': title,
+                  'p_content': content,
+                  'p_images': images
+                      .asMap()
+                      .entries
+                      .map(
+                        (entry) => {
+                          'storage_path': entry.value.storagePath,
+                          'public_url': entry.value.publicUrl,
+                          'sort_order': entry.key,
+                        },
+                      )
+                      .toList(growable: false),
+                  'p_place_name': place?.name,
+                  'p_place_latitude': place?.latitude,
+                  'p_place_longitude': place?.longitude,
+                  'p_place_address': place?.address,
+                  'p_place_road_address': place?.roadAddress,
+                  'p_place_category': place?.category,
+                  'p_job_wage_type': wageType,
+                  'p_job_wage_amount': wageAmount,
+                  'p_job_working_time': workingTime,
+                  'p_job_recruitment_deadline': recruitmentDeadline
+                      ?.toIso8601String()
+                      .split('T')
+                      .first,
+                  'p_job_is_always_recruiting': isAlwaysRecruiting,
+                },
+              )
+              as String;
+
+      return Result.success(postId);
+    } on PostgrestException catch (error) {
+      return Result.failure('구인글 등록에 실패했습니다: ${error.message}');
+    } catch (error) {
+      return Result.failure('구인글 등록에 실패했습니다: $error');
+    }
+  }
+
+  @override
   /// 게시글과 이미지 메타데이터를 수정 RPC로 원자적으로 갱신합니다.
   Future<Result<CommunityPostUpdateResult>> updatePost({
     required String postId,
@@ -325,6 +386,78 @@ class CommunityPostDataSourceImpl implements CommunityPostDataSource {
       return Result.failure('게시글 수정에 실패했습니다: ${error.message}');
     } catch (error) {
       return Result.failure('게시글 수정 중 오류가 발생했습니다: $error');
+    }
+  }
+
+  @override
+  /// 일자리 게시글의 구조화 필드를 일자리 전용 수정 RPC로 원자적으로 갱신합니다.
+  Future<Result<CommunityPostUpdateResult>> updateJobPost({
+    required String postId,
+    required String upperRegion,
+    required String lowerRegion,
+    required String title,
+    required String content,
+    String? wageType,
+    double? wageAmount,
+    String? workingTime,
+    DateTime? recruitmentDeadline,
+    required bool isAlwaysRecruiting,
+    List<CommunityUploadedImage> images = const [],
+    CommunityPlace? place,
+  }) async {
+    try {
+      final response = await _client.rpc(
+        'update_job_post_with_images',
+        params: {
+          'p_post_id': postId,
+          'p_upper_region': upperRegion,
+          'p_lower_region': lowerRegion,
+          'p_title': title,
+          'p_content': content,
+          'p_images': images
+              .asMap()
+              .entries
+              .map(
+                (entry) => {
+                  'storage_path': entry.value.storagePath,
+                  'public_url': entry.value.publicUrl,
+                  'sort_order': entry.key,
+                },
+              )
+              .toList(growable: false),
+          'p_place_name': place?.name,
+          'p_place_latitude': place?.latitude,
+          'p_place_longitude': place?.longitude,
+          'p_place_address': place?.address,
+          'p_place_road_address': place?.roadAddress,
+          'p_place_category': place?.category,
+          'p_job_wage_type': wageType,
+          'p_job_wage_amount': wageAmount,
+          'p_job_working_time': workingTime,
+          'p_job_recruitment_deadline': recruitmentDeadline
+              ?.toIso8601String()
+              .split('T')
+              .first,
+          'p_job_is_always_recruiting': isAlwaysRecruiting,
+        },
+      );
+      final responseMap = response as Map<String, dynamic>;
+      final removedPaths =
+          (responseMap['removed_storage_paths'] as List<dynamic>? ??
+                  const <dynamic>[])
+              .whereType<String>()
+              .toList(growable: false);
+
+      return Result.success(
+        CommunityPostUpdateResult(
+          postId: responseMap['post_id'] as String,
+          removedStoragePaths: removedPaths,
+        ),
+      );
+    } on PostgrestException catch (error) {
+      return Result.failure('구인글 수정에 실패했습니다: ${error.message}');
+    } catch (error) {
+      return Result.failure('구인글 수정에 실패했습니다: $error');
     }
   }
 

@@ -54,6 +54,20 @@ abstract interface class CommunityPostDataSource {
     CommunityPlace? place,
   });
 
+  Future<Result<String>> createJobPost({
+    required String upperRegion,
+    required String lowerRegion,
+    required String title,
+    required String content,
+    String? wageType,
+    double? wageAmount,
+    String? workingTime,
+    DateTime? recruitmentDeadline,
+    required bool isAlwaysRecruiting,
+    List<CommunityUploadedImage> images = const [],
+    CommunityPlace? place,
+  });
+
   Future<Result<CommunityPostUpdateResult>> updatePost({
     required String postId,
     required String upperRegion,
@@ -61,6 +75,21 @@ abstract interface class CommunityPostDataSource {
     required String category,
     required String title,
     required String content,
+    List<CommunityUploadedImage> images = const [],
+    CommunityPlace? place,
+  });
+
+  Future<Result<CommunityPostUpdateResult>> updateJobPost({
+    required String postId,
+    required String upperRegion,
+    required String lowerRegion,
+    required String title,
+    required String content,
+    String? wageType,
+    double? wageAmount,
+    String? workingTime,
+    DateTime? recruitmentDeadline,
+    required bool isAlwaysRecruiting,
     List<CommunityUploadedImage> images = const [],
     CommunityPlace? place,
   });

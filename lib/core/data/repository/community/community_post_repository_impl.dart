@@ -214,6 +214,63 @@ class CommunityPostRepositoryImpl implements CommunityPostRepository {
     };
   }
 
+  @override
+  Future<Result<CommunityPost>> createJobPost({
+    required String upperRegion,
+    required String lowerRegion,
+    required String title,
+    required String content,
+    String? wageType,
+    double? wageAmount,
+    String? workingTime,
+    DateTime? recruitmentDeadline,
+    required bool isAlwaysRecruiting,
+    List<File> imageFiles = const [],
+    CommunityPlace? place,
+  }) async {
+    final accountId = _currentAccountId;
+    if (accountId == null) {
+      return const Result.failure('로그인이 필요합니다.');
+    }
+
+    List<CommunityUploadedImage> uploadedImages = [];
+
+    if (imageFiles.isNotEmpty) {
+      final uploadResult = await _uploadImages(
+        accountId: accountId,
+        files: imageFiles,
+      );
+      switch (uploadResult) {
+        case Success(data: final images):
+          uploadedImages = images;
+        case Failure(message: final msg):
+          return Result.failure(msg);
+      }
+    }
+
+    final postResult = await dataSource.createJobPost(
+      upperRegion: upperRegion,
+      lowerRegion: lowerRegion,
+      title: title,
+      content: content,
+      wageType: wageType,
+      wageAmount: wageAmount,
+      workingTime: workingTime,
+      recruitmentDeadline: recruitmentDeadline,
+      isAlwaysRecruiting: isAlwaysRecruiting,
+      images: uploadedImages,
+      place: place,
+    );
+
+    return switch (postResult) {
+      Success(data: final postId) => _getCreatedPost(postId),
+      Failure(message: final msg) => _cleanupAndReturnFailure<CommunityPost>(
+        uploadedImages: uploadedImages,
+        message: msg,
+      ),
+    };
+  }
+
   /// 기존 이미지와 새 이미지를 합쳐 게시글을 수정하고, 실패한 새 업로드는 정리 큐에 등록합니다.
   @override
   Future<Result<bool>> updatePost({
@@ -272,6 +329,78 @@ class CommunityPostRepositoryImpl implements CommunityPostRepository {
     switch (updateResult) {
       case Success():
         // 삭제된 Storage 파일은 DB RPC가 공통 정리 큐에 등록합니다.
+        return const Result.success(true);
+      case Failure(message: final msg):
+        return _cleanupAndReturnFailure<bool>(
+          uploadedImages: uploadedImages,
+          message: msg,
+        );
+    }
+  }
+
+  @override
+  Future<Result<bool>> updateJobPost({
+    required String postId,
+    required String upperRegion,
+    required String lowerRegion,
+    required String title,
+    required String content,
+    String? wageType,
+    double? wageAmount,
+    String? workingTime,
+    DateTime? recruitmentDeadline,
+    required bool isAlwaysRecruiting,
+    List<CommunityPostImage> existingImages = const [],
+    List<File> newImageFiles = const [],
+    CommunityPlace? place,
+  }) async {
+    final accountId = _currentAccountId;
+    if (accountId == null) {
+      return const Result.failure('로그인이 필요합니다.');
+    }
+
+    List<CommunityUploadedImage> uploadedImages = [];
+
+    if (newImageFiles.isNotEmpty) {
+      final uploadResult = await _uploadImages(
+        accountId: accountId,
+        files: newImageFiles,
+      );
+      switch (uploadResult) {
+        case Success(data: final images):
+          uploadedImages = images;
+        case Failure(message: final msg):
+          return Result.failure(msg);
+      }
+    }
+
+    final retainedImages = existingImages
+        .map(
+          (CommunityPostImage image) => CommunityUploadedImage(
+            storagePath: image.storagePath,
+            publicUrl: image.publicUrl,
+          ),
+        )
+        .toList(growable: false);
+    final finalImages = [...retainedImages, ...uploadedImages];
+
+    final updateResult = await dataSource.updateJobPost(
+      postId: postId,
+      upperRegion: upperRegion,
+      lowerRegion: lowerRegion,
+      title: title,
+      content: content,
+      wageType: wageType,
+      wageAmount: wageAmount,
+      workingTime: workingTime,
+      recruitmentDeadline: recruitmentDeadline,
+      isAlwaysRecruiting: isAlwaysRecruiting,
+      images: finalImages,
+      place: place,
+    );
+
+    switch (updateResult) {
+      case Success():
         return const Result.success(true);
       case Failure(message: final msg):
         return _cleanupAndReturnFailure<bool>(
