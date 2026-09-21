@@ -13,6 +13,7 @@ import 'package:meomum/feature/home/presentation/screen/home_screen_root.dart';
 import 'package:meomum/feature/home_post_detail/presentation/screen/home_post_detail_screen_root.dart';
 import 'package:meomum/feature/community_post_detail/presentation/screen/community_post_detail_screen_root.dart';
 import 'package:meomum/feature/community_edit_post/presentation/screen/community_edit_post_screen_root.dart';
+import 'package:meomum/feature/tour_api_job_detail/presentation/screen/tour_api_job_detail_screen_root.dart';
 import 'package:meomum/feature/location_search/presentation/screen/location_search_screen_root.dart';
 import 'package:meomum/feature/map/presentation/screen/map_screen_root.dart';
 import 'package:meomum/feature/map_search/presentation/screen/map_search_screen_root.dart';
@@ -134,6 +135,15 @@ final routerProvider = Provider<GoRouter>((Ref ref) {
                         builder: (_, _) => const LocationSearchScreenRoot(),
                       ),
                     ],
+                  ),
+                  GoRoute(
+                    parentNavigatorKey: rootNavigatorKey,
+                    path: Routes.tourApiJobDetail,
+                    builder: (_, GoRouterState state) {
+                      return TourApiJobDetailScreenRoot(
+                        empmnInfoNo: state.pathParameters[Routes.empmnInfoNo]!,
+                      );
+                    },
                   ),
                 ],
               ),
