@@ -117,6 +117,13 @@ extension CommunityPostDtoMapper on CommunityPostDto {
       images: resolvedImages,
       profileImageUrl: profileImageUrl,
       place: place,
+      jobWageType: jobWageType,
+      jobWageAmount: jobWageAmount,
+      jobWorkingTime: jobWorkingTime,
+      jobRecruitmentDeadline: jobRecruitmentDeadline == null
+          ? null
+          : DateTime.tryParse(jobRecruitmentDeadline!),
+      jobIsAlwaysRecruiting: jobIsAlwaysRecruiting,
     );
   }
 }

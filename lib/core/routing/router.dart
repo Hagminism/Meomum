@@ -13,10 +13,12 @@ import 'package:meomum/feature/home/presentation/screen/home_screen_root.dart';
 import 'package:meomum/feature/home_post_detail/presentation/screen/home_post_detail_screen_root.dart';
 import 'package:meomum/feature/community_post_detail/presentation/screen/community_post_detail_screen_root.dart';
 import 'package:meomum/feature/community_edit_post/presentation/screen/community_edit_post_screen_root.dart';
+import 'package:meomum/feature/tour_api_job_detail/presentation/screen/tour_api_job_detail_screen_root.dart';
 import 'package:meomum/feature/location_search/presentation/screen/location_search_screen_root.dart';
 import 'package:meomum/feature/map/presentation/screen/map_screen_root.dart';
 import 'package:meomum/feature/map_search/presentation/screen/map_search_screen_root.dart';
 import 'package:meomum/feature/edit_profile/presentation/screen/edit_profile_screen_root.dart';
+import 'package:meomum/feature/edit_region/presentation/screen/edit_region_screen_root.dart';
 import 'package:meomum/feature/my_page/presentation/screen/my_page_screen_root.dart';
 import 'package:meomum/feature/my_page_detail/presentation/screen/my_page_detail_screen_root.dart';
 import 'package:meomum/feature/on_boarding/feature/create_profile/presentation/screen/create_profile_screen_root.dart';
@@ -134,6 +136,15 @@ final routerProvider = Provider<GoRouter>((Ref ref) {
                       ),
                     ],
                   ),
+                  GoRoute(
+                    parentNavigatorKey: rootNavigatorKey,
+                    path: Routes.tourApiJobDetail,
+                    builder: (_, GoRouterState state) {
+                      return TourApiJobDetailScreenRoot(
+                        empmnInfoNo: state.pathParameters[Routes.empmnInfoNo]!,
+                      );
+                    },
+                  ),
                 ],
               ),
             ],
@@ -205,6 +216,13 @@ final routerProvider = Provider<GoRouter>((Ref ref) {
                         parentNavigatorKey: rootNavigatorKey,
                         path: Routes.myPageFeedEditProfile,
                         builder: (_, _) => const EditProfileScreenRoot(),
+                        routes: [
+                          GoRoute(
+                            parentNavigatorKey: rootNavigatorKey,
+                            path: Routes.myPageFeedEditRegion,
+                            builder: (_, _) => const EditRegionScreenRoot(),
+                          ),
+                        ],
                       ),
                       GoRoute(
                         parentNavigatorKey: rootNavigatorKey,

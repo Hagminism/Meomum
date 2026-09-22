@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:meomum/feature/community/domain/model/enum/community_category.dart';
+import 'package:meomum/feature/community/domain/model/enum/community_job_source.dart';
 import 'package:meomum/feature/community/domain/model/community_region.dart';
 
 part 'community_action.freezed.dart';
@@ -11,11 +12,15 @@ sealed class CommunityAction with _$CommunityAction {
       SelectRegion;
   const factory CommunityAction.selectCategory(CommunityCategory category) =
       SelectCategory;
+  const factory CommunityAction.selectJobSource(CommunityJobSource source) =
+      SelectJobSource;
   const factory CommunityAction.changeImagePage(String postId, int pageIndex) =
       ChangeImagePage;
   const factory CommunityAction.toggleLike(String postId) = ToggleLike;
   const factory CommunityAction.tapComment(String postId) = TapComment;
   const factory CommunityAction.tapPost(String postId) = TapPost;
+  const factory CommunityAction.tapTourApiJob(String empmnInfoNo) =
+      TapTourApiJob;
   const factory CommunityAction.tapWrite() = TapWrite;
   const factory CommunityAction.loadMore() = LoadMore;
   const factory CommunityAction.refresh() = Refresh;

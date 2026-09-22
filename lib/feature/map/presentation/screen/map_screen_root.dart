@@ -33,9 +33,11 @@ class _MapScreenRootState extends ConsumerState<MapScreenRoot> {
   StreamSubscription<MapEvent>? _eventSubscription;
 
   // Naver 관련 위젯 및 마커 매니저
-  final StoreMarkerManager _markerManager = StoreMarkerManager();
+  late final StoreMarkerManager _markerManager;
   Widget? _mapView;
   NaverMapController? _mapController;
+  List<CommercialStore>? _selectedClusterStores;
+  Offset? _selectedClusterOffset;
 
   /// tracking mode를 변경 중인지 여부를 나타냅니다.
   bool _isUpdatingLocationTracking = false;
@@ -44,6 +46,10 @@ class _MapScreenRootState extends ConsumerState<MapScreenRoot> {
   void initState() {
     super.initState();
 
+    _markerManager = StoreMarkerManager(
+      onStoreTapped: _openStoreDetail,
+      onClusterTapped: _showClusterStores,
+    );
     _mapView = _createMapView();
 
     ref.listenManual<MapState>(mapViewModelProvider, _handleMapStateChanged);
@@ -113,7 +119,11 @@ class _MapScreenRootState extends ConsumerState<MapScreenRoot> {
             NInclusiveRange(18, 21): 15,
           },
         ),
+        clusterMarkerBuilder: _configureClusterMarker,
       ),
+      onMapTapped: (_, _) {
+        _dismissClusterSelection();
+      },
       onMapReady: (controller) {
         _mapController = controller;
         _markerManager.setController(controller);
@@ -184,6 +194,9 @@ class _MapScreenRootState extends ConsumerState<MapScreenRoot> {
       mapView: _mapView ?? _createMapView(),
       state: state,
       onStoreSelected: _openStoreDetail,
+      selectedClusterStores: _selectedClusterStores,
+      selectedClusterOffset: _selectedClusterOffset,
+      onClusterSelectionDismissed: _dismissClusterSelection,
       onAction: (action) {
         switch (action) {
           case MapReady():
@@ -205,7 +218,44 @@ class _MapScreenRootState extends ConsumerState<MapScreenRoot> {
     );
   }
 
+  void _configureClusterMarker(
+    NClusterInfo info,
+    NClusterMarker clusterMarker,
+  ) {
+    _markerManager.configureClusterMarker(info, clusterMarker);
+  }
+
+  Future<void> _showClusterStores(
+    List<CommercialStore> stores,
+    NLatLng position,
+  ) async {
+    final controller = _mapController;
+    if (controller == null || !mounted || stores.length < 2) return;
+
+    final screenPosition = await controller.latLngToScreenLocation(position);
+    if (!mounted) return;
+
+    setState(() {
+      _selectedClusterStores = stores;
+      _selectedClusterOffset = Offset(screenPosition.x, screenPosition.y);
+    });
+  }
+
+  void _dismissClusterSelection() {
+    if (_selectedClusterStores == null && _selectedClusterOffset == null) {
+      return;
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      _selectedClusterStores = null;
+      _selectedClusterOffset = null;
+    });
+  }
+
   void _openStoreDetail(CommercialStore store) {
+    _dismissClusterSelection();
     context.push(Routes.storeDetailLocation(store));
   }
 

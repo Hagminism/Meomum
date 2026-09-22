@@ -45,4 +45,55 @@ void main() {
 
     expect(selectedStore, store);
   });
+
+  testWidgets('검색어를 입력하면 queryChanged 액션을 전달한다', (
+    WidgetTester tester,
+  ) async {
+    final actions = <MapSearchAction>[];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MapSearchScreen(
+          state: const MapSearchState(),
+          onAction: (MapSearchAction action) {
+            actions.add(action);
+          },
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byType(EditableText), '영등포');
+
+    expect(actions, [const MapSearchAction.queryChanged('영등포')]);
+  });
+
+  testWidgets('검색 오류 상태에서 원시 오류 대신 다시 시도 액션을 전달한다', (
+    WidgetTester tester,
+  ) async {
+    final actions = <MapSearchAction>[];
+    const rawError = '데이터베이스 조회에 실패했습니다: statement timeout';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MapSearchScreen(
+          state: const MapSearchState(
+            query: '영등포역',
+            hasSearched: true,
+            errorMessage: rawError,
+          ),
+          onAction: (MapSearchAction action) {
+            actions.add(action);
+          },
+        ),
+      ),
+    );
+
+    expect(find.text(rawError), findsNothing);
+    expect(find.text('검색을 불러오지 못했어요.'), findsOneWidget);
+
+    await tester.tap(find.text('다시 시도'));
+    await tester.pump();
+
+    expect(actions, [const MapSearchAction.retryPressed()]);
+  });
 }

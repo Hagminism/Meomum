@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meomum/core/data/repository/auth/auth_repository_impl.dart';
 import 'package:meomum/core/data/repository/community/community_post_repository_impl.dart';
+import 'package:meomum/core/data/repository/community/tour_api_job_posting_repository_impl.dart';
 import 'package:meomum/core/domain/repository/community/community_post_repository.dart';
+import 'package:meomum/core/domain/repository/community/tour_api_job_posting_repository.dart';
 import 'package:meomum/core/utils/result.dart';
 import 'package:meomum/feature/community/domain/model/community_post.dart';
 import 'package:meomum/feature/community/domain/model/community_region.dart';
@@ -14,12 +16,14 @@ import 'package:meomum/feature/community/presentation/screen/community_state.dar
 
 class CommunityViewModel extends Notifier<CommunityState> {
   late final CommunityPostRepository _repository;
+  late final TourApiJobPostingRepository _tourApiRepository;
 
   static const int _pageSize = 20;
 
   @override
   CommunityState build() {
     _repository = ref.watch(communityPostRepositoryProvider);
+    _tourApiRepository = ref.watch(tourApiJobPostingRepositoryProvider);
     ref.onDispose(() => _eventController.close());
 
     final currentUser = ref.read(authRepositoryProvider).currentUser;
@@ -59,6 +63,8 @@ class CommunityViewModel extends Notifier<CommunityState> {
           selectedCategory: action.category,
           imagePageByPostId: const {},
         );
+      case SelectJobSource():
+        state = state.copyWith(selectedJobSource: action.source);
       case ChangeImagePage():
         state = state.copyWith(
           imagePageByPostId: {
@@ -69,10 +75,10 @@ class CommunityViewModel extends Notifier<CommunityState> {
       case ToggleLike():
         _toggleLike(action.postId);
       case TapComment():
-        _eventController.add(
-          const CommunityEvent.showMessage('댓글 기능은 추후 연결 예정입니다.'),
-        );
+        break;
       case TapPost():
+        break;
+      case TapTourApiJob():
         break;
       case TapWrite():
         break;
@@ -90,7 +96,12 @@ class CommunityViewModel extends Notifier<CommunityState> {
 
   /// 선택한 지역의 첫 페이지 게시글을 조회하고 상태를 갱신합니다.
   Future<void> _fetchPosts(CommunityRegion region) async {
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(
+      isLoading: true,
+      isTourApiLoading: true,
+      tourApiErrorMessage: null,
+      tourApiJobPostings: const [],
+    );
 
     final result = await _repository.getPosts(
       upperRegion: region.upperRegion,
@@ -108,6 +119,26 @@ class CommunityViewModel extends Notifier<CommunityState> {
       case Failure(message: final message):
         state = state.copyWith(isLoading: false);
         _eventController.add(CommunityEvent.showMessage(message));
+    }
+
+    final apiResult = await _tourApiRepository.getJobPostings(
+      upperRegion: region.upperRegion,
+      lowerRegion: region.lowerRegion,
+      limit: 30,
+    );
+
+    switch (apiResult) {
+      case Success(data: final postings):
+        state = state.copyWith(
+          tourApiJobPostings: postings,
+          isTourApiLoading: false,
+          tourApiErrorMessage: null,
+        );
+      case Failure(message: final message):
+        state = state.copyWith(
+          isTourApiLoading: false,
+          tourApiErrorMessage: message,
+        );
     }
   }
 

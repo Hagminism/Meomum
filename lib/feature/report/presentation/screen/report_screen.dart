@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:meomum/core/presentation/component/custom_app_bar.dart';
-import 'package:meomum/feature/community_write/presentation/component/media_picker_button.dart';
-import 'package:meomum/feature/community_write/presentation/component/media_preview_list.dart';
+import 'package:meomum/core/presentation/component/media_picker_button.dart';
+import 'package:meomum/feature/report/presentation/component/report_media_preview_list.dart';
 import 'package:meomum/feature/report/presentation/component/report_post_summary.dart';
 import 'package:meomum/feature/report/presentation/screen/report_action.dart';
 import 'package:meomum/feature/report/presentation/screen/report_state.dart';
@@ -151,7 +151,7 @@ class ReportScreen extends StatelessWidget {
                     ),
                     if (state.mediaFiles.isNotEmpty) ...[
                       const SizedBox(width: 10),
-                      MediaPreviewList(
+                      ReportMediaPreviewList(
                         mediaFiles: state.mediaFiles,
                         onRemove: (int index) => onAction(
                           ReportAction.removePhoto(index),

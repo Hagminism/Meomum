@@ -56,6 +56,9 @@ class _MyPageScreenRootState extends ConsumerState<MyPageScreenRoot> {
           case TapMyFeed():
             context.push('${Routes.myPage}/${Routes.myPageFeed}');
             break;
+          case ChangePromotionIndex():
+            viewModel.onAction(action);
+            break;
           case TapProfile():
           case TapCurrentStayMenu():
           case TapStayHistory():

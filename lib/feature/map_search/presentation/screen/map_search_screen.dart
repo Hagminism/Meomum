@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:meomum/core/domain/model/commercial_store/commercial_store.dart';
-import 'package:meomum/feature/map_search/presentation/component/map_search_result_item.dart';
+import 'package:meomum/core/presentation/component/custom_app_bar.dart';
+import 'package:meomum/feature/map/presentation/component/drawer/map_store_list_item.dart';
+import 'package:meomum/feature/map_search/presentation/component/map_search_error_view.dart';
+import 'package:meomum/feature/map_search/presentation/component/map_search_field.dart';
 import 'package:meomum/feature/map_search/presentation/screen/map_search_action.dart';
 import 'package:meomum/feature/map_search/presentation/screen/map_search_state.dart';
 import 'package:meomum/ui/app_colors.dart';
@@ -21,60 +24,28 @@ class MapSearchScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.homeBackground,
-      appBar: AppBar(
-        backgroundColor: AppColors.homeBackground,
-        elevation: 0,
-        leading: IconButton(
-          onPressed: () => onAction(const MapSearchAction.backPressed()),
-          tooltip: '지도 화면으로 돌아가기',
-          icon: const Icon(Icons.arrow_back),
-        ),
-        title: const Text(
-          '장소 검색',
-          style: TextStyle(
-            color: AppColors.black,
-            fontFamily: 'Pretendard',
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+      appBar: CustomAppBar(
+        title: '장소 검색',
+        showBackButton: true,
+        backButtonTooltip: '지도 화면으로 돌아가기',
+        onBackPressed: () {
+          onAction(const MapSearchAction.backPressed());
+        },
       ),
       body: SafeArea(
         child: Column(
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-              child: TextField(
+              child: MapSearchField(
+                query: state.query,
                 autofocus: true,
-                cursorColor: AppColors.primary,
-                textInputAction: TextInputAction.search,
                 onChanged: (query) {
                   onAction(MapSearchAction.queryChanged(query));
                 },
-                onSubmitted: (_) {
+                onSubmitted: () {
                   onAction(const MapSearchAction.searchSubmitted());
                 },
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: AppColors.inputBackground,
-                  hintText: '상호명, 지점명, 주소로 검색',
-                  labelText: '매장 검색',
-                  hintStyle: const TextStyle(
-                    color: AppColors.placeholderText,
-                    fontFamily: 'Pretendard',
-                    fontSize: 16,
-                  ),
-                  prefixIcon: const Icon(
-                    Icons.search,
-                    color: AppColors.hintIcon,
-                    semanticLabel: '검색',
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
-                ),
               ),
             ),
             Expanded(child: _buildContent()),
@@ -94,40 +65,11 @@ class MapSearchScreen extends StatelessWidget {
       );
     }
 
-    final errorMessage = state.errorMessage;
-    if (errorMessage != null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.error_outline,
-                color: AppColors.snackBarError,
-                size: 40,
-                semanticLabel: '오류',
-              ),
-              const SizedBox(height: 12),
-              Text(
-                errorMessage,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: AppColors.feedContentText,
-                  fontFamily: 'Pretendard',
-                  fontSize: 15,
-                ),
-              ),
-              const SizedBox(height: 16),
-              OutlinedButton(
-                onPressed: () {
-                  onAction(const MapSearchAction.retryPressed());
-                },
-                child: const Text('다시 시도'),
-              ),
-            ],
-          ),
-        ),
+    if (state.errorMessage != null) {
+      return MapSearchErrorView(
+        onRetry: () {
+          onAction(const MapSearchAction.retryPressed());
+        },
       );
     }
 
@@ -187,14 +129,12 @@ class MapSearchScreen extends StatelessWidget {
       );
     }
 
-    return ListView.separated(
+    return ListView.builder(
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       itemCount: state.results.length,
-      separatorBuilder: (context, index) =>
-          const Divider(height: 1, color: AppColors.divider),
       itemBuilder: (context, index) {
         final store = state.results[index];
-        return MapSearchResultItem(
+        return MapStoreListItem(
           key: ValueKey(store.id),
           store: store,
           onTap: onStoreSelected == null ? null : () => onStoreSelected!(store),

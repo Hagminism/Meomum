@@ -1,46 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:meomum/core/presentation/component/custom_app_bar.dart';
-import 'package:meomum/feature/community/domain/model/community_place.dart';
-import 'package:meomum/feature/community/domain/model/community_region.dart';
 import 'package:meomum/feature/community/domain/model/enum/community_category.dart';
+import 'package:meomum/feature/community_post_form/presentation/component/category/community_category_selector_button.dart';
 import 'package:meomum/feature/community_post_form/presentation/component/community_post_form_media_preview_list.dart';
-import 'package:meomum/feature/community_post_form/presentation/model/community_post_form_media.dart';
+import 'package:meomum/feature/community_post_form/presentation/component/community_job_form_fields.dart';
+import 'package:meomum/feature/community_post_form/presentation/component/media_picker_button.dart';
+import 'package:meomum/feature/community_post_form/presentation/component/selected_location_field.dart';
 import 'package:meomum/feature/community_post_form/presentation/screen/community_post_form_action.dart';
-import 'package:meomum/feature/community_write/presentation/component/category/community_category_selector_button.dart';
-import 'package:meomum/feature/community_write/presentation/component/media_picker_button.dart';
-import 'package:meomum/feature/community_write/presentation/component/selected_location_field.dart';
+import 'package:meomum/feature/community_post_form/presentation/screen/community_post_form_state.dart';
 import 'package:meomum/ui/app_colors.dart';
 
 class CommunityPostFormScreen extends StatelessWidget {
   final String appBarTitle;
   final String uploadButtonLabel;
-  final CommunityRegion selectedRegion;
-  final CommunityCategory category;
-  final List<CommunityPostFormMedia> mediaItems;
-  final CommunityPlace? selectedPlace;
-  final String title;
-  final String content;
-  final bool isUploadEnabled;
-  final bool isLoading;
+  final CommunityPostFormState state;
   final void Function(CommunityPostFormAction) onAction;
 
   const CommunityPostFormScreen({
     super.key,
     required this.appBarTitle,
     required this.uploadButtonLabel,
-    required this.selectedRegion,
-    required this.category,
-    required this.mediaItems,
-    required this.selectedPlace,
-    required this.title,
-    required this.content,
-    required this.isUploadEnabled,
-    required this.isLoading,
+    required this.state,
     required this.onAction,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (state.isInitializing) {
+      return _buildStatusScreen(
+        const Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
+      );
+    }
+
+    if (state.errorMessage != null) {
+      return _buildStatusScreen(
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(
+              state.errorMessage!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: 'Pretendard',
+                fontSize: 16,
+                color: AppColors.black,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       behavior: HitTestBehavior.translucent,
@@ -66,7 +78,7 @@ class CommunityPostFormScreen extends StatelessWidget {
                           title: appBarTitle,
                           titleColor: const Color(0xFF646465),
                           showCloseButton: true,
-                          onClosePressed: isLoading
+                          onClosePressed: state.isLoading
                               ? null
                               : () => onAction(
                                   const CommunityPostFormAction.tapBack(),
@@ -83,7 +95,7 @@ class CommunityPostFormScreen extends StatelessWidget {
                             _buildSectionLabel('게시할 지역', isRequired: true),
                             const SizedBox(height: 8),
                             InkWell(
-                              onTap: isLoading
+                              onTap: state.isLoading
                                   ? null
                                   : () => onAction(
                                       const CommunityPostFormAction.tapRegionSelect(),
@@ -107,7 +119,7 @@ class CommunityPostFormScreen extends StatelessWidget {
                                   children: [
                                     Expanded(
                                       child: Text(
-                                        '${selectedRegion.upperRegion} ${selectedRegion.lowerRegion}',
+                                        '${state.selectedRegion.upperRegion} ${state.selectedRegion.lowerRegion}',
                                         style: const TextStyle(
                                           fontFamily: 'Pretendard',
                                           fontSize: 16,
@@ -128,13 +140,44 @@ class CommunityPostFormScreen extends StatelessWidget {
                             _buildSectionLabel('게시판', isRequired: true),
                             const SizedBox(height: 8),
                             CommunityCategorySelectorButton(
-                              selectedCategory: category,
-                              onTap: isLoading
+                              selectedCategory: state.category,
+                              onTap: state.isLoading
                                   ? () {}
                                   : () => onAction(
                                       const CommunityPostFormAction.tapCategorySelect(),
                                     ),
                             ),
+                            if (state.category == CommunityCategory.job) ...[
+                              const SizedBox(height: 20),
+                              CommunityJobFormFields(
+                                wageType: state.wageType,
+                                wageAmount: state.wageAmount,
+                                workingTime: state.workingTime,
+                                recruitmentDeadline: state.recruitmentDeadline,
+                                isAlwaysRecruiting: state.isAlwaysRecruiting,
+                                enabled: !state.isLoading,
+                                onWageTypeChanged: (String? value) => onAction(
+                                  CommunityPostFormAction.changeWageType(value),
+                                ),
+                                onWageAmountChanged: (String value) => onAction(
+                                  CommunityPostFormAction.changeWageAmount(
+                                    value,
+                                  ),
+                                ),
+                                onWorkingTimeChanged: (String value) =>
+                                    onAction(
+                                      CommunityPostFormAction.changeWorkingTime(
+                                        value,
+                                      ),
+                                    ),
+                                onRecruitmentDeadlineTap: () => onAction(
+                                  const CommunityPostFormAction.tapRecruitmentDeadline(),
+                                ),
+                                onAlwaysRecruitingToggle: () => onAction(
+                                  const CommunityPostFormAction.toggleAlwaysRecruiting(),
+                                ),
+                              ),
+                            ],
                             const SizedBox(height: 20),
                             _buildSectionLabel('사진이나 동영상'),
                             const SizedBox(height: 8),
@@ -143,17 +186,17 @@ class CommunityPostFormScreen extends StatelessWidget {
                               child: Row(
                                 children: [
                                   MediaPickerButton(
-                                    onTap: isLoading
+                                    onTap: state.isLoading
                                         ? () {}
                                         : () => onAction(
                                             const CommunityPostFormAction.pickMedia(),
                                           ),
                                   ),
-                                  if (mediaItems.isNotEmpty) ...[
+                                  if (state.mediaItems.isNotEmpty) ...[
                                     const SizedBox(width: 10),
                                     CommunityPostFormMediaPreviewList(
-                                      mediaItems: mediaItems,
-                                      onRemove: isLoading
+                                      mediaItems: state.mediaItems,
+                                      onRemove: state.isLoading
                                           ? (int _) {}
                                           : (int index) => onAction(
                                               CommunityPostFormAction.removeMedia(
@@ -169,13 +212,13 @@ class CommunityPostFormScreen extends StatelessWidget {
                             _buildSectionLabel('위치'),
                             const SizedBox(height: 8),
                             SelectedLocationField(
-                              place: selectedPlace,
-                              onTap: isLoading
+                              place: state.selectedPlace,
+                              onTap: state.isLoading
                                   ? () {}
                                   : () => onAction(
                                       const CommunityPostFormAction.tapLocationSearch(),
                                     ),
-                              onClear: isLoading
+                              onClear: state.isLoading
                                   ? () {}
                                   : () => onAction(
                                       const CommunityPostFormAction.setLocation(
@@ -188,7 +231,7 @@ class CommunityPostFormScreen extends StatelessWidget {
                             const SizedBox(height: 8),
                             _buildInputField(
                               hintText: '제목을 입력해주세요',
-                              initialValue: title,
+                              initialValue: state.title,
                               maxLength: 50,
                               onChanged: (String value) => onAction(
                                 CommunityPostFormAction.changeTitle(value),
@@ -199,7 +242,7 @@ class CommunityPostFormScreen extends StatelessWidget {
                             const SizedBox(height: 8),
                             _buildInputField(
                               hintText: '내용을 입력해주세요',
-                              initialValue: content,
+                              initialValue: state.content,
                               maxLines: 8,
                               height: 180,
                               maxLength: 10000,
@@ -266,7 +309,7 @@ class CommunityPostFormScreen extends StatelessWidget {
       child: TextFormField(
         initialValue: initialValue,
         cursorColor: AppColors.primary,
-        enabled: !isLoading,
+        enabled: !state.isLoading,
         maxLines: maxLines,
         maxLength: maxLength,
         onChanged: onChanged,
@@ -316,7 +359,7 @@ class CommunityPostFormScreen extends StatelessWidget {
         width: double.infinity,
         height: 50,
         child: ElevatedButton(
-          onPressed: isUploadEnabled
+          onPressed: state.isUploadEnabled
               ? () => onAction(const CommunityPostFormAction.tapUpload())
               : null,
           style: ElevatedButton.styleFrom(
@@ -329,7 +372,7 @@ class CommunityPostFormScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
           ),
-          child: isLoading
+          child: state.isLoading
               ? const SizedBox(
                   width: 24,
                   height: 24,
@@ -348,6 +391,29 @@ class CommunityPostFormScreen extends StatelessWidget {
                   ),
                 ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildStatusScreen(Widget body) {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, Object? result) {
+        if (!didPop) {
+          onAction(const CommunityPostFormAction.tapBack());
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.writeBackground,
+        appBar: CustomAppBar(
+          title: appBarTitle,
+          titleColor: const Color(0xFF646465),
+          showCloseButton: true,
+          onClosePressed: () => onAction(
+            const CommunityPostFormAction.tapBack(),
+          ),
+        ),
+        body: body,
       ),
     );
   }

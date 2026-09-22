@@ -23,6 +23,19 @@ sealed class CommunityPostFormAction with _$CommunityPostFormAction {
   const factory CommunityPostFormAction.changeTitle(String title) = ChangeTitle;
   const factory CommunityPostFormAction.changeContent(String content) =
       ChangeContent;
+  const factory CommunityPostFormAction.changeWageType(String? wageType) =
+      ChangeWageType;
+  const factory CommunityPostFormAction.changeWageAmount(String amount) =
+      ChangeWageAmount;
+  const factory CommunityPostFormAction.changeWorkingTime(String workingTime) =
+      ChangeWorkingTime;
+  const factory CommunityPostFormAction.tapRecruitmentDeadline() =
+      TapRecruitmentDeadline;
+  const factory CommunityPostFormAction.selectRecruitmentDeadline(
+    DateTime? deadline,
+  ) = SelectRecruitmentDeadline;
+  const factory CommunityPostFormAction.toggleAlwaysRecruiting() =
+      ToggleAlwaysRecruiting;
   const factory CommunityPostFormAction.tapUpload() = TapUpload;
   const factory CommunityPostFormAction.tapBack() = TapBack;
 }

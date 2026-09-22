@@ -4,8 +4,8 @@ import 'package:meomum/feature/community/domain/model/community_post.dart';
 import 'package:meomum/feature/community/domain/model/community_post_image.dart';
 import 'package:meomum/feature/community/domain/model/community_region.dart';
 import 'package:meomum/feature/community/domain/model/enum/community_category.dart';
-import 'package:meomum/feature/community_edit_post/presentation/screen/community_edit_post_state.dart';
 import 'package:meomum/feature/community_post_form/presentation/model/community_post_form_media.dart';
+import 'package:meomum/feature/community_post_form/presentation/screen/community_post_form_state.dart';
 
 void main() {
   const region = CommunityRegion(
@@ -31,14 +31,14 @@ void main() {
     images: [image],
   );
 
-  CommunityEditPostState createState({
+  CommunityPostFormState createState({
     String title = '게시글 제목',
     String content = '게시글 내용',
     List<CommunityPostFormMedia> mediaItems = const [
       CommunityPostFormMedia.remote(image: image),
     ],
   }) {
-    return CommunityEditPostState(
+    return CommunityPostFormState(
       postId: post.id,
       selectedRegion: region,
       originalPost: post,

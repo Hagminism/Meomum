@@ -4,6 +4,12 @@
 # working directory name when running `supabase init`.
 project_id = "Meomum"
 
+[functions.tour-job-sync]
+verify_jwt = false
+
+[functions.tour-job-detail]
+verify_jwt = false
+
 [api]
 enabled = true
 # Port to use for the API URL.

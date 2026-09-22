@@ -8,6 +8,8 @@ sealed class MyPageAction with _$MyPageAction {
   const factory MyPageAction.tapProfile() = TapProfile;
   const factory MyPageAction.tapSettings() = TapSettings;
   const factory MyPageAction.tapCurrentStayMenu() = TapCurrentStayMenu;
+  const factory MyPageAction.changePromotionIndex(int index) =
+      ChangePromotionIndex;
   const factory MyPageAction.tapCategory(String id) = TapCategory;
   const factory MyPageAction.tapStayHistory(String id) = TapStayHistory;
   const factory MyPageAction.tapStayHistoryMenu(String id) = TapStayHistoryMenu;

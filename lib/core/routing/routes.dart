@@ -14,6 +14,9 @@ class Routes {
   static const String communityCategoryQuery = 'category';
   static const String postDetail = 'post-detail/:postId';
   static const String postId = 'postId';
+  static const String tourApiJobDetail = 'tour-job-detail/:empmnInfoNo';
+  static const String tourApiJobDetailSegment = 'tour-job-detail';
+  static const String empmnInfoNo = 'empmnInfoNo';
   static const String postEdit = 'edit-post';
   static const String communityWrite = 'write';
   static const String communityLocationSearch = 'location-search';
@@ -28,6 +31,7 @@ class Routes {
   static const String myPageSettingsNotices = 'notices';
   static const String myPageFeed = 'feed';
   static const String myPageFeedEditProfile = 'edit-profile';
+  static const String myPageFeedEditRegion = 'edit-region';
   static const String myPageFeedPostDetail = 'post-detail/:postId';
 
   static String storeDetailLocation(CommercialStore store) {

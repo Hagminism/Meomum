@@ -5,12 +5,20 @@ import 'package:meomum/core/domain/model/commercial_store/commercial_store.dart'
 
 /// 네이버 지도 위의 상가 마커(클러스터블 마커) 추가, 삭제 및 동기화를 전담 관리하는 클래스입니다.
 class StoreMarkerManager {
+  final void Function(CommercialStore store) onStoreTapped;
+  final void Function(List<CommercialStore> stores, NLatLng position)
+  onClusterTapped;
+
+  StoreMarkerManager({
+    required this.onStoreTapped,
+    required this.onClusterTapped,
+  });
+
   NaverMapController? _controller;
   final Set<String> _currentMarkerIds = <String>{};
+  Map<String, CommercialStore> _storesById = <String, CommercialStore>{};
   bool _isUpdating = false;
   List<CommercialStore>? _pendingStores;
-
-  StoreMarkerManager();
 
   /// 네이버 지도 컨트롤러를 연결합니다.
   void setController(NaverMapController controller) {
@@ -21,8 +29,28 @@ class StoreMarkerManager {
   void detachController() {
     _controller = null;
     _currentMarkerIds.clear();
+    _storesById = <String, CommercialStore>{};
     _pendingStores = null;
     _isUpdating = false;
+  }
+
+  /// 클러스터 마커를 눌렀을 때 클러스터에 포함된 상가 목록을 전달합니다.
+  void configureClusterMarker(
+    NClusterInfo info,
+    NClusterMarker clusterMarker,
+  ) {
+    clusterMarker.setOnTapListener((_) {
+      final stores = info.children
+          .map((child) => _storesById[child.id])
+          .whereType<CommercialStore>()
+          .toList(growable: false);
+
+      if (stores.length == 1) {
+        onStoreTapped(stores.single);
+      } else if (stores.length > 1) {
+        onClusterTapped(stores, info.position);
+      }
+    });
   }
 
   /// 화면에 존재하는 마커를 diffing하여 삭제/추가하고 최신 상가 리스트와 동기화합니다.
@@ -49,6 +77,10 @@ class StoreMarkerManager {
     final controller = _controller;
     if (controller == null) return;
 
+    _storesById = {
+      for (final store in stores) store.id: store,
+    };
+
     final nextIds = stores.map((store) => store.id).toSet();
     final idsToRemove = _currentMarkerIds.difference(nextIds);
 
@@ -60,18 +92,22 @@ class StoreMarkerManager {
     }
 
     // 2. 새로 추가된 상가에 대한 클러스터블 마커 생성 및 일괄 추가
-    final markersToAdd = stores
-        .where((store) => !_currentMarkerIds.contains(store.id))
-        .map(
-          (store) => NClusterableMarker(
-            id: store.id,
-            position: NLatLng(store.latitude, store.longitude),
-            caption: NOverlayCaption(text: store.displayName),
-            iconTintColor: AppColors.primary,
-            size: Size(30, 40),
-          ),
-        )
-        .toSet();
+    final markersToAdd = <NClusterableMarker>{};
+    for (final store in stores) {
+      if (_currentMarkerIds.contains(store.id)) continue;
+
+      final marker = NClusterableMarker(
+        id: store.id,
+        position: NLatLng(store.latitude, store.longitude),
+        caption: NOverlayCaption(text: store.displayName),
+        iconTintColor: AppColors.primary,
+        size: const Size(30, 40),
+      );
+      marker.setOnTapListener((_) {
+        onStoreTapped(store);
+      });
+      markersToAdd.add(marker);
+    }
 
     if (markersToAdd.isNotEmpty) {
       await controller.addOverlayAll(markersToAdd);

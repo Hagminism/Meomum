@@ -43,6 +43,20 @@ abstract interface class CommunityPostRepository {
     CommunityPlace? place,
   });
 
+  Future<Result<CommunityPost>> createJobPost({
+    required String upperRegion,
+    required String lowerRegion,
+    required String title,
+    required String content,
+    String? wageType,
+    double? wageAmount,
+    String? workingTime,
+    DateTime? recruitmentDeadline,
+    required bool isAlwaysRecruiting,
+    List<File> imageFiles = const [],
+    CommunityPlace? place,
+  });
+
   Future<Result<bool>> updatePost({
     required String postId,
     required String upperRegion,
@@ -50,6 +64,22 @@ abstract interface class CommunityPostRepository {
     required CommunityCategory category,
     required String title,
     required String content,
+    List<CommunityPostImage> existingImages = const [],
+    List<File> newImageFiles = const [],
+    CommunityPlace? place,
+  });
+
+  Future<Result<bool>> updateJobPost({
+    required String postId,
+    required String upperRegion,
+    required String lowerRegion,
+    required String title,
+    required String content,
+    String? wageType,
+    double? wageAmount,
+    String? workingTime,
+    DateTime? recruitmentDeadline,
+    required bool isAlwaysRecruiting,
     List<CommunityPostImage> existingImages = const [],
     List<File> newImageFiles = const [],
     CommunityPlace? place,
