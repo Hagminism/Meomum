@@ -28,15 +28,17 @@ class AuthDataSourceImpl implements AuthDataSource {
 
   /// 선택한 Auth0 Connection으로 Universal Login을 진행하고 앱 계정을 준비한다.
   ///
-  /// Android에서는 HTTPS App Link, iOS에서는 Custom URL Scheme으로 앱으로 돌아온다.
+  /// Android와 iOS 모두 Custom URL Scheme으로 앱으로 돌아온다.
   @override
   Future<Result<AuthIdentity>> signInWithOAuth(AuthProvider provider) async {
     try {
-      // TODO: 릴리즈 시 iOS에서도 Univerial Link 방식으로 수정
-      final credentials = await _auth0.webAuthentication().login(
-        useHTTPS: !Platform.isIOS,
-        parameters: {'connection': _connectionName(provider)},
-      );
+      final credentials = await _auth0
+          .webAuthentication(
+            scheme: Platform.isAndroid ? 'meomum' : null,
+          )
+          .login(
+            parameters: {'connection': _connectionName(provider)},
+          );
       return Result.success(
         await _createAuthIdentity(credentials, provider: provider),
       );
@@ -85,7 +87,11 @@ class AuthDataSourceImpl implements AuthDataSource {
   @override
   Future<Result<bool>> signOut() async {
     try {
-      await _auth0.webAuthentication().logout(useHTTPS: !Platform.isIOS);
+      await _auth0
+          .webAuthentication(
+            scheme: Platform.isAndroid ? 'meomum' : null,
+          )
+          .logout();
       await _auth0.credentialsManager.clearCredentials();
       return const Result.success(true);
     } on WebAuthenticationException catch (error) {
@@ -116,7 +122,11 @@ class AuthDataSourceImpl implements AuthDataSource {
 
     // 계정 데이터와 Auth0 삭제 요청이 처리된 뒤 Auth0 브라우저 세션을 종료합니다.
     try {
-      await _auth0.webAuthentication().logout(useHTTPS: !Platform.isIOS);
+      await _auth0
+          .webAuthentication(
+            scheme: Platform.isAndroid ? 'meomum' : null,
+          )
+          .logout();
     } on WebAuthenticationException {
       // 브라우저 로그아웃이 실패해도 로컬 자격 증명은 반드시 제거합니다.
     } catch (_) {
