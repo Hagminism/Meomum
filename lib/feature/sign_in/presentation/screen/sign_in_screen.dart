@@ -62,13 +62,14 @@ class SignInScreen extends StatelessWidget {
                             onAction(const SignInAction.tapKakao());
                           },
                         ),
-                        const SizedBox(height: 20),
-                        SocialSignInButton(
-                          authProvider: AuthProvider.naver,
-                          onTap: () {
-                            onAction(const SignInAction.tapNaver());
-                          },
-                        ),
+                        // TODO: 네이버 로그인 프로덕션 신청 완료 후 버튼을 다시 노출한다.
+                        // const SizedBox(height: 20),
+                        // SocialSignInButton(
+                        //   authProvider: AuthProvider.naver,
+                        //   onTap: () {
+                        //     onAction(const SignInAction.tapNaver());
+                        //   },
+                        // ),
                         const SizedBox(height: 20),
                         SocialSignInButton(
                           authProvider: AuthProvider.google,
